@@ -7,7 +7,7 @@
 //    NSRectFill([self bounds]);   // Equiv to [[NSBezierPath bezierPathWithRect:[self bounds]] fill]
 	NSMutableDictionary *dicAttr = [ NSMutableDictionary dictionary ];
     NSFont *fontAttr;
-    [ dicAttr setObject : [ NSColor blueColor ]
+    [ dicAttr setObject : [ NSColor blackColor ]
                 forKey  : NSForegroundColorAttributeName ];
                 
     fontAttr = [ NSFont fontWithName : @"Helvetica"
@@ -15,16 +15,14 @@
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
     NSAttributedString* str = [[NSAttributedString alloc] initWithString:line attributes:dicAttr];
-    //[line   drawAtPoint : NSMakePoint( 10, 10 )
-	//	 withAttributes : dicAttr ];
     //[str drawAtPoint : NSMakePoint( 10, 10 )];
-    if (cursorOn){
+    /*if (cursorOn){
         CGFloat w = [str size].width;
         
         NSPoint	point0 = {w + 10, 10 - [fontAttr descender]};
         NSPoint	point1 = {w + 10, 10 - [fontAttr descender] + [fontAttr ascender]};
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
-    }
+    }*/
     
     // taken from Core Text:Common Operations
     // Initialize a graphics context and set the text matrix to a known value.
@@ -42,17 +40,22 @@
     // Use the returned character count (to the break) to create the line.
     CTLineRef aline = CTTypesetterCreateLine(typesetter, CFRangeMake(start, count));
     
-    // Get the offset needed to center the line.
-//    float flush = 0.5; // centered
-//    double penOffset = CTLineGetPenOffsetForFlush(line, flush, width);
-    
-    // Move the given text drawing position by the calculated offset and draw the line.
+    // Move the given text drawing position and draw the line.
     CGContextSetTextPosition(context, 10, 10);
     CTLineDraw(aline, context);
     
     // Move the index beyond the line break.
     start += count;
 //*/
+
+    if (cursorOn){
+        CGFloat ascent, descent, leading;
+        double w = CTLineGetTypographicBounds(aline, & ascent, & descent, & leading );
+        
+        NSPoint	point0 = {w + 10, 10 - [fontAttr descender]};
+        NSPoint	point1 = {w + 10, 10 - [fontAttr descender] + [fontAttr ascender]};
+        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    }
 }
 
 - (void) awakeFromNib
