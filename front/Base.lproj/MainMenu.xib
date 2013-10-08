@@ -654,7 +654,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kzW-pQ-mtS" customClass="MyView">
-                        <rect key="frame" x="-6" y="0.0" width="486" height="270"/>
+                        <rect key="frame" x="0.0" y="0.0" width="486" height="270"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
                 </subviews>

@@ -55,7 +55,10 @@
     if (cursorOn){
         CGFloat ascent, descent, leading;
         double w = CTLineGetTypographicBounds(aline, & ascent, & descent, & leading );
-        
+        if ((start && ([line characterAtIndex:(start - 1)]=='\r')) || ypos==0.0) {
+            ypos = ypos - [fontAttr descender] + [fontAttr ascender]*1.5 + [fontAttr leading];
+            w = 0;
+        }
         NSPoint	point0 = {w + 10, 10 + ypos };
         NSPoint	point1 = {w + 10, 10 + ypos - [fontAttr ascender]};
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
