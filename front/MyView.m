@@ -33,27 +33,31 @@
     // Create a typesetter using the attributed string.
     CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((__bridge CFAttributedStringRef)(str));
     
-    // Find a break for line from the beginning of the string to the given width.
     CFIndex start = 0;
-    CFIndex count = CTTypesetterSuggestLineBreak(typesetter, start, 200);
-    
-    // Use the returned character count (to the break) to create the line.
-    CTLineRef aline = CTTypesetterCreateLine(typesetter, CFRangeMake(start, count));
-    
-    // Move the given text drawing position and draw the line.
-    CGContextSetTextPosition(context, 10, 10);
-    CTLineDraw(aline, context);
-    
-    // Move the index beyond the line break.
-    start += count;
-//*/
+    CTLineRef aline;
+    CGFloat ypos = 0.0;
+    while (start < CFStringGetLength((__bridge CFStringRef)(str))){
+        ypos = ypos - [fontAttr descender] + [fontAttr ascender]*1.5 + [fontAttr leading];
+        // Find a break for line from the beginning of the string to the given width.
+        CFIndex count = CTTypesetterSuggestLineBreak(typesetter, start, 200);
+        
+        // Use the returned character count (to the break) to create the line.
+        aline = CTTypesetterCreateLine(typesetter, CFRangeMake(start, count));
+        
+        // Move the given text drawing position and draw the line.
+        CGContextSetTextPosition(context, 10, 10 + ypos);
+        CTLineDraw(aline, context);
+        
+        // Move the index beyond the line break.
+        start += count;
+    }//*/
 
     if (cursorOn){
         CGFloat ascent, descent, leading;
         double w = CTLineGetTypographicBounds(aline, & ascent, & descent, & leading );
         
-        NSPoint	point0 = {w + 10, 10 - [fontAttr descender]};
-        NSPoint	point1 = {w + 10, 10 - [fontAttr descender] + [fontAttr ascender]};
+        NSPoint	point0 = {w + 10, 10 + ypos };
+        NSPoint	point1 = {w + 10, 10 + ypos - [fontAttr ascender]};
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
 }
