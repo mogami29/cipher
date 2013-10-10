@@ -34,7 +34,7 @@
     CTTypesetterRef typesetter = CTTypesetterCreateWithAttributedString((__bridge CFAttributedStringRef)(str));
     
     CFIndex start = 0;
-    CTLineRef aline;
+    CTLineRef aline = nil;
     CGFloat ypos = 0.0;
     while (start < CFStringGetLength((__bridge CFStringRef)(str))){
         ypos = ypos - [fontAttr descender] + [fontAttr ascender]*1.5 + [fontAttr leading];
@@ -54,7 +54,8 @@
 
     if (cursorOn){
         CGFloat ascent, descent, leading;
-        double w = CTLineGetTypographicBounds(aline, & ascent, & descent, & leading );
+        double w = 0.0;
+        if(aline) w = CTLineGetTypographicBounds(aline, & ascent, & descent, & leading );
         if ((start && ([line characterAtIndex:(start - 1)]=='\r')) || ypos==0.0) {
             ypos = ypos - [fontAttr descender] + [fontAttr ascender]*1.5 + [fontAttr leading];
             w = 0;
@@ -73,6 +74,7 @@
     
     cursorOn = 1;
     [self startAnimation];
+    [self setFrameSize:NSMakeSize(500, 1000)];
 }
 
 - (void) keyDown : (NSEvent *) theEvent
@@ -84,10 +86,12 @@
     [line appendString: hoge];
     [self display];
 }
+
 - (BOOL)isFlipped
 {
     return YES;
 }
+
 - (void) mouseDown:(NSEvent *)theEvent
 {
     [line setString: @"hoge"];
@@ -129,7 +133,7 @@
 - (void)performAnimation:(NSTimer *)aTimer {
     // We determine how much time has elapsed since the last animation,
     // and we advance the angle accordingly.
-    NSTimeInterval thisTime = [NSDate timeIntervalSinceReferenceDate];
+    //NSTimeInterval thisTime = [NSDate timeIntervalSinceReferenceDate];
     cursorOn = !cursorOn;
     //    lastTime = thisTime;
     [self setNeedsDisplay:YES];
