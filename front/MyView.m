@@ -66,16 +66,30 @@
     }
 }
 
-- (void) awakeFromNib
+- (id) initWithFrame:(NSRect)frameRect
+{
+    self = [super initWithFrame:frameRect];
+    line = [[NSMutableString alloc] init];
+    cursorOn = 1;
+    [self startAnimation];
+    [self setFrameSize:NSMakeSize(500, 1000)];
+    return self;
+}
+
+- (void) dealloc
+{
+    [self stopAnimation];
+}
+
+/*- (void) awakeFromNib
 {
     NSLog( @"awakeFromNib" );
     [ [ self window ] makeFirstResponder : self ];
     line = [[NSMutableString alloc] init];
-    
     cursorOn = 1;
     [self startAnimation];
     [self setFrameSize:NSMakeSize(500, 1000)];
-}
+}*/
 
 - (void) keyDown : (NSEvent *) theEvent
 {
@@ -138,6 +152,19 @@
     //    lastTime = thisTime;
     [self setNeedsDisplay:YES];
     // use later: - (void)setNeedsDisplayInRect:(NSRect)invalidRect
+}
+
+// From TextInputView
+- (BOOL)acceptsFirstResponder {
+    return YES;
+}
+
+- (BOOL)becomeFirstResponder {
+    return YES;
+}
+
+- (BOOL)resignFirstResponder {
+    return YES;
 }
 
 @end

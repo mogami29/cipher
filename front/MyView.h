@@ -6,7 +6,7 @@
 	NSTimer *timer;
 }
 - (void) drawRect : (NSRect) rect;
-- (void) awakeFromNib;
+//- (void) awakeFromNib;
 - (void) keyDown : (NSEvent *) theEvent;
 - (void) mouseDown:(NSEvent *)theEvent;
 // introduced from CircleView for test
