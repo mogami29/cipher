@@ -8,8 +8,8 @@
 - (void) drawRect : (NSRect) rect;
 //- (void) awakeFromNib;
 - (void) keyDown : (NSEvent *) theEvent;
-- (void) mouseDown:(NSEvent *)theEvent;
-// introduced from CircleView for test
+- (void) mouseDown:(NSEvent *) theEvent;
+// introduced from CircleView
 - (void) startAnimation;
 - (void) stopAnimation;
 - (void) toggleAnimation;
