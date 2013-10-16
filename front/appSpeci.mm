@@ -6,6 +6,8 @@
 #include <string.h>
 //#include "lib.h"
 
+#import <Cocoa/Cocoa.h>
+
 void	drawLines(list*line, bool draw);
 static int getWidth(obj string);
 static void drawFormula(obj line, bool draw);
@@ -33,16 +35,16 @@ static list lines;
 //---------current line with insertion point object---------------------------
 
 static text line;
-static int startOfThisLine;	//â‘ÎÀ•W, multiple line‚Ì‚Æ‚«‚Ìn‚ßB
+static int startOfThisLine;	//Ãªâ€šÃ«Å’Ã§Â¿Ã¯W, multiple lineÃ‡ÃƒÃ‡âˆ†Ã‡Â´Ã‡ÃƒÃ©nÃ‡ï¬‚Ã…B
 
 static Point cursorPosition;
 static Point curBase;
-int baseLine = 50;// ‚Ù‚©‚Ég‚Á‚Ä‚¢‚é‚Ì‚Íplot() 
-			// baseLine‚ÍƒJ[ƒ\ƒ‹ˆÊ’u‚ÌŠg’£‚Æ‚¨‚à‚¤B
-			// line•ÒW’†‚ÍcursorPosition‚Æ“¯‚É•ÏX‚ğs‚¤B
+int baseLine = 50;// Ã‡Å¸Ã‡Â©Ã‡â€¦Ã©gÃ‡Â¡Ã‡Æ’Ã‡Â¢Ã‡ÃˆÃ‡ÃƒÃ‡Ã•plot() 
+			// baseLineÃ‡Ã•Ã‰JÃ…[Ã‰\Ã‰Ã£Ã Â Ã­uÃ‡ÃƒÃ¤gÃ­Â£Ã‡âˆ†Ã‡Â®Ã‡â€¡Ã‡Â§Ã…B
+			// lineÃ¯â€œÃ¨WÃ­ÃœÃ‡Ã•cursorPositionÃ‡âˆ†Ã¬Ã˜Ã©Ã»Ã‡â€¦Ã¯Å“Ã§XÃ‡ï£¿Ã§sÃ‡Â§Ã…B
 
-static list 	insList=nil;		// insertion point ‚ÌƒXƒ^ƒbƒN
-					// ins‚Æ‡‚í‚¹‚Äinsertion point‚ğ•\‚·
+static list 	insList=nil;		// insertion point Ã‡ÃƒÃ‰XÃ‰^Ã‰bÃ‰N
+					// insÃ‡âˆ†Ã§Ã¡Ã‡ÃŒÃ‡Ï€Ã‡Æ’insertion pointÃ‡ï£¿Ã¯\Ã‡âˆ‘
 static list	beginSelList;
 struct insp {
 	int pos;
@@ -66,23 +68,51 @@ struct insp {
 		return lpos;
 		return rest(curstr, pos);
 	}
-} beginOfSel, ins;		//ins‚ÍŒ»İ‚Ìinsertion point
+} beginOfSel, ins;		//insÃ‡Ã•Ã¥ÂªÃ§â€ºÃ‡Ãƒinsertion point
 
 static Point cursorBeforeVertMove;
 
 static Point selectionCursorPosition;
 static bool 	nowSelected = false;
 
-// didBuf‚Ìƒf[ƒ^Œ`®‚Ì’è‹`
+// didBufÃ‡ÃƒÃ‰fÃ…[Ã‰^Ã¥`Ã©Ã†Ã‡ÃƒÃ­Ã‹Ã£`
 // 	list of insert_string("hoge"), move_to(list ins), delete(int n)
-// undoBuf‚Ìƒf[ƒ^Œ`®‚Ì’è‹`
+// undoBufÃ‡ÃƒÃ‰fÃ…[Ã‰^Ã¥`Ã©Ã†Ã‡ÃƒÃ­Ã‹Ã£`
 //		delete(int n), move_to(list ins), insert_string("hoge")
 
-//‚¢‚Ü‚Ì‚Æ‚±‚ëundobuf‚ğ‚Â‚©‚¢1-level‚Ìundo‚¾‚¯
+//Ã‡Â¢Ã‡â€¹Ã‡ÃƒÃ‡âˆ†Ã‡Â±Ã‡ÃundobufÃ‡ï£¿Ã‡Â¬Ã‡Â©Ã‡Â¢1-levelÃ‡ÃƒundoÃ‡Ã¦Ã‡Ã˜
 static list didBuf = nil;
 static list undoBuf = nil;
 static obj undobuf = nil;
-//------------drawŒn----------
+//------------drawÃ¥n----------
+Point curPt;
+
+void GetPen(Point * pt){
+    *pt = curPt;
+}
+void MoveTo(int h, int v){
+    curPt.h = h;
+    curPt.v = v;
+}
+void Line(int h, int v){
+    // Put NSBezierCurve here
+    curPt.h += h;
+    curPt.v += v;
+}
+void Move(int h, int v){
+    curPt.h += h;
+    curPt.v += v;
+}
+void TextSize(float s){
+    // set text size here
+}
+float StringWidth(const unsigned char * str){
+    // calculate here
+    return NAN;
+}
+void DrawString(const char * str){
+    // draw string here
+}
 
 void drawFraction(list_* f, bool draw){
 	Point pt;
@@ -115,22 +145,22 @@ void drawSubScript(obj v, bool draw){
 	TextSize(FONTSIZE);
 	Move(0,-FONTSIZE/3);
 }
-// CR‚Ís––‚É•t‘®‚·‚é‚Æl‚¦‚éB
-Point curbase;	// curBase‚Ícursor‚Ìbaseline, curbase‚ÍŒ»İ•`‰æ’†‚Ìbaseline
+// CRÃ‡Ã•Ã§sÃ±Ã±Ã‡â€¦Ã¯tÃ«Ã†Ã‡âˆ‘Ã‡ÃˆÃ‡âˆ†Ã§lÃ‡Â¶Ã‡ÃˆÃ…B
+Point curbase;	// curBaseÃ‡Ã•cursorÃ‡Ãƒbaseline, curbaseÃ‡Ã•Ã¥ÂªÃ§â€ºÃ¯`Ã¢ÃŠÃ­ÃœÃ‡Ãƒbaseline
 static bool crossed;
 
 int drawOne(list& l, int& pos, bool draw){
 	Point pt;
 	obj v = first(l);
 	switch(type(v)){
-	case INT:
+    case INT:{
 		char buf[8];
 		// read
 		*buf=0;
 		int c = uint(v);
 		buf[++*buf] = c;
 		if(c&0x80){
-			if(! rest(l)) break;//2 byte•¶š‚ª1byte‚¸‚Â‘}“ü‚³‚ê‚é‚©‚ç
+			if(! rest(l)) break;//2 byteÃ¯âˆ‚Ã©Ã¶Ã‡â„¢1byteÃ‡âˆÃ‡Â¬Ã«}Ã¬Â¸Ã‡â‰¥Ã‡ÃÃ‡ÃˆÃ‡Â©Ã‡Ã
 			if(second(l)->type != INT) break;
 			buf[++*buf] = uint(second(l));
 		}
@@ -138,14 +168,15 @@ int drawOne(list& l, int& pos, bool draw){
 		if(c=='\t') width = StringWidth("\p    ");
 		//draw:
 		if(c=='\t') {
-			DrawString("\p    ");
+			DrawString("    ");
 			break;
 		}
 		GetPen(&pt);
 		if(!draw || pt.v < -FONTSIZE) Move(width, 0);
-			else	DrawString((StringPtr)buf);
+			else	DrawString(buf);
 		break;
-	case FRACTION:
+	}
+    case FRACTION:
 		drawFraction((list_*)v, draw);
 		break;
 	case SuperScript:
@@ -155,12 +186,12 @@ int drawOne(list& l, int& pos, bool draw){
 		drawSubScript(v, draw);
 		break;
 	case tShow:
-		DrawString("\p¤");
+		DrawString("â–½");
 		drawLines(&ul(v), draw);
-		DrawString("\p¤");
+		DrawString("â–½");
 		break;
 	case tHide:
-		DrawString("\p¢");
+		DrawString("â–³");
 		break;
 	}
 	return 0;
@@ -220,7 +251,7 @@ Point curclick;
 
 int drawFormula0(list* line, list& l, int& pos, bool draw){
 	Point pt;
-	int linew=0;
+	int linew = 0;
 	char buf[256];
 	for(; ; ){	// chars
 		if(line==ins.curstr && l == *ins.lpos){
@@ -286,7 +317,7 @@ void drawLines(list*line, bool draw){
 int getWidth(obj str){
 	Point pt, np;
 	GetPen(&pt);
-	drawFormula(str, false);	// wrap‚³‚ê‚é‚Æ‚Ü‚¸‚¢
+	drawFormula(str, false);	// wrapÃ‡â‰¥Ã‡ÃÃ‡ÃˆÃ‡âˆ†Ã‡â€¹Ã‡âˆÃ‡Â¢
 	GetPen(&np);
 	return np.h-pt.h;
 }
@@ -295,14 +326,13 @@ void drawObj(obj line){		//set cursorPositino at the same time
 	char str[256];
 	if(type(line) ==STRING){
 		strcpy(str, ustr(line));
-		CtoPstr(str);
-		DrawString((StringPtr)str);
+		DrawString(str);
 		return;
 	} else if(type(line)==IMAGE || type(line)==tCImg){
 		print_image(line);
 		return;
 	} else if(type(line)==tLine){
-		showline(line);
+		//showline(line);   // restore needed 131014
 		return;
 	}
 	assert(line->type==LIST);
@@ -316,7 +346,7 @@ inline void set_insp(int pos){		// <-> move insertion
 	insList = nil;
 	ins = insp(&line, pos);
 }
-int findPreviousLetter(){		// ‚¢‚¸‚êlist‚ğ•Ô‚·‚æ‚¤‚É
+int findPreviousLetter(){		// Ã‡Â¢Ã‡âˆÃ‡ÃlistÃ‡ï£¿Ã¯â€˜Ã‡âˆ‘Ã‡ÃŠÃ‡Â§Ã‡â€¦
 	int p=0;
 	int i=0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
@@ -453,8 +483,6 @@ list ins_list(list*scan, list*cstr){	// finding insList from curstr
 	return nil;
 }*/
 
-//inline obj snthOf(list l, int i){return first(rest(l, i));};
-
 static list isInFracRecur(){
 	list l = insList;
 	if(! l) return nil;
@@ -475,7 +503,7 @@ void moveToUpperLevel(){
 	if(isInFrac()) pos = popInsertion();
 	ins = insp(curr_str(insList), pos);
 }
-int getNLine(list l){//line”-1,CR‚Ì”‚ğ”‚¦‚é
+int getNLine(list l){//lineÃªÃ®-1,CRÃ‡ÃƒÃªÃ®Ã‡ï£¿ÃªÃ®Ã‡Â¶Ã‡Ãˆ
 	int i=0;
 	for(; l; l=rest(l)) if(first(l)->type==INT && uint(first(l))==CR) i++;
 	return i;
@@ -483,7 +511,7 @@ int getNLine(list l){//line”-1,CR‚Ì”‚ğ”‚¦‚é
 void insertSuperScriptAndMoveInto(){
 	obj vp = render(SuperScript, nil);
 	insert(vp);
-	pushInsertion();		//insertion point‚Í‚İ‚¬‚Å‘Ò‚Á‚Ä‚¢‚Ä‚à‚ç‚¤‚±‚Æ‚É‚·‚éB
+	pushInsertion();		//insertion pointÃ‡Ã•Ã‡â€ºÃ‡Â¨Ã‡â‰ˆÃ«â€œÃ‡Â¡Ã‡Æ’Ã‡Â¢Ã‡Æ’Ã‡â€¡Ã‡ÃÃ‡Â§Ã‡Â±Ã‡âˆ†Ã‡â€¦Ã‡âˆ‘Ã‡ÃˆÃ…B
 	ins.moveInto(&ul(vp));
 }
 
@@ -536,7 +564,7 @@ void moveRight(){
 }
 list cutSelected(){
 	if(beginSelList != insList){
-		SysBeep(1);
+		//SysBeep(1);
 		return nil;
 	}
 	int b = smaller(beginOfSel.pos, ins.pos);
@@ -544,9 +572,6 @@ list cutSelected(){
 	if(b==e) return nil;
 
 	ins.setpos(b);
-/*	list*lp = rest(ins.curstr, b);
-	for(int i=0; i<e-b; i++) release(pop(lp));
-	return;	*/
 	list*bp = rest(ins.curstr, b);
 	list*ep = rest(ins.curstr, e);
 	list l= *bp;
@@ -595,7 +620,7 @@ void moveDown(){
 static unsigned long caretLastChanged;
 static int caretState;	//==0 if hidden, ==1 if shown
 
-// Caret‚Í qd.pt‚ğŒ©‚Ä‚¢‚é‚Ì‚ª‚Ü‚¸‚¢
+// CaretÃ‡Ã• qd.ptÃ‡ï£¿Ã¥Â©Ã‡Æ’Ã‡Â¢Ã‡ÃˆÃ‡ÃƒÃ‡â„¢Ã‡â€¹Ã‡âˆÃ‡Â¢
 
 void ShowCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
@@ -607,26 +632,27 @@ void ShowCaret(){
 
 void HideCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
-	PenPat(&qd.white);
+//	PenPat(&qd.white);
+// change color here
 	Line(0,-FONTSIZE);
 	Move(0, FONTSIZE);
-	PenPat(&qd.black);
+//	PenPat(&qd.black);
 	caretLastChanged = TickCount();
 	caretState = 0;
 }
 
 void updateCaret(){
-	if(TickCount()-caretLastChanged >= GetCaretTime() ){
+/*	if(TickCount() - caretLastChanged >= GetCaretTime() ){
 		if(caretState == 0) ShowCaret();
 		else HideCaret();
-	}
+	}*/
 }
 
 #define upboundby(b,x) ((x)<(b)?(x):(b))
 extern WindowPtr	currWindow;
 
-void win_normalize(){
-	if(!baseLine > windowHeight-FONTSIZE && !baseLine < FONTSIZE) return;
+void win_normalize(){       // smoothly scroll the view to make the cursor within
+/*	if(!baseLine > windowHeight-FONTSIZE && !baseLine < FONTSIZE) return;
 	RgnHandle updateRgn = NewRgn();
 	Rect rect = currWindow->portRect;
 	while(baseLine > windowHeight-FONTSIZE) {
@@ -642,7 +668,7 @@ void win_normalize(){
 		ScrollRect(&rect, 0, -move, updateRgn);
 	}
 	DisposeRgn(updateRgn);
-	MoveTo(LEFTMARGIN,baseLine);
+*/	MoveTo(LEFTMARGIN,baseLine);
 }
 
 void scrollBy(int pixels){
@@ -700,8 +726,7 @@ void myPrintf(char *fmt,...){
 	if(strlen(str)>255) assert_func("app.c", __LINE__);
 	addStringToText(str);
 	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
-	CtoPstr(str);
-	DrawString((StringPtr)str);
+	DrawString(str);
 }
 
 void print_str(char*s){
@@ -714,22 +739,22 @@ void print_str(char*s){
 	int p=0;
 	for(; s[p] && p<250; p++) str[p] = s[p];
 	s[p] = NUL;
-	CtoPstr(str);
-	DrawString((StringPtr)str);
+	DrawString(str);
 }
 
 int imbalanced(list line){
 	int paren=0,brace=0;
 	for(list l=line; l; l=rest(l)){
 		switch(first(l)->type){
-		case INT:
+        case INT:{
 			char c=uint(first(l));
 			if(c=='(') paren++;
 			if(c==')') paren--;
 			if(c=='{') brace++;
 			if(c=='}') brace--;
 			break;
-		case FRACTION:
+		}
+        case FRACTION:
 		case SuperScript:
 		case SubScript:
 			break;
@@ -743,14 +768,13 @@ void updateAround(bool erase){
 	r.right= LEFTMARGIN+colWidth+50;
 	r.top 	= baseLine-FONTSIZE*2;
 	r.bottom = baseLine+FONTSIZE;
-//	r.top 	= cursorPosition.v-FONTSIZE;
-//	r.bottom = cursorPosition.v;
 	if(erase){
 		r.top 	= baseLine-FONTSIZE*2;
 		r.bottom = windowHeight;
 	}	
-	if(erase) EraseRect(&r);
-	InvalRect(&r);
+    // need repair here 131013
+    //if(erase) EraseRect(&r);
+	//InvalRect(&r);
 	DoUpdate(currWindow);
 }
 void HandleTyping0(char c){
@@ -818,8 +842,8 @@ sho:	if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 void handleCR(){
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine-viewPosition+FONTSIZE*(2+getNLine(line));//dame
-	scrollBy(0);	//‰üs‚µ‚Ü‚·B
-	interpret(interpreter, line);
+	scrollBy(0);	//Ã¢Â¸Ã§sÃ‡ÂµÃ‡â€¹Ã‡âˆ‘Ã…B
+//	interpret(interpreter, line);   // repair here 131013
 	scrollBy(FONTSIZE*2);
 	newLine();
 }
@@ -848,16 +872,16 @@ void HandleShifted(char c){
 	updateAround(true);
 	MoveTo(cursorPosition.h, cursorPosition.v);
 
-	UInt8 curMode = LMGetHiliteMode();
-	LMSetHiliteMode(curMode & 0x7f);
+    // hiliting: need repair 131013
+	//UInt8 curMode = LMGetHiliteMode();
+	//LMSetHiliteMode(curMode & 0x7f);
 	Rect r;
 	r.left =	smaller(selectionCursorPosition.h, cursorPosition.h);
 	r.right=	larger(selectionCursorPosition.h, cursorPosition.h);
 	r.top =	smaller(selectionCursorPosition.v, cursorPosition.v)-FONTSIZE;
 	r.bottom=	larger(selectionCursorPosition.v, cursorPosition.v);
-	InvertRect(&r);
-	LMSetHiliteMode(curMode | 0x80);
-//	ShowCaret();
+	//InvertRect(&r);
+	//LMSetHiliteMode(curMode | 0x80);
 	nowSelected = true;
 }
 void getClickPosition(Point pt){
@@ -875,13 +899,13 @@ void HandleContentClick(Point pt){
 	getClickPosition(pt);
 }
 void DoUpdate(WindowPtr targetWindow) {
-	SetPortWindowPort(targetWindow);
-	BeginUpdate(targetWindow);
+//	SetPortWindowPort(targetWindow);
+//	BeginUpdate(targetWindow);
 //	EraseRect(&targetWindow->portRect);
 	Redraw();
-//	DrawGrowIcon(targetWindow);	//ƒTƒCƒYƒ{ƒbƒNƒX‚ğ•`‚­
-//	DrawControls(targetWindow);	//ƒRƒ“ƒgƒ[ƒ‹A‚Â‚Ü‚èƒXƒNƒ[ƒ‹ƒo[‚ğ•`‚­
-	EndUpdate(targetWindow);
+//	DrawGrowIcon(targetWindow);	//Ã‰TÃ‰CÃ‰YÃ‰{Ã‰bÃ‰NÃ‰XÃ‡ï£¿Ã¯`Ã‡â‰ 
+//	DrawControls(targetWindow);	//Ã‰RÃ‰Ã¬Ã‰gÃ‰Ã§Ã…[Ã‰Ã£Ã…AÃ‡Â¬Ã‡â€¹Ã‡Ã‹Ã‰XÃ‰NÃ‰Ã§Ã…[Ã‰Ã£Ã‰oÃ…[Ã‡ï£¿Ã¯`Ã‡â‰ 
+//	EndUpdate(targetWindow);
 }
 void DoUndo(){
 	obj doit=retain(undobuf);
@@ -900,7 +924,7 @@ void DoUndo(){
 }
 void DoCopy(){
 	if(beginSelList != insList) {
-		SysBeep(1);
+		//SysBeep(1);
 		return;
 	}
 	int b = smaller(beginOfSel.pos, ins.pos);
@@ -909,8 +933,9 @@ void DoCopy(){
 
 	string rs = nullstr();
 	serialize(&rs, rest(*ins.curstr,b), rest(*ins.curstr,e));
-	ZeroScrap();
-	PutScrap(strlen(rs.s), 'TEXT', rs.s);
+	// copying to clipboard : need repair 131013
+    //ZeroScrap();
+	//PutScrap(strlen(rs.s), 'TEXT', rs.s);
 	freestr(&rs);
 }
 
@@ -930,8 +955,8 @@ void DoCut(){
 void DoPaste(){
 	Handle	dataBlock;
 	long		offset, dataSize;
-
-	if((dataSize = GetScrap(0, 'TEXT', &offset)) > 0) {	//TEXT‚Ì‘¶İ‚ğƒ`ƒFƒbƒN
+/*  PASTE needs port 131013
+	if((dataSize = GetScrap(0, 'TEXT', &offset)) > 0) {	//TEXTÃ‡ÃƒÃ«âˆ‚Ã§â€ºÃ‡ï£¿Ã‰`Ã‰FÃ‰bÃ‰N
 		dataBlock = NewHandle(dataSize);
 		dataSize = GetScrap(dataBlock, 'TEXT', &offset);
 
@@ -939,15 +964,15 @@ void DoPaste(){
 		for(list l=tt; l; l=rest(l)) insert(first(l));
 		updateAround(true);
 		MoveTo(cursorPosition.h, cursorPosition.v);
-		DisposeHandle(dataBlock);	//‚±‚ê‚Å‚¢‚¢‚Ì‚©‚ÈH
+		DisposeHandle(dataBlock);	//Ã‡Â±Ã‡ÃÃ‡â‰ˆÃ‡Â¢Ã‡Â¢Ã‡ÃƒÃ‡Â©Ã‡Â»Ã…H
 	}
-	// not yet ?
+*/
 }
 
 void DoOpen(){
 	static obj fn = String2v("j");
 	long bytes;
-	obj rr = val(read(&bytes, (fn)));
+	obj rr = nil;//val(read(&bytes, (fn)));     // restore needed 131014
 	newLine();
 	line = CStringToLine(rr);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
@@ -958,7 +983,7 @@ void DoOpen(){
 void DoSave(){
 	static obj fn = String2v("j");
 	obj st = listToCString(line);
-	write(ustr(st), strlen(ustr(st))+1, fn);
+	//write(ustr(st), strlen(ustr(st))+1, fn);  // restore needed 131014
 	release(st);
 }
 
@@ -970,7 +995,7 @@ static int CRmode = 0;
 
 obj edit(obj fn){	// open edit save
 	long bytes;
-	obj rr = val(read(&bytes, (fn)));
+	obj rr = nil;//val(read(&bytes, (fn)));     // restore needed 131014
 	newLine();
 	line = CStringToLine(rr);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
@@ -981,7 +1006,7 @@ obj edit(obj fn){	// open edit save
 	addLineToText(List2v(line));
 
 	obj st = listToCString(line);
-	write(ustr(st), strlen(ustr(st))+1, fn);
+	//write(ustr(st), strlen(ustr(st))+1, fn);    // restore needed 131014
 	release(st);
 	return nil;
 }
@@ -995,7 +1020,7 @@ obj editline(obj v){
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine-viewPosition;
-	scrollBy(FONTSIZE*2+getNLine(line)*FONTSIZE);	//‰üs‚µ‚Ü‚·B
+	scrollBy(FONTSIZE*2+getNLine(line)*FONTSIZE);	//Ã¢Â¸Ã§sÃ‡ÂµÃ‡â€¹Ã‡âˆ‘Ã…B
 	obj lin = listToCString(line);
 	newLine();
 	return lin;
@@ -1115,8 +1140,6 @@ void Redraw(){
 		assert(type(first(l))==LIST);
 		list aLine = ul(first(l));
 		int position = uint(second(aLine));
-	//	obj hpos = snthOf(aLine,2);
-	//	if(hpos!=nil) h = uint(hpos); else h=LEFTMARGIN; 
 		int h;
 		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
 		MoveTo(h, position-viewPosition);

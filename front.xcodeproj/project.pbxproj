@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		051F9E071809FCB600289510 /* appSpeci.mm in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm */; };
-		0598030118095CE9000E9157 /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 059802FF18095CE9000E9157 /* value.cpp */; };
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
 		0598486417EE906F008EEB70 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.m */; };
 		05AD7D6017EDAA5A006391A3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */; };
@@ -23,6 +22,7 @@
 		05AD7D8317EDAA5A006391A3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */; };
 		05AD7D8B17EDAA5A006391A3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05AD7D8917EDAA5A006391A3 /* InfoPlist.strings */; };
 		05AD7D8D17EDAA5A006391A3 /* frontTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 05AD7D8C17EDAA5A006391A3 /* frontTests.m */; };
+		05FF81C5180B7DF6002B4ACF /* value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05FF81C4180B7DF6002B4ACF /* value.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,7 +38,6 @@
 /* Begin PBXFileReference section */
 		051F9E061809FCB600289510 /* appSpeci.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = appSpeci.mm; sourceTree = "<group>"; };
 		059802FE18095BB1000E9157 /* ciph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ciph.h; path = "../../cipher-shell/cipher-shell/ciph.h"; sourceTree = "<group>"; };
-		059802FF18095CE9000E9157 /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = value.cpp; path = "../../cipher-shell/cipher-shell/value.cpp"; sourceTree = "<group>"; };
 		0598030018095CE9000E9157 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = value.h; path = "../../cipher-shell/cipher-shell/value.h"; sourceTree = "<group>"; };
 		0598030218095D4C000E9157 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = "../../cipher-shell/cipher-shell/list.cpp"; sourceTree = "<group>"; };
 		0598030318095D4C000E9157 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = "../../cipher-shell/cipher-shell/list.h"; sourceTree = "<group>"; };
@@ -65,6 +64,7 @@
 		05AD7D8817EDAA5A006391A3 /* frontTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "frontTests-Info.plist"; sourceTree = "<group>"; };
 		05AD7D8A17EDAA5A006391A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		05AD7D8C17EDAA5A006391A3 /* frontTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = frontTests.m; sourceTree = "<group>"; };
+		05FF81C4180B7DF6002B4ACF /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = value.cpp; path = "../../cipher-shell/cipher-shell/value.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,7 +140,7 @@
 				0598030318095D4C000E9157 /* list.h */,
 				0598030218095D4C000E9157 /* list.cpp */,
 				0598030018095CE9000E9157 /* value.h */,
-				059802FF18095CE9000E9157 /* value.cpp */,
+				05FF81C4180B7DF6002B4ACF /* value.cpp */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
@@ -279,7 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				051F9E071809FCB600289510 /* appSpeci.mm in Sources */,
-				0598030118095CE9000E9157 /* value.cpp in Sources */,
+				05FF81C5180B7DF6002B4ACF /* value.cpp in Sources */,
 				05AD7D7317EDAA5A006391A3 /* Document.m in Sources */,
 				05AD7D6C17EDAA5A006391A3 /* main.m in Sources */,
 				0598486417EE906F008EEB70 /* MyView.m in Sources */,
@@ -422,6 +422,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "front/front-Prefix.pch";
 				INFOPLIST_FILE = "front/front-Info.plist";
@@ -435,6 +436,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "front/front-Prefix.pch";
 				INFOPLIST_FILE = "front/front-Info.plist";
