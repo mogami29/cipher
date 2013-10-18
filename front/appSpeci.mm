@@ -30,6 +30,28 @@ public:
 typedef list text;
 
 
+// globals -> should be a instance vars
+WindowPtr	currWindow;
+int windowHeight = 800;
+int windowWidth = 550;
+
+void assert_func(const char* file, int line){
+	scroll();
+	NSLog(@"assertion failure line %d in %s.", line, file);
+	//longjmp(jmpEnv, 1);
+}
+
+void error_func(const char *str, const char* file, int line){
+	scroll();
+	NSLog(@"error: %s occured in line %d of file %s\n", str, line, file);
+	//longjmp(jmpEnv, 1);
+}
+
+void exit2shell(){
+    NSLog(@"exit requested (but not done)");
+    //	longjmp(jmpEnv, 1);
+}
+
 int viewPosition = 0;
 static list lines;
 //---------current line with insertion point object---------------------------
@@ -86,6 +108,8 @@ static list undoBuf = nil;
 static obj undobuf = nil;
 //------------drawån----------
 Point curPt;
+NSMutableDictionary *dicAttr;
+NSFont *fontAttr;
 
 void GetPen(Point * pt){
     *pt = curPt;
@@ -96,6 +120,9 @@ void MoveTo(int h, int v){
 }
 void Line(int h, int v){
     // Put NSBezierCurve here
+    NSPoint	point0 = {(float)curPt.h, (float)curPt.v};
+    NSPoint	point1 = {(float)curPt.h + h, (float)curPt.v + v};
+    [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     curPt.h += h;
     curPt.v += v;
 }
@@ -104,14 +131,23 @@ void Move(int h, int v){
     curPt.v += v;
 }
 void TextSize(float s){
-    // set text size here
+    // setting text font size
+    fontAttr = [ NSFont fontWithName : @"Helvetica" size : s ];
+    [ dicAttr setObject : fontAttr
+                forKey  : NSFontAttributeName];
 }
-float StringWidth(const unsigned char * str){
-    // calculate here
-    return NAN;
+float StringWidth(const char * str){    // takes pascal string
+    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding];
+    NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
+    CGFloat w = [attStr size].width;
+    return w;
 }
 void DrawString(const char * str){
-    // draw string here
+    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding];
+    NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
+    [attStr drawAtPoint : NSMakePoint( curPt.h, curPt.v )];
+    CGFloat w = [attStr size].width;
+    curPt.h += w;
 }
 
 void drawFraction(list_* f, bool draw){
@@ -160,12 +196,13 @@ int drawOne(list& l, int& pos, bool draw){
 		int c = uint(v);
 		buf[++*buf] = c;
 		if(c&0x80){
-			if(! rest(l)) break;//2 byteï∂éöÇ™1byteÇ∏Ç¬ë}ì¸Ç≥ÇÍÇÈÇ©ÇÁ
+			if(! rest(l)) break;//2 byte文字が1byteずつ挿入されるから
 			if(second(l)->type != INT) break;
 			buf[++*buf] = uint(second(l));
 		}
-		int width = StringWidth((StringPtr)buf);
-		if(c=='\t') width = StringWidth("\p    ");
+        buf[*buf + 1] = 0;      // P-string manipulation
+		int width = StringWidth(buf+1);
+		if(c=='\t') width = StringWidth("    ");
 		//draw:
 		if(c=='\t') {
 			DrawString("    ");
@@ -173,7 +210,7 @@ int drawOne(list& l, int& pos, bool draw){
 		}
 		GetPen(&pt);
 		if(!draw || pt.v < -FONTSIZE) Move(width, 0);
-			else	DrawString(buf);
+			else	DrawString(buf+1);
 		break;
 	}
     case FRACTION:
@@ -689,6 +726,12 @@ void initLines(){
 	lines = phi();
 //	ins.curstr = &line;
 	ins = insp(&line, 0);
+    dicAttr = [ NSMutableDictionary dictionary ];
+    [ dicAttr setObject : [ NSColor blackColor ]
+                forKey  : NSForegroundColorAttributeName ];
+    fontAttr = [ NSFont fontWithName : @"Helvetica" size : FONTSIZE ];
+    [ dicAttr setObject : fontAttr
+                forKey  : NSFontAttributeName];
 }
 
 void addObjToText(obj line){	//taking line
@@ -711,7 +754,7 @@ void addStringToText(char* string){
 #include <stdarg.h>
 #include <stdio.h>
 
-void myPrintf(char *fmt,...){
+void myPrintf(const char *fmt,...){
 	va_list	ap;
 	char str[256];
 	Point pt;
@@ -822,7 +865,7 @@ void HandleTyping0(char c){
 		else halfchar = 0;
 	}
 	
-sho:	if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
+sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 		if(type(undobuf) !=tMove){
 			undoBuf = cons(undobuf, undoBuf);
 			undobuf = create(tMove, cons(Int(ins.pos), retain(insList)));
@@ -834,14 +877,14 @@ sho:	if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
 	beginOfSel = ins;	//for text selection
-	release(beginSelList);
-	beginSelList = retain(insList);
+	//release(beginSelList);       possibly no need 131018
+	//beginSelList = retain(insList);
 	selectionCursorPosition = cursorPosition;
 	nowSelected = false;
 }
 void handleCR(){
 	addLineToText(List2v(line));
-	baseLine = startOfThisLine-viewPosition+FONTSIZE*(2+getNLine(line));//dame
+	baseLine = startOfThisLine - viewPosition + FONTSIZE*(2 + getNLine(line));//dame
 	scrollBy(0);	//â¸çsÇµÇ‹Ç∑ÅB
 //	interpret(interpreter, line);   // repair here 131013
 	scrollBy(FONTSIZE*2);
@@ -1026,7 +1069,7 @@ obj editline(obj v){
 	return lin;
 }
 
-static void append(string*rs, char*s){
+static void append(string*rs, const char*s){
 	for(; *s; s++) appendS(rs, *s);
 }
 

@@ -10,6 +10,7 @@
 		051F9E071809FCB600289510 /* appSpeci.mm in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm */; };
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
 		0598486417EE906F008EEB70 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.m */; };
+		05A21B7918109E5900F512A6 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A21B7818109E5900F512A6 /* vector.cpp */; };
 		05AD7D6017EDAA5A006391A3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */; };
 		05AD7D6A17EDAA5A006391A3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05AD7D6817EDAA5A006391A3 /* InfoPlist.strings */; };
 		05AD7D6C17EDAA5A006391A3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 05AD7D6B17EDAA5A006391A3 /* main.m */; };
@@ -44,6 +45,7 @@
 		059803051809E89E000E9157 /* appSpeci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appSpeci.h; sourceTree = "<group>"; };
 		0598486217EE906F008EEB70 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
 		0598486317EE906F008EEB70 /* MyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyView.m; sourceTree = "<group>"; };
+		05A21B7818109E5900F512A6 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vector.cpp; path = "../../cipher-shell/cipher-shell/vector.cpp"; sourceTree = "<group>"; };
 		05AD7D5C17EDAA5A006391A3 /* front.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = front.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		05AD7D6217EDAA5A006391A3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -141,6 +143,7 @@
 				0598030218095D4C000E9157 /* list.cpp */,
 				0598030018095CE9000E9157 /* value.h */,
 				05FF81C4180B7DF6002B4ACF /* value.cpp */,
+				05A21B7818109E5900F512A6 /* vector.cpp */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
@@ -284,6 +287,7 @@
 				05AD7D6C17EDAA5A006391A3 /* main.m in Sources */,
 				0598486417EE906F008EEB70 /* MyView.m in Sources */,
 				0598030418095D4C000E9157 /* list.cpp in Sources */,
+				05A21B7918109E5900F512A6 /* vector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

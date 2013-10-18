@@ -1,4 +1,5 @@
 #import "MyView.h"
+#import "appSpeci.h"
 @implementation MyView
 
 - (void) drawRect : (NSRect) rect 
@@ -64,6 +65,8 @@
         NSPoint	point1 = {w + 10, 10 + ypos - [fontAttr ascender]};
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
+
+    Redraw();
 }
 
 - (id) initWithFrame:(NSRect)frameRect
@@ -73,6 +76,8 @@
     cursorOn = 1;
     [self startAnimation];
     [self setFrameSize:NSMakeSize(500, 1000)];
+    initLines();
+    newLine();
     return self;
 }
 
@@ -98,6 +103,7 @@
 //	bar;
     cursorOn = true;
     [line appendString: hoge];
+    HandleTyping([hoge characterAtIndex:0]);
     [self display];
 }
 

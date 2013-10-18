@@ -18,8 +18,11 @@ void myPrintf(char *fmt,...);
 void print_str(char*s);
 int getKey(int mode);
 
-void updateCaret();
 void addObjToText(struct value* line);	//taking obj
+#if __cplusplus
+extern "C" {
+#endif
+void updateCaret();
 void addStringToText(char* string);
 void initLines();
 void newLine();
@@ -37,6 +40,10 @@ void DoSave();
 void DoLatex();
 void DoPrint();
 void Redraw();
+#if __cplusplus
+}   // Extern C
+#endif
+
 
 #define NUL 0
 #define BS	8
