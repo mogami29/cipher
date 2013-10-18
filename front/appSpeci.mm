@@ -57,16 +57,16 @@ static list lines;
 //---------current line with insertion point object---------------------------
 
 static text line;
-static int startOfThisLine;	//ê‚ëŒç¿ïW, multiple lineÇÃÇ∆Ç´ÇÃénÇﬂÅB
+static int startOfThisLine;	//絶対座標, multiple lineのときの始め。
 
 static Point cursorPosition;
 static Point curBase;
-int baseLine = 50;// ÇŸÇ©Ç…égÇ¡ÇƒÇ¢ÇÈÇÃÇÕplot() 
-			// baseLineÇÕÉJÅ[É\Éãà íuÇÃägí£Ç∆Ç®Ç‡Ç§ÅB
-			// lineï“èWíÜÇÕcursorPositionÇ∆ìØéûÇ…ïœçXÇçsÇ§ÅB
+int baseLine = 50;// ほかに使っているのはplot()
+                // baseLineはカーソル位置の拡張とおもう。
+                // line編集中はcursorPositionと同時に変更を行う。
 
-static list 	insList=nil;		// insertion point ÇÃÉXÉ^ÉbÉN
-					// insÇ∆çáÇÌÇπÇƒinsertion pointÇï\Ç∑
+static list 	insList=nil;// insertion point のスタック
+                            // insと合わせてinsertion pointを表す
 static list	beginSelList;
 struct insp {
 	int pos;
@@ -90,19 +90,19 @@ struct insp {
 		return lpos;
 		return rest(curstr, pos);
 	}
-} beginOfSel, ins;		//insÇÕåªç›ÇÃinsertion point
+} beginOfSel, ins;		//insは現在のinsertion point
 
 static Point cursorBeforeVertMove;
 
 static Point selectionCursorPosition;
 static bool 	nowSelected = false;
 
-// didBufÇÃÉfÅ[É^å`éÆÇÃíËã`
+// didBufのデータ形式の定義
 // 	list of insert_string("hoge"), move_to(list ins), delete(int n)
-// undoBufÇÃÉfÅ[É^å`éÆÇÃíËã`
+// undoBufのデータ形式の定義
 //		delete(int n), move_to(list ins), insert_string("hoge")
 
-//Ç¢Ç‹ÇÃÇ∆Ç±ÇÎundobufÇÇ¬Ç©Ç¢1-levelÇÃundoÇæÇØ
+//いまのところundobufをつかい1-levelのundoだけ
 static list didBuf = nil;
 static list undoBuf = nil;
 static obj undobuf = nil;
@@ -181,8 +181,8 @@ void drawSubScript(obj v, bool draw){
 	TextSize(FONTSIZE);
 	Move(0,-FONTSIZE/3);
 }
-// CRÇÕçsññÇ…ïtëÆÇ∑ÇÈÇ∆çlÇ¶ÇÈÅB
-Point curbase;	// curBaseÇÕcursorÇÃbaseline, curbaseÇÕåªç›ï`âÊíÜÇÃbaseline
+// CRは行末に付属すると考える。
+Point curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
 int drawOne(list& l, int& pos, bool draw){
@@ -354,7 +354,7 @@ void drawLines(list*line, bool draw){
 int getWidth(obj str){
 	Point pt, np;
 	GetPen(&pt);
-	drawFormula(str, false);	// wrapÇ≥ÇÍÇÈÇ∆Ç‹Ç∏Ç¢
+	drawFormula(str, false);	// wrapされるとまずい
 	GetPen(&np);
 	return np.h-pt.h;
 }
@@ -383,7 +383,7 @@ inline void set_insp(int pos){		// <-> move insertion
 	insList = nil;
 	ins = insp(&line, pos);
 }
-int findPreviousLetter(){		// Ç¢Ç∏ÇÍlistÇï‘Ç∑ÇÊÇ§Ç…
+int findPreviousLetter(){		// いずれlistを返すように
 	int p=0;
 	int i=0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
@@ -540,7 +540,7 @@ void moveToUpperLevel(){
 	if(isInFrac()) pos = popInsertion();
 	ins = insp(curr_str(insList), pos);
 }
-int getNLine(list l){//lineêî-1,CRÇÃêîÇêîÇ¶ÇÈ
+int getNLine(list l){//line数-1,CRの数を数える
 	int i=0;
 	for(; l; l=rest(l)) if(first(l)->type==INT && uint(first(l))==CR) i++;
 	return i;
@@ -548,7 +548,7 @@ int getNLine(list l){//lineêî-1,CRÇÃêîÇêîÇ¶ÇÈ
 void insertSuperScriptAndMoveInto(){
 	obj vp = render(SuperScript, nil);
 	insert(vp);
-	pushInsertion();		//insertion pointÇÕÇ›Ç¨Ç≈ë“Ç¡ÇƒÇ¢ÇƒÇ‡ÇÁÇ§Ç±Ç∆Ç…Ç∑ÇÈÅB
+	pushInsertion();		//insertion pointはみぎで待っていてもらうことにする。
 	ins.moveInto(&ul(vp));
 }
 
@@ -657,7 +657,7 @@ void moveDown(){
 static unsigned long caretLastChanged;
 static int caretState;	//==0 if hidden, ==1 if shown
 
-// CaretÇÕ qd.ptÇå©ÇƒÇ¢ÇÈÇÃÇ™Ç‹Ç∏Ç¢
+// Caretは qd.ptを見ているのがまずい
 
 void ShowCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
@@ -885,7 +885,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 void handleCR(){
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine - viewPosition + FONTSIZE*(2 + getNLine(line));//dame
-	scrollBy(0);	//â¸çsÇµÇ‹Ç∑ÅB
+	scrollBy(0);	// newline
 //	interpret(interpreter, line);   // repair here 131013
 	scrollBy(FONTSIZE*2);
 	newLine();
@@ -946,8 +946,8 @@ void DoUpdate(WindowPtr targetWindow) {
 //	BeginUpdate(targetWindow);
 //	EraseRect(&targetWindow->portRect);
 	Redraw();
-//	DrawGrowIcon(targetWindow);	//ÉTÉCÉYÉ{ÉbÉNÉXÇï`Ç≠
-//	DrawControls(targetWindow);	//ÉRÉìÉgÉçÅ[ÉãÅAÇ¬Ç‹ÇËÉXÉNÉçÅ[ÉãÉoÅ[Çï`Ç≠
+//	DrawGrowIcon(targetWindow);
+//	DrawControls(targetWindow);
 //	EndUpdate(targetWindow);
 }
 void DoUndo(){
@@ -999,7 +999,7 @@ void DoPaste(){
 	Handle	dataBlock;
 	long		offset, dataSize;
 /*  PASTE needs port 131013
-	if((dataSize = GetScrap(0, 'TEXT', &offset)) > 0) {	//TEXTÇÃë∂ç›ÇÉ`ÉFÉbÉN
+	if((dataSize = GetScrap(0, 'TEXT', &offset)) > 0) {
 		dataBlock = NewHandle(dataSize);
 		dataSize = GetScrap(dataBlock, 'TEXT', &offset);
 
@@ -1007,7 +1007,7 @@ void DoPaste(){
 		for(list l=tt; l; l=rest(l)) insert(first(l));
 		updateAround(true);
 		MoveTo(cursorPosition.h, cursorPosition.v);
-		DisposeHandle(dataBlock);	//Ç±ÇÍÇ≈Ç¢Ç¢ÇÃÇ©Ç»ÅH
+		DisposeHandle(dataBlock);
 	}
 */
 }
@@ -1063,7 +1063,7 @@ obj editline(obj v){
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine-viewPosition;
-	scrollBy(FONTSIZE*2+getNLine(line)*FONTSIZE);	//â¸çsÇµÇ‹Ç∑ÅB
+	scrollBy(FONTSIZE*2+getNLine(line)*FONTSIZE);	// newline
 	obj lin = listToCString(line);
 	newLine();
 	return lin;
