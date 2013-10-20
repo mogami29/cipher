@@ -101,14 +101,24 @@
     NSString* str = [theEvent characters];
 	//BOOL bar = [str isEqualToString: @"\n"];
     unichar key = [str characterAtIndex:0];     // can be plural
-    if (/*key == 0x7f ||*/ key >= 0xF700){ // 0x7f is delete
+    if (/*key == 0x7F ||*/ key >= 0xF704){  // 0x7F is delete    +4 is exepting arrow keys
         [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];      // too slow
-        //[[self inputContext] handleEvent:theEvent];   // unsuccessful. no input context to non textview view?
+        //[[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
         return;
     }
     cursorOn = true;
     [line appendString: str];
-    HandleTyping([str characterAtIndex:0]);
+    switch (key){
+        case NSLeftArrowFunctionKey:
+            key = arrowLeft; break;
+        case NSRightArrowFunctionKey:
+            key = arrowRight; break;
+        case NSUpArrowFunctionKey:
+            key = arrowUp; break;
+        case NSDownArrowFunctionKey:
+            key = arrowDown; break;
+    }
+    HandleTyping(key);
     [self display];
 }
 
