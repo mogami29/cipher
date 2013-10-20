@@ -65,28 +65,28 @@ int baseLine = 50;// ほかに使っているのはplot()
                 // baseLineはカーソル位置の拡張とおもう。
                 // line編集中はcursorPositionと同時に変更を行う。
 
-static list 	insList=nil;// insertion point のスタック
-                            // insと合わせてinsertion pointを表す
+static list insList = nil;// insertion point のスタック (list of "Int")
+                        // insと合わせてinsertion pointを表す
 static list	beginSelList;
 struct insp {
-	int pos;
-	list *curstr;	// current string
-	list* lpos;
+	int pos;            // position in curstr
+	list *curstr;       // current string
+	list *lpos;         // pos-th of curstr. アクセサ関数の中からのみ変更されている。
 
 	inline void moveInto(list *l){
 		curstr = l;
 		lpos = l;
-		pos = 0;	}
+		pos = 0; }
 	inline void moveRightmost(list *l){
 		curstr = l;
 		pos = length(*l);	
 		lpos = rest(l, pos);}
-	insp(list* l, int i):curstr(l), pos(i) {lpos=rest(l,i);}
-	insp():curstr(nil), pos(0){lpos=nil;}
+	insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
+	insp():curstr(nil), pos(0){lpos = nil;}
 	void setpos(int p){
-		lpos= rest(curstr, p);
+		lpos = rest(curstr, p);
 		pos = p; }
-	list* list_point(){		// functionalize !
+	list* list_point(){	// functionalize !
 		return lpos;
 		return rest(curstr, pos);
 	}
@@ -106,7 +106,7 @@ static bool 	nowSelected = false;
 static list didBuf = nil;
 static list undoBuf = nil;
 static obj undobuf = nil;
-//------------drawån----------
+//-----------draw functions----------
 Point curPt;
 NSMutableDictionary *dicAttr;
 NSFont *fontAttr;
@@ -294,12 +294,12 @@ int drawFormula0(list* line, list& l, int& pos, bool draw){
 		if(line==ins.curstr && l == *ins.lpos){
 			GetPen(&cursorPosition);
 			curBase = curbase;
-			crossed=true;
+			crossed = true;
 		}
 		if(! l) goto endline;
 
 		obj v= first(l);
-		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
+		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l); goto newline;};	//newlineifneccesary
 		drawOne(l, pos, draw);
 		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
 			pos++; l=rest(l);
@@ -307,7 +307,7 @@ int drawFormula0(list* line, list& l, int& pos, bool draw){
 		pos++, l=rest(l);
 
 		GetPen(&pt);
-		if(pt.h > 50+colWidth) goto newline;//wrap
+		if(pt.h > 50+colWidth) goto newline;    //wrap
 		if(pt.v < clickpnt.v + FONTSIZE/2 && pt.h < clickpnt.h){
 			click = insp(line, pos);
 			curclick = pt;
@@ -359,7 +359,7 @@ int getWidth(obj str){
 	return np.h-pt.h;
 }
 
-void drawObj(obj line){		//set cursorPositino at the same time
+void drawObj(obj line){		//set cursorPosition at the same time
 	char str[256];
 	if(type(line) ==STRING){
 		strcpy(str, ustr(line));
@@ -378,14 +378,14 @@ void drawObj(obj line){		//set cursorPositino at the same time
 
 //------accessors of the current line -----------------
 
-inline void set_insp(int pos){		// <-> move insertion
+inline void set_insp(int pos){	// <-> move insertion
 	release(insList);
 	insList = nil;
 	ins = insp(&line, pos);
 }
 int findPreviousLetter(){		// いずれlistを返すように
-	int p=0;
-	int i=0;
+	int p = 0;
+	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
 		p=i;
 		if(type(first(l))==INT && (uint(first(l))&0x80)) {
@@ -395,10 +395,10 @@ int findPreviousLetter(){		// いずれlistを返すように
 	return p;
 }
 int findPreviousLine(){//returns -1 in fail
-	int pp=-1,p=0, curr_pos;
+	int pp = -1,p = 0, curr_pos;
 	if(insList) curr_pos = uint(*last(insList));
 	else curr_pos = ins.pos;
-	int i=0;
+	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++) 
 		if(first(l)->type==INT && uint(first(l))==CR) {
 			pp=p;
