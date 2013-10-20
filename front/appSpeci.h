@@ -46,7 +46,7 @@ void Redraw();
 
 
 #define NUL 0
-#define BS	8
+#define BS	0x7F
 #define CR 13
 
 #define arrowLeft 	28

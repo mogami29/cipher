@@ -98,13 +98,23 @@
 
 - (void) keyDown : (NSEvent *) theEvent
 {
-    NSString* hoge = [theEvent characters];
-//	BOOL bar = [hoge isEqualToString: @"\n"];
-//	bar;
+    NSString* str = [theEvent characters];
+	//BOOL bar = [str isEqualToString: @"\n"];
+    unichar key = [str characterAtIndex:0];     // can be plural
+    if (/*key == 0x7f ||*/ key >= 0xF700){ // 0x7f is delete
+        [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];      // too slow
+        //[[self inputContext] handleEvent:theEvent];   // unsuccessful. no input context to non textview view?
+        return;
+    }
     cursorOn = true;
-    [line appendString: hoge];
-    HandleTyping([hoge characterAtIndex:0]);
+    [line appendString: str];
+    HandleTyping([str characterAtIndex:0]);
     [self display];
+}
+
+- (void) deleteBackward:(id)sender
+{
+    HandleTyping(BS);
 }
 
 - (BOOL)isFlipped
