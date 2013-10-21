@@ -22,7 +22,6 @@ void addObjToText(struct value* line);	//taking obj
 #if __cplusplus
 extern "C" {
 #endif
-void updateCaret();
 void addStringToText(char* string);
 void initLines();
 void newLine();
@@ -39,6 +38,8 @@ void DoOpen();
 void DoSave();
 void DoLatex();
 void DoPrint();
+void ShowCaret();
+void HideCaret();
 void Redraw();
 #if __cplusplus
 }   // Extern C

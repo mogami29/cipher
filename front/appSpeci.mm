@@ -654,7 +654,7 @@ void moveDown(){
 }
 
 //--------------------
-static unsigned long caretLastChanged;
+//static unsigned long caretLastChanged;
 static int caretState;	//==0 if hidden, ==1 if shown
 
 // Caretは qd.ptを見ているのがまずい
@@ -663,27 +663,26 @@ void ShowCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
 	Line(0,-FONTSIZE);
 	Move(0, FONTSIZE);
-	caretLastChanged = TickCount();
+//	caretLastChanged = TickCount();
 	caretState = 1;
 }
 
 void HideCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
-//	PenPat(&qd.white);
-// change color here
-	Line(0,-FONTSIZE);
-	Move(0, FONTSIZE);
+//	PenPat(&qd.white);  // change color here
+//	Line(0,-FONTSIZE);
+//	Move(0, FONTSIZE);
 //	PenPat(&qd.black);
-	caretLastChanged = TickCount();
+//	caretLastChanged = TickCount();
 	caretState = 0;
 }
 
-void updateCaret(){
-/*	if(TickCount() - caretLastChanged >= GetCaretTime() ){
+/*void updateCaret(){
+	if(TickCount() - caretLastChanged >= GetCaretTime() ){
 		if(caretState == 0) ShowCaret();
 		else HideCaret();
-	}*/
-}
+	}
+}*/
 
 #define upboundby(b,x) ((x)<(b)?(x):(b))
 extern WindowPtr	currWindow;

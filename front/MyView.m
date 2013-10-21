@@ -66,6 +66,9 @@
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
 
+    if (cursorOn) {
+        ShowCaret();
+    } else HideCaret();
     Redraw();
 }
 
@@ -107,7 +110,7 @@
         return;
     }
     cursorOn = true;
-    [line appendString: str];
+    //[line appendString: str];
     switch (key){
         case NSLeftArrowFunctionKey:
             key = arrowLeft; break;
