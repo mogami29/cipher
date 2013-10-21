@@ -145,7 +145,7 @@ float StringWidth(const char * str){    // takes pascal string
 void DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding];
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
-    [attStr drawAtPoint : NSMakePoint( curPt.h, curPt.v )];
+    [attStr drawAtPoint : NSMakePoint( curPt.h, curPt.v - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
     curPt.h += w;
 }
