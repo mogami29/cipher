@@ -89,16 +89,6 @@
     [self stopAnimation];
 }
 
-/*- (void) awakeFromNib
-{
-    NSLog( @"awakeFromNib" );
-    [ [ self window ] makeFirstResponder : self ];
-    line = [[NSMutableString alloc] init];
-    cursorOn = 1;
-    [self startAnimation];
-    [self setFrameSize:NSMakeSize(500, 1000)];
-}*/
-
 - (void) keyDown : (NSEvent *) theEvent
 {
     NSString* str = [theEvent characters];
