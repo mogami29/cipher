@@ -19,7 +19,7 @@ static void win_normalize();
 inline int_* create(ValueType t, int i){
 	int_* r = (int_*)alloc();
 	r->type = t;
-	uint(r) = i;	
+	uint(r) = i;
 	return r;
 }
 class frac: public list_ {
@@ -387,7 +387,7 @@ int findPreviousLetter(){		// いずれlistを返すように
 	int p = 0;
 	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
-		p=i;
+		p = i;
 		if(type(first(l))==INT && (uint(first(l))&0x80)) {
 			l=rest(l); i++;
 		}
@@ -395,14 +395,14 @@ int findPreviousLetter(){		// いずれlistを返すように
 	return p;
 }
 int findPreviousLine(){//returns -1 if none
-	int pp = -1,p = 0, curr_pos;
+	int pp = -1, p = 0, curr_pos;
 	if(insList) curr_pos = uint(*last(insList));
 	else curr_pos = ins.pos;
 	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++) 
 		if(first(l)->type==INT && uint(first(l))==CR) {
-			pp=p;
-			p=i+1;
+			pp = p;
+			p = i+1;
 		}
 	return pp;
 }
@@ -633,8 +633,6 @@ void moveDown(){
 //--------------------
 //static unsigned long caretLastChanged;
 static int caretState;	//==0 if hidden, ==1 if shown
-
-// Caretは qd.ptを見ているのがまずい
 
 void ShowCaret(){
 	MoveTo(cursorPosition.h, cursorPosition.v);
