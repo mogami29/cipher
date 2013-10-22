@@ -65,8 +65,9 @@ int baseLine = 50;// ほかに使っているのはplot()
                 // baseLineはカーソル位置の拡張とおもう。
                 // line編集中はcursorPositionと同時に変更を行う。
 
-static list insList = nil;// insertion point のスタック (list of "Int")
+static list insList = nil;// insertion point のスタック（先頭の要素が、一番内側の方。） (list of "Int")
                         // insと合わせてinsertion pointを表す
+                        // ins.posは実質insListの先頭。
 static list	beginSelList;
 struct insp {
 	int pos;            // position in curstr
@@ -185,7 +186,7 @@ void drawSubScript(obj v, bool draw){
 Point curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
-int drawOne(list& l, int& pos, bool draw){
+int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 	Point pt;
 	obj v = first(l);
 	switch(type(v)){
@@ -211,8 +212,7 @@ int drawOne(list& l, int& pos, bool draw){
 		GetPen(&pt);
 		if(!draw || pt.v < -FONTSIZE) Move(width, 0);
 			else	DrawString(buf+1);
-		break;
-	}
+		break; }
     case FRACTION:
 		drawFraction((list_*)v, draw);
 		break;
@@ -235,15 +235,15 @@ int drawOne(list& l, int& pos, bool draw){
 }
 
 
-inline int getInsertionCloseTo0(list& l, int &pos, int h, int&curr_mark){
+inline int getInsertionCloseTo0(list& l, int &pos, int h, int& curr_mark){
 	Point pt;
 	for(; ;){
 		GetPen(&pt);
 		if(pt.h <= h) curr_mark = pos;
 		if(! l) goto endline;
 		if(&line==ins.curstr && l==*ins.lpos) crossed = true;
-
-		obj v=first(l);
+        
+		obj v = first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
 		drawOne(l, pos, false);
 		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
@@ -394,7 +394,7 @@ int findPreviousLetter(){		// いずれlistを返すように
 	}
 	return p;
 }
-int findPreviousLine(){//returns -1 in fail
+int findPreviousLine(){//returns -1 if none
 	int pp = -1,p = 0, curr_pos;
 	if(insList) curr_pos = uint(*last(insList));
 	else curr_pos = ins.pos;
@@ -449,29 +449,6 @@ void insert(obj v){
 		release(undobuf);
 		undobuf = create(tDel, 1);
 	}
-}
-void newLine(){
-	line = phi();
-	ins.moveInto(&line);
-	insList = nil;
-
-	startOfThisLine = baseLine+viewPosition;
-	cursorPosition.h = LEFTMARGIN;
-	cursorPosition.v = baseLine;
-	MoveTo(LEFTMARGIN, baseLine);
-
-	cursorBeforeVertMove = cursorPosition;
-
-//	beginOfSel.pos = 0;
-	beginOfSel = insp();
-	beginSelList = nil;
-	selectionCursorPosition = cursorPosition;
-	nowSelected = false;
-	
-	release(didBuf);
-	release(undoBuf);
-	didBuf = nil;
-	undoBuf = nil;
 }
 static void pushInsertion(){
 	insList = cons(Int(ins.pos), insList);
@@ -720,6 +697,30 @@ void scroll(){
 extern Interpreter	interpreter;
 
 static list csparse(char* str, int len);
+
+void newLine(){
+	line = phi();
+	ins.moveInto(&line);
+	insList = nil;
+    
+	startOfThisLine = baseLine+viewPosition;
+	cursorPosition.h = LEFTMARGIN;
+	cursorPosition.v = baseLine;
+	MoveTo(LEFTMARGIN, baseLine);
+    
+	cursorBeforeVertMove = cursorPosition;
+    
+    //	beginOfSel.pos = 0;
+	beginOfSel = insp();
+	beginSelList = nil;
+	selectionCursorPosition = cursorPosition;
+	nowSelected = false;
+	
+	release(didBuf);
+	release(undoBuf);
+	didBuf = nil;
+	undoBuf = nil;
+}
 
 void initLines(){
 	lines = phi();
