@@ -32,8 +32,8 @@ typedef list text;
 
 // globals -> should be a instance vars
 WindowPtr	currWindow;
-int windowHeight = 800;
-int windowWidth = 550;
+static int windowHeight = 800;
+static int windowWidth = 550;
 
 void assert_func(const char* file, int line){
 	scroll();
@@ -61,8 +61,8 @@ static int startOfThisLine;	//絶対座標, multiple lineのときの始め。
 
 static Point cursorPosition;
 static Point curBase;
-int baseLine = 50;// ほかに使っているのはplot()
-                // baseLineはカーソル位置の拡張とおもう。
+float baseLine = 50;// ほかに使っているのはplot()
+                // baseLine ~ カーソル位置。描画なしでの予測と解釈できる
                 // line編集中はcursorPositionと同時に変更を行う。
 
 static list insList = nil;// insertion point のスタック（先頭の要素が、一番内側の方。） (list of "Int")
@@ -635,9 +635,6 @@ void moveDown(){
 static int caretState;	//==0 if hidden, ==1 if shown
 
 void ShowCaret(){
-	MoveTo(cursorPosition.h, cursorPosition.v);
-	Line(0,-FONTSIZE);
-	Move(0, FONTSIZE);
 //	caretLastChanged = TickCount();
 	caretState = 1;
 }
@@ -816,7 +813,7 @@ void updateAround(bool erase){
     // need repair here 131013
     //if(erase) EraseRect(&r);
 	//InvalRect(&r);
-	DoUpdate(currWindow);
+//	DoUpdate(currWindow);
 }
 void HandleTyping0(char c){
 	HideCaret();
@@ -869,8 +866,8 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 			undobuf = create(tMove, cons(Int(ins.pos), retain(insList)));
 		}
 	}
-	updateAround(!(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown));
-	baseLine = curBase.v;
+//	updateAround(!(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown));
+//	baseLine = curBase.v;
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
@@ -1188,6 +1185,11 @@ void Redraw(){
 	}
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
 	drawLines(&line, true);
+    if(caretState){
+        MoveTo(cursorPosition.h, cursorPosition.v);
+        Line(0,-FONTSIZE);
+        Move(0, FONTSIZE);
+    }
 }
 
 

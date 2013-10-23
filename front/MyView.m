@@ -112,6 +112,16 @@
             key = arrowDown; break;
     }
     HandleTyping(key);
+    
+    NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
+    if(baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
+        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine + FONTSIZE - clip.size.height);
+        [self scrollPoint:newScrollOrigin];
+    }
+    if(baseLine - FONTSIZE < clip.origin.y) {
+        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
+        [self scrollPoint:newScrollOrigin];
+    }
     [self display];
 }
 

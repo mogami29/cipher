@@ -7,8 +7,9 @@
 #define colSep 30
 #define nCols 1
 extern WindowPtr currWindow;
-extern int windowWidth;
-extern int windowHeight;
+//extern int windowWidth;
+//extern int windowHeight;
+extern float baseLine;
 
 void draw_integer(long i);
 void drawSeparator(int length);
