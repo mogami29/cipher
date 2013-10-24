@@ -7,7 +7,6 @@
 #define colSep 30
 #define nCols 1
 extern WindowPtr currWindow;
-//extern int windowWidth;
 extern int viewHeight;
 extern float baseLine;
 

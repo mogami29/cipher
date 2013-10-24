@@ -32,8 +32,6 @@ typedef list text;
 
 // globals -> should be a instance vars
 WindowPtr	currWindow;
-static int windowHeight = 800;
-static int windowWidth = 550;
 
 void assert_func(const char* file, int line){
 	scroll();
@@ -344,9 +342,9 @@ void drawLines(list*line, bool draw){
 				crossed=true;
 			}
 			if(! l) return;
-			if(vv > windowHeight) break;
+			//if(vv > windowHeight) break;
 		}
-		vv += -windowHeight + FONTSIZE;
+		//vv += -windowHeight + FONTSIZE;
 		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
 	}
 }
@@ -808,7 +806,7 @@ void updateAround(bool erase){
 	r.bottom = baseLine+FONTSIZE;
 	if(erase){
 		r.top 	= baseLine-FONTSIZE*2;
-		r.bottom = windowHeight;
+	//	r.bottom = windowHeight;
 	}	
     // need repair here 131013
     //if(erase) EraseRect(&r);
