@@ -1173,6 +1173,8 @@ list CStringToLine(obj str){
 	assert(str->type==STRING);
 	return csparse(ustr(str), strlen(ustr(str)));
 }
+int viewHeight = 100;
+
 void Redraw(){
 	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
@@ -1185,6 +1187,7 @@ void Redraw(){
 	}
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
 	drawLines(&line, true);
+	viewHeight = startOfThisLine + FONTSIZE*(2 + getNLine(line)) + 3*FONTSIZE;// too inacurate
     if(caretState){
         MoveTo(cursorPosition.h, cursorPosition.v);
         Line(0,-FONTSIZE);

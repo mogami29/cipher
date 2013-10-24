@@ -8,7 +8,7 @@
 #define nCols 1
 extern WindowPtr currWindow;
 //extern int windowWidth;
-//extern int windowHeight;
+extern int viewHeight;
 extern float baseLine;
 
 void draw_integer(long i);

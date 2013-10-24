@@ -78,7 +78,7 @@
     line = [[NSMutableString alloc] init];
     cursorOn = 1;
     [self startAnimation];
-    [self setFrameSize:NSMakeSize(500, 1000)];
+    [self setFrameSize:NSMakeSize(500, 100)];
     initLines();
     newLine();
     return self;
@@ -122,6 +122,7 @@
         NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
         [self scrollPoint:newScrollOrigin];
     }
+    [self setFrameSize:NSMakeSize(500, viewHeight)];
     [self display];
 }
 
