@@ -371,7 +371,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		return;
 	}
 	assert(line->type==LIST);
-	drawFormula(line, true);
+	drawLines(&ul(line), true);
 }
 
 //------accessors of the current line -----------------
