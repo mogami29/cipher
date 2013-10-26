@@ -184,7 +184,7 @@ void drawSubScript(obj v, bool draw){
 NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
-int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
+int drawOne(list& l, int& pos, bool draw){  // bool DrawACharOrABox() ?
 	NSPoint pt;
 	obj v = first(l);
 	switch(type(v)){
@@ -220,12 +220,14 @@ int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 	case SubScript:
 		drawSubScript(v, draw);
 		break;
+    default:
+        assert(0);
 	case tShow:
 		DrawString("▽");
 		drawLines(&ul(v), draw);
 		DrawString("▽");
 		break;
-	case tHide:
+    case tHide:
 		DrawString("△");
 		break;
 	}
@@ -286,8 +288,6 @@ NSPoint curclick;
 
 bool drawFormula0(list* line, list& l, int& pos, bool draw){
 	NSPoint pt;
-	int linew = 0;
-	char buf[256];
 	for(; ; ){	// chars
 		if(line==ins.curstr && l == *ins.lpos){
 			GetPen(&cursorPosition);
@@ -317,7 +317,7 @@ newline:
 	return 1;
 }
 
-void drawFormula(obj line, bool draw){
+void drawFormula(obj line, bool draw){      // drawLine()   ?
 	list l=ul(line);
 	int pos=0;
 	drawFormula0(&ul(line), l, pos, draw);
@@ -794,6 +794,8 @@ int imbalanced(list line){
 		case SuperScript:
 		case SubScript:
 			break;
+        default:
+            assert(0);
 		}
 	}
 	return abs(paren)+abs(brace);
