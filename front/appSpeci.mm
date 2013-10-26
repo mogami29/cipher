@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 void	drawLines(list*line, bool draw);
-static int getWidth(obj string);
+static float getWidth(obj string);
 static void drawFormula(obj line, bool draw);
 static int findPreviousLine();
 static list CStringToLine(obj str);
@@ -57,8 +57,8 @@ static list lines;
 static text line;
 static int startOfThisLine;	//絶対座標, multiple lineのときの始め。
 
-static Point cursorPosition;
-static Point curBase;
+static NSPoint cursorPosition;
+static NSPoint curBase;
 float baseLine = 50;// ほかに使っているのはplot()
                 // baseLine ~ カーソル位置。描画なしでの予測と解釈できる
                 // line編集中はcursorPositionと同時に変更を行う。
@@ -91,9 +91,9 @@ struct insp {
 	}
 } beginOfSel, ins;		//insは現在のinsertion point
 
-static Point cursorBeforeVertMove;
+static NSPoint cursorBeforeVertMove;
 
-static Point selectionCursorPosition;
+static NSPoint selectionCursorPosition;
 static bool 	nowSelected = false;
 
 // didBufのデータ形式の定義
@@ -106,28 +106,28 @@ static list didBuf = nil;
 static list undoBuf = nil;
 static obj undobuf = nil;
 //-----------draw functions----------
-Point curPt;
+NSPoint curPt;
 NSMutableDictionary *dicAttr;
 NSFont *fontAttr;
 
-void GetPen(Point * pt){
+void GetPen(NSPoint * pt){
     *pt = curPt;
 }
-void MoveTo(int h, int v){
-    curPt.h = h;
-    curPt.v = v;
+void MoveTo(float h, float v){
+    curPt.x = h;
+    curPt.y = v;
 }
-void Line(int h, int v){
+void Line(float h, float v){
     // Put NSBezierCurve here
-    NSPoint	point0 = {(float)curPt.h, (float)curPt.v};
-    NSPoint	point1 = {(float)curPt.h + h, (float)curPt.v + v};
+    NSPoint	point0 = {(float)curPt.x, (float)curPt.y};
+    NSPoint	point1 = {(float)curPt.x + h, (float)curPt.y + v};
     [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
-    curPt.h += h;
-    curPt.v += v;
+    curPt.x += h;
+    curPt.y += v;
 }
-void Move(int h, int v){
-    curPt.h += h;
-    curPt.v += v;
+void Move(float h, float v){
+    curPt.x += h;
+    curPt.y += v;
 }
 void TextSize(float s){
     // setting text font size
@@ -144,25 +144,25 @@ float StringWidth(const char * str){    // takes pascal string
 void DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSUTF8StringEncoding];
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
-    [attStr drawAtPoint : NSMakePoint( curPt.h, curPt.v - [fontAttr ascender] + [fontAttr descender])];
+    [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
-    curPt.h += w;
+    curPt.x += w;
 }
 
 void drawFraction(list_* f, bool draw){
-	Point pt;
+	NSPoint pt;
 	GetPen(&pt);
 	assert(f->type==FRACTION);
-	int numerWidth = getWidth(em0(f));
-	int denomWidth = getWidth(em1(f));
-	int width = 2 + larger(numerWidth, denomWidth) +2;
-	MoveTo(pt.h, pt.v-FONTSIZE/3);
+	float numerWidth = getWidth(em0(f));
+	float denomWidth = getWidth(em1(f));
+	float width = 2 + larger(numerWidth, denomWidth) +2;
+	MoveTo(pt.x, pt.y-FONTSIZE/3);
 	if(draw) Line(width,0);
-	MoveTo(pt.h+width/2-numerWidth/2, pt.v-FONTSIZE*2/3);
+	MoveTo(pt.x+width/2-numerWidth/2, pt.y-FONTSIZE*2/3);
 	drawFormula(em0(f), draw);
-	MoveTo(pt.h+width/2-denomWidth/2, pt.v+FONTSIZE);
+	MoveTo(pt.x+width/2-denomWidth/2, pt.y+FONTSIZE);
 	drawFormula(em1(f), draw);
-	MoveTo(pt.h+width+2, pt.v);
+	MoveTo(pt.x+width+2, pt.y);
 }
 void drawSuperScript(obj v, bool draw){
 	Move(0,-FONTSIZE*2/3);
@@ -181,11 +181,11 @@ void drawSubScript(obj v, bool draw){
 	Move(0,-FONTSIZE/3);
 }
 // CRは行末に付属すると考える。
-Point curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
+NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
 int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
-	Point pt;
+	NSPoint pt;
 	obj v = first(l);
 	switch(type(v)){
     case INT:{
@@ -200,7 +200,7 @@ int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 			buf[++*buf] = uint(second(l));
 		}
         buf[*buf + 1] = 0;      // P-string manipulation
-		int width = StringWidth(buf+1);
+		float width = StringWidth(buf+1);
 		if(c=='\t') width = StringWidth("    ");
 		//draw:
 		if(c=='\t') {
@@ -208,7 +208,7 @@ int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 			break;
 		}
 		GetPen(&pt);
-		if(!draw || pt.v < -FONTSIZE) Move(width, 0);
+		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
 			else	DrawString(buf+1);
 		break; }
     case FRACTION:
@@ -233,11 +233,11 @@ int drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 }
 
 
-inline int getInsertionCloseTo0(list& l, int &pos, int h, int& curr_mark){
-	Point pt;
+inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
+	NSPoint pt;
 	for(; ;){
 		GetPen(&pt);
-		if(pt.h <= h) curr_mark = pos;
+		if(pt.x <= h) curr_mark = pos;
 		if(! l) goto endline;
 		if(&line==ins.curstr && l==*ins.lpos) crossed = true;
         
@@ -250,7 +250,7 @@ inline int getInsertionCloseTo0(list& l, int &pos, int h, int& curr_mark){
 		pos++, l=rest(l);
 
 		GetPen(&pt);
-		if(pt.h > LEFTMARGIN+colWidth) goto newline; //wrap
+		if(pt.x > LEFTMARGIN+colWidth) goto newline; //wrap
  	}
 newline:
 	return 1;
@@ -258,7 +258,7 @@ endline:
 	return 0;
 }
 
-void findInsertionCloseTo(int h, int &next, int &prev){
+void findInsertionCloseTo(float h, int &next, int &prev){
 	int pos = findPreviousLine();
 	int curr_mark=0; 
 	if(pos<0) pos=0;
@@ -271,9 +271,9 @@ void findInsertionCloseTo(int h, int &next, int &prev){
 	for(; l;){
 		if(getInsertionCloseTo0(l, pos, h, curr_mark)==1) goto newline;
 			else goto endline;
-newline:	Point pt;
+newline:	NSPoint pt;
 		GetPen(&pt);
-		MoveTo(LEFTMARGIN, pt.v+LINEHEIGHT);
+		MoveTo(LEFTMARGIN, pt.y+LINEHEIGHT);
 		if(! crossed) prev = curr_mark;
 endline:	if(metend) {next = curr_mark; return;}
 		if(crossed) metend = true;
@@ -281,11 +281,11 @@ endline:	if(metend) {next = curr_mark; return;}
 }
 
 insp click;
-Point clickpnt;
-Point curclick;
+NSPoint clickpnt;
+NSPoint curclick;
 
-int drawFormula0(list* line, list& l, int& pos, bool draw){
-	Point pt;
+bool drawFormula0(list* line, list& l, int& pos, bool draw){
+	NSPoint pt;
 	int linew = 0;
 	char buf[256];
 	for(; ; ){	// chars
@@ -305,8 +305,8 @@ int drawFormula0(list* line, list& l, int& pos, bool draw){
 		pos++, l=rest(l);
 
 		GetPen(&pt);
-		if(pt.h > 50+colWidth) goto newline;    //wrap
-		if(pt.v < clickpnt.v + FONTSIZE/2 && pt.h < clickpnt.h){
+		if(pt.x > 50+colWidth) goto newline;    //wrap
+		if(pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
 			click = insp(line, pos);
 			curclick = pt;
 		}
@@ -325,10 +325,10 @@ void drawFormula(obj line, bool draw){
 void drawLines(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
-	Point pt;
+	NSPoint pt;
 	GetPen(&pt);
 
-	int vv=pt.v;
+	float vv = pt.y;
 	for(int col=0; col < nCols; col++){	// columns
 		for(; ; ){				// lines by CR
 			GetPen(&curbase);	// get baseline of the line
@@ -349,12 +349,12 @@ void drawLines(list*line, bool draw){
 	}
 }
 
-int getWidth(obj str){
-	Point pt, np;
+float getWidth(obj str){
+	NSPoint pt, np;
 	GetPen(&pt);
 	drawFormula(str, false);	// wrapされるとまずい
 	GetPen(&np);
-	return np.h-pt.h;
+	return np.x - pt.x;
 }
 
 void drawObj(obj line){		//set cursorPosition at the same time
@@ -604,7 +604,7 @@ void moveUp(){
 		}
 	}
 	int nx,pv;
-	findInsertionCloseTo(cursorBeforeVertMove.h, nx, pv);
+	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(pv == -1) return;
 	set_insp(pv);
 	baseLine += -LINEHEIGHT;
@@ -622,7 +622,7 @@ void moveDown(){
 		}
 	}
 	int nx,pv;
-	findInsertionCloseTo(cursorBeforeVertMove.h, nx, pv);
+	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(nx==-1) return;
 	set_insp(nx);
 	baseLine += +LINEHEIGHT;
@@ -638,7 +638,7 @@ void ShowCaret(){
 }
 
 void HideCaret(){
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 //	PenPat(&qd.white);  // change color here
 //	Line(0,-FONTSIZE);
 //	Move(0, FONTSIZE);
@@ -697,8 +697,8 @@ void newLine(){
 	insList = nil;
     
 	startOfThisLine = baseLine+viewPosition;
-	cursorPosition.h = LEFTMARGIN;
-	cursorPosition.v = baseLine;
+	cursorPosition.x = LEFTMARGIN;
+	cursorPosition.y = baseLine;
 	MoveTo(LEFTMARGIN, baseLine);
     
 	cursorBeforeVertMove = cursorPosition;
@@ -738,9 +738,9 @@ static void addLineToText(obj line){	//taking line
 }
 
 void addStringToText(char* string){
-	Point pt;
+	NSPoint pt;
 	GetPen(&pt);
-	list aLine = list3(String2v(string), Int(viewPosition+baseLine), Int(pt.h));
+	list aLine = list3(String2v(string), Int(viewPosition+baseLine), Int(pt.x));
 	append(&lines, List2v(aLine));
 }
 
@@ -750,10 +750,10 @@ void addStringToText(char* string){
 void myPrintf(const char *fmt,...){
 	va_list	ap;
 	char str[256];
-	Point pt;
+	NSPoint pt;
 	GetPen(&pt);
-	if(pt.h > LEFTMARGIN+colWidth) return;
-//	if(pt.h > LEFTMARGIN+colWidth) scroll();
+	if(pt.x > LEFTMARGIN+colWidth) return;
+//	if(pt.x > LEFTMARGIN+colWidth) scroll();
 	va_start(ap,fmt);
 	if (fmt) {
 		vsprintf(str,fmt,ap);
@@ -767,9 +767,9 @@ void myPrintf(const char *fmt,...){
 
 void print_str(char*s){
 	char str[256];
-	Point pt;
+	NSPoint pt;
 	GetPen(&pt);
-	if(pt.h > LEFTMARGIN+colWidth) return;
+	if(pt.x > LEFTMARGIN+colWidth) return;
 //	addStringToText(str);
 //	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
 	int p=0;
@@ -865,7 +865,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 		}
 	}
 //	updateAround(!(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown));
-//	baseLine = curBase.v;
+//	baseLine = curBase.y;
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
@@ -906,21 +906,21 @@ void HandleShifted(char c){
 		win_normalize();
 	}
 	updateAround(true);
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 
     // hiliting: need repair 131013
 	//UInt8 curMode = LMGetHiliteMode();
 	//LMSetHiliteMode(curMode & 0x7f);
 	Rect r;
-	r.left =	smaller(selectionCursorPosition.h, cursorPosition.h);
-	r.right=	larger(selectionCursorPosition.h, cursorPosition.h);
-	r.top =	smaller(selectionCursorPosition.v, cursorPosition.v)-FONTSIZE;
-	r.bottom=	larger(selectionCursorPosition.v, cursorPosition.v);
+	r.left =	smaller(selectionCursorPosition.x, cursorPosition.x);
+	r.right=	larger(selectionCursorPosition.x, cursorPosition.x);
+	r.top =	smaller(selectionCursorPosition.y, cursorPosition.y)-FONTSIZE;
+	r.bottom=	larger(selectionCursorPosition.y, cursorPosition.y);
 	//InvertRect(&r);
 	//LMSetHiliteMode(curMode | 0x80);
 	nowSelected = true;
 }
-void getClickPosition(Point pt){
+void getClickPosition(NSPoint pt){
 	clickpnt = pt;
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
 	click = insp(nil, 0);
@@ -931,7 +931,7 @@ void getClickPosition(Point pt){
 	insList = ins_list(&line, click.curstr);
 	cursorPosition = curclick;
 }
-void HandleContentClick(Point pt){
+void HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
 }
 void DoUpdate(WindowPtr targetWindow) {
@@ -985,7 +985,7 @@ void DoCut(){
 	DoCopy();
 	putinUndobuf(cutSelected());
 	updateAround(true);
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
 void DoPaste(){
@@ -999,7 +999,7 @@ void DoPaste(){
 		list tt = csparse((char*)*dataBlock, dataSize);
 		for(list l=tt; l; l=rest(l)) insert(first(l));
 		updateAround(true);
-		MoveTo(cursorPosition.h, cursorPosition.v);
+		MoveTo(cursorPosition.x, cursorPosition.y);
 		DisposeHandle(dataBlock);
 	}
 */
@@ -1013,7 +1013,7 @@ void DoOpen(){
 	line = CStringToLine(rr);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
 	drawLines(&line, true);
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
 void DoSave(){
@@ -1036,7 +1036,7 @@ obj edit(obj fn){	// open edit save
 	line = CStringToLine(rr);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
 	drawLines(&line, true);
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 
 	while(! getKey(shiftCR)) ;
 	addLineToText(List2v(line));
@@ -1052,7 +1052,7 @@ obj editline(obj v){
 	line = CStringToLine(v);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
 	drawLines(&line, true);
-	MoveTo(cursorPosition.h, cursorPosition.v);
+	MoveTo(cursorPosition.x, cursorPosition.y);
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine-viewPosition;
@@ -1187,7 +1187,7 @@ void Redraw(){
 	drawLines(&line, true);
 	viewHeight = startOfThisLine + FONTSIZE*(2 + getNLine(line)) + 3*FONTSIZE;// too inacurate
     if(caretState){
-        MoveTo(cursorPosition.h, cursorPosition.v);
+        MoveTo(cursorPosition.x, cursorPosition.y);
         Line(0,-FONTSIZE);
         Move(0, FONTSIZE);
     }
