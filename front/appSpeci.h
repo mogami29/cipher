@@ -34,7 +34,7 @@ void DoCopy();
 void DoHide();
 void DoCut();
 void DoPaste();
-void DoOpen();
+void setCString(const char *);
 void DoSave();
 void DoLatex();
 void DoPrint();

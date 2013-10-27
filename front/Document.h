@@ -9,5 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 @interface Document : NSDocument
-
+{
+    NSData* loadedData;
+    IBOutlet id myView;
+}
 @end

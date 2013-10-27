@@ -1007,13 +1007,10 @@ void DoPaste(){
 */
 }
 
-void DoOpen(){
-	static obj fn = String2v("j");
-	long bytes;
-	obj rr = nil;//val(read(&bytes, (fn)));     // restore needed 131014
+void setCString(const char* str){
 	newLine();
-	line = CStringToLine(rr);
-	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
+	line = csparse((char *)str, strlen(str));
+	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	drawLines(&line, true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
 }

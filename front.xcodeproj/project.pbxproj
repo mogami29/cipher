@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		051F9E071809FCB600289510 /* appSpeci.mm in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm */; };
+		0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0527D948181C808200E5B8E0 /* tokenizer.cpp */; };
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
 		0598486417EE906F008EEB70 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.m */; };
 		05A21B7918109E5900F512A6 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A21B7818109E5900F512A6 /* vector.cpp */; };
@@ -38,6 +39,8 @@
 
 /* Begin PBXFileReference section */
 		051F9E061809FCB600289510 /* appSpeci.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = appSpeci.mm; sourceTree = "<group>"; };
+		0527D947181C807000E5B8E0 /* y.tab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = y.tab.h; path = "../../cipher-shell/cipher-shell/y.tab.h"; sourceTree = "<group>"; };
+		0527D948181C808200E5B8E0 /* tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenizer.cpp; path = "../../cipher-shell/cipher-shell/tokenizer.cpp"; sourceTree = "<group>"; };
 		059802FE18095BB1000E9157 /* ciph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ciph.h; path = "../../cipher-shell/cipher-shell/ciph.h"; sourceTree = "<group>"; };
 		0598030018095CE9000E9157 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = value.h; path = "../../cipher-shell/cipher-shell/value.h"; sourceTree = "<group>"; };
 		0598030218095D4C000E9157 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = "../../cipher-shell/cipher-shell/list.cpp"; sourceTree = "<group>"; };
@@ -144,6 +147,8 @@
 				0598030018095CE9000E9157 /* value.h */,
 				05FF81C4180B7DF6002B4ACF /* value.cpp */,
 				05A21B7818109E5900F512A6 /* vector.cpp */,
+				0527D947181C807000E5B8E0 /* y.tab.h */,
+				0527D948181C808200E5B8E0 /* tokenizer.cpp */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
@@ -282,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				051F9E071809FCB600289510 /* appSpeci.mm in Sources */,
+				0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */,
 				05FF81C5180B7DF6002B4ACF /* value.cpp in Sources */,
 				05AD7D7317EDAA5A006391A3 /* Document.m in Sources */,
 				05AD7D6C17EDAA5A006391A3 /* main.m in Sources */,

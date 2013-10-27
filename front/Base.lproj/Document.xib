@@ -7,6 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
             <connections>
+                <outlet property="myView" destination="eV5-BL-nzg" id="3Ds-tP-wDf"/>
                 <outlet property="window" destination="5" id="18"/>
             </connections>
         </customObject>
@@ -39,7 +40,7 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" id="QZL-wV-gzm">
-                            <rect key="frame" x="492" y="1" width="16" height="413"/>
+                            <rect key="frame" x="493" y="1" width="15" height="413"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>

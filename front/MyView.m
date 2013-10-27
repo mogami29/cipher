@@ -142,6 +142,16 @@
     [self display];
 }
 
+- (NSString *)string
+{
+    return nil;
+}
+
+- (void)setString:(NSString *)string
+{
+    setCString([string UTF8String]);
+}
+
 // taken from Circleview
 - (void) startAnimation {
     [self stopAnimation];
