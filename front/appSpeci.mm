@@ -63,6 +63,8 @@ float baseLine = 50;// ほかに使っているのはplot()
                 // baseLine ~ カーソル位置。描画なしでの予測と解釈できる
                 // line編集中はcursorPositionと同時に変更を行う。
 
+static bool drawingTheEditingLine = false;
+static list drawList;
 static list insList = nil;// insertion point のスタック（先頭の要素が、一番内側の方。） (list of "Int")
                         // insと合わせてinsertion pointを表す
                         // ins.posは実質insListの先頭。
@@ -159,9 +161,13 @@ void drawFraction(list_* f, bool draw){
 	MoveTo(pt.x, pt.y-FONTSIZE/3);
 	if(draw) Line(width,0);
 	MoveTo(pt.x+width/2-numerWidth/2, pt.y-FONTSIZE*2/3);
-	drawFormula(em0(f), draw);
+	drawList = cons(Int(1), drawList);
+        drawFormula(em0(f), draw);
+    vrInt(pop(&drawList));
 	MoveTo(pt.x+width/2-denomWidth/2, pt.y+FONTSIZE);
-	drawFormula(em1(f), draw);
+	drawList = cons(Int(2), drawList);
+        drawFormula(em1(f), draw);
+    vrInt(pop(&drawList));
 	MoveTo(pt.x+width+2, pt.y);
 }
 void drawSuperScript(obj v, bool draw){
@@ -184,19 +190,18 @@ void drawSubScript(obj v, bool draw){
 NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
-int drawOne(list& l, int& pos, bool draw){  // bool DrawACharOrABox() ?
+void drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
 	NSPoint pt;
 	obj v = first(l);
-	switch(type(v)){
-    case INT:{
+    if (type(v)==INT) {
 		char buf[8];
 		// read
 		*buf=0;
 		int c = uint(v);
 		buf[++*buf] = c;
 		if(c&0x80){
-			if(! rest(l)) break;//2 byte文字が1byteずつ挿入されるから
-			if(second(l)->type != INT) break;
+			if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
+			if(second(l)->type != INT) return;
 			buf[++*buf] = uint(second(l));
 		}
         buf[*buf + 1] = 0;      // P-string manipulation
@@ -205,12 +210,15 @@ int drawOne(list& l, int& pos, bool draw){  // bool DrawACharOrABox() ?
 		//draw:
 		if(c=='\t') {
 			DrawString("    ");
-			break;
+			return;
 		}
 		GetPen(&pt);
 		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
-			else	DrawString(buf+1);
-		break; }
+        else	DrawString(buf+1);
+		return;
+    }
+    drawList = cons(Int(pos+1), drawList);
+	switch(type(v)){
     case FRACTION:
 		drawFraction((list_*)v, draw);
 		break;
@@ -231,7 +239,8 @@ int drawOne(list& l, int& pos, bool draw){  // bool DrawACharOrABox() ?
 		DrawString("△");
 		break;
 	}
-	return 0;
+    vrInt(pop(&drawList));
+	return;
 }
 
 
@@ -325,6 +334,7 @@ void drawFormula(obj line, bool draw){      // drawLine()   ?
 void drawLines(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
+    drawList = phi();   // may have trouble with tShow
 	NSPoint pt;
 	GetPen(&pt);
 
@@ -1183,7 +1193,9 @@ void Redraw(){
 		drawObj(first(aLine));
 	}
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
+    drawingTheEditingLine = true;
 	drawLines(&line, true);
+    drawingTheEditingLine = false;
 	viewHeight = startOfThisLine + FONTSIZE*(2 + getNLine(line)) + 3*FONTSIZE;// too inacurate
     if(caretState){
         MoveTo(cursorPosition.x, cursorPosition.y);
