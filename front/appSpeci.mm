@@ -8,9 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-void	drawLines(list*line, bool draw);
+void	drawLine(list*line, bool draw);
 static float getWidth(obj string);
-static void drawFormula(obj line, bool draw);
+static void drawFragment(obj line, bool draw);
 static int findPreviousLine();
 static list CStringToLine(obj str);
 static void serialize(string*rs, list l, list end);
@@ -162,11 +162,11 @@ void drawFraction(list_* f, bool draw){
 	if(draw) Line(width,0);
 	MoveTo(pt.x+width/2-numerWidth/2, pt.y-FONTSIZE*2/3);
 	drawList = cons(Int(1), drawList);
-        drawFormula(em0(f), draw);
+        drawFragment(em0(f), draw);
     vrInt(pop(&drawList));
 	MoveTo(pt.x+width/2-denomWidth/2, pt.y+FONTSIZE);
 	drawList = cons(Int(2), drawList);
-        drawFormula(em1(f), draw);
+        drawFragment(em1(f), draw);
     vrInt(pop(&drawList));
 	MoveTo(pt.x+width+2, pt.y);
 }
@@ -174,7 +174,7 @@ void drawSuperScript(obj v, bool draw){
 	Move(0,-FONTSIZE*2/3);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SuperScript);
-	drawFormula(v, draw);
+	drawFragment(v, draw);
 	TextSize(FONTSIZE);
 	Move(0,FONTSIZE*2/3);
 }
@@ -182,7 +182,7 @@ void drawSubScript(obj v, bool draw){
 	Move(0,+FONTSIZE/3);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SubScript);
-	drawFormula(v, draw);
+	drawFragment(v, draw);
 	TextSize(FONTSIZE);
 	Move(0,-FONTSIZE/3);
 }
@@ -190,7 +190,7 @@ void drawSubScript(obj v, bool draw){
 NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
-void drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
+void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
     if (type(v)==INT) {
@@ -232,7 +232,7 @@ void drawOne(list& l, int& pos, bool draw){  // DrawACharOrABox() ?
         assert(0);
 	case tShow:
 		DrawString("▽");
-		drawLines(&ul(v), draw);
+		drawLine(&ul(v), draw);
 		DrawString("▽");
 		break;
     case tHide:
@@ -254,7 +254,7 @@ inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
         
 		obj v = first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
-		drawOne(l, pos, false);
+		drawACharOrABox(l, pos, false);
 		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
 			pos++; l=rest(l);
 		}
@@ -295,7 +295,7 @@ insp click;
 NSPoint clickpnt;
 NSPoint curclick;
 
-bool drawFormula0(list* line, list& l, int& pos, bool draw){
+bool drawFragment0(list* line, list& l, int& pos, bool draw){
 	NSPoint pt;
 	for(; ; ){	// chars
 		if(line==ins.curstr && l == *ins.lpos){
@@ -307,7 +307,7 @@ bool drawFormula0(list* line, list& l, int& pos, bool draw){
 
 		obj v= first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l); goto newline;};	//newlineifneccesary
-		drawOne(l, pos, draw);
+		drawACharOrABox(l, pos, draw);
 		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
 			pos++; l=rest(l);
 		}
@@ -326,12 +326,12 @@ newline:
 	return 1;
 }
 
-void drawFormula(obj line, bool draw){      // drawLine()   ?
+void drawFragment(obj line, bool draw){      // drawLine()   ?
 	list l=ul(line);
 	int pos=0;
-	drawFormula0(&ul(line), l, pos, draw);
+	drawFragment0(&ul(line), l, pos, draw);
 }
-void drawLines(list*line, bool draw){
+void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
     drawList = phi();   // may have trouble with tShow
@@ -342,7 +342,7 @@ void drawLines(list*line, bool draw){
 	for(int col=0; col < nCols; col++){	// columns
 		for(; ; ){				// lines by CR
 			GetPen(&curbase);	// get baseline of the line
-			if(drawFormula0(line, l, pos, draw)){
+			if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
@@ -362,7 +362,7 @@ void drawLines(list*line, bool draw){
 float getWidth(obj str){
 	NSPoint pt, np;
 	GetPen(&pt);
-	drawFormula(str, false);	// wrapされるとまずい
+	drawFragment(str, false);	// wrapされるとまずい
 	GetPen(&np);
 	return np.x - pt.x;
 }
@@ -381,7 +381,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		return;
 	}
 	assert(line->type==LIST);
-	drawLines(&ul(line), true);
+	drawLine(&ul(line), true);
 }
 
 //------accessors of the current line -----------------
@@ -936,7 +936,7 @@ void getClickPosition(NSPoint pt){
 	clickpnt = pt;
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
 	click = insp(nil, 0);
-	drawLines(&line, false);
+	drawLine(&line, false);
 	if(!click.curstr) return;
 	ins = click;
 	release(insList);
@@ -1021,7 +1021,7 @@ void setCString(const char* str){
 	newLine();
 	line = csparse((char *)str, strlen(str));
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
-	drawLines(&line, true);
+	drawLine(&line, true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
@@ -1044,7 +1044,7 @@ obj edit(obj fn){	// open edit save
 	newLine();
 	line = CStringToLine(rr);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
-	drawLines(&line, true);
+	drawLine(&line, true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
 
 	while(! getKey(shiftCR)) ;
@@ -1060,7 +1060,7 @@ obj editline(obj v){
 	newLine();
 	line = CStringToLine(v);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
-	drawLines(&line, true);
+	drawLine(&line, true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
@@ -1194,7 +1194,7 @@ void Redraw(){
 	}
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
     drawingTheEditingLine = true;
-	drawLines(&line, true);
+	drawLine(&line, true);
     drawingTheEditingLine = false;
 	viewHeight = startOfThisLine + FONTSIZE*(2 + getNLine(line)) + 3*FONTSIZE;// too inacurate
     if(caretState){
