@@ -94,14 +94,15 @@
     NSString* str = [theEvent characters];
 	//BOOL bar = [str isEqualToString: @"\n"];
     unichar key = [str characterAtIndex:0];     // can be plural
-    if (/*key == 0x7F ||*/ key >= 0xF704){  // 0x7F is delete    +4 is exepting arrow keys
-        [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];      // too slow
+    if (key == 0x7F || key >= 0xF700){  // 0x7F is delete
+        [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
         //[[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
+        [self display];
         return;
     }
     cursorOn = true;
     //[line appendString: str];
-    switch (key){
+    /*switch (key){
         case NSLeftArrowFunctionKey:
             key = arrowLeft; break;
         case NSRightArrowFunctionKey:
@@ -110,7 +111,7 @@
             key = arrowUp; break;
         case NSDownArrowFunctionKey:
             key = arrowDown; break;
-    }
+    }*/
     HandleTyping(key);
     
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
@@ -129,6 +130,26 @@
 - (void) deleteBackward:(id)sender
 {
     HandleTyping(BS);
+}
+
+- (void) moveLeft:(id)sender    // what is moveBackward?
+{
+    HandleTyping(arrowLeft);
+}
+
+- (void) moveRight:(id)sender
+{
+    HandleTyping(arrowRight);
+}
+
+- (void) moveUp:(id)sender
+{
+    HandleTyping(arrowUp);
+}
+
+- (void) moveDown:(id)sender
+{
+    HandleTyping(arrowDown);
 }
 
 - (BOOL)isFlipped
