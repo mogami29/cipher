@@ -1000,21 +1000,11 @@ void DoCut(){
 	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
-void DoPaste(){
-	Handle	dataBlock;
-	long		offset, dataSize;
-/*  PASTE needs port 131013
-	if((dataSize = GetScrap(0, 'TEXT', &offset)) > 0) {
-		dataBlock = NewHandle(dataSize);
-		dataSize = GetScrap(dataBlock, 'TEXT', &offset);
-
-		list tt = csparse((char*)*dataBlock, dataSize);
-		for(list l=tt; l; l=rest(l)) insert(first(l));
-		updateAround(true);
-		MoveTo(cursorPosition.x, cursorPosition.y);
-		DisposeHandle(dataBlock);
-	}
-*/
+void  insertCString(const char* str){
+    list tt = csparse((char *)str, strlen(str));
+    for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
+    release(tt);
+    MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
 void setCString(const char* str){

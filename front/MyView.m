@@ -152,6 +152,36 @@
     setCString([string UTF8String]);
 }
 
+- (void) cut:sender {
+    
+}
+
+// from paste board Getting Started
+- (void) copy:sender {
+    NSString *string = [self string];
+    if (string != nil) {
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        [pasteboard clearContents];
+        NSArray *copiedObjects = [NSArray arrayWithObject:string];
+        [pasteboard writeObjects:copiedObjects];
+    }
+    NSLog(@"copy");
+}
+
+- (void) paste:sender {
+    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+    NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+    NSDictionary *options = [NSDictionary dictionary];
+    
+    BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
+    if (ok) {
+        NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
+        NSString *string = [objectsToPaste objectAtIndex:0];
+        insertCString([string UTF8String]);
+    }
+    [self setNeedsDisplay:YES];
+}
+
 // taken from Circleview
 - (void) startAnimation {
     [self stopAnimation];

@@ -33,7 +33,7 @@ void DoUndo();
 void DoCopy();
 void DoHide();
 void DoCut();
-void DoPaste();
+void insertCString(const char* str);
 void setCString(const char *);
 void DoSave();
 void DoLatex();
