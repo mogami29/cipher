@@ -139,19 +139,13 @@ void TextSize(float s){
 }
 float StringWidth(const char * str){    // takes pascal string
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    if(! s1) {
-        assert(0);
-    }
+    assert(s1);
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     CGFloat w = [attStr size].width;
     return w;
 }
 void DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    if(! s1) {
-        assert(0);
-    }
-    
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
@@ -706,7 +700,7 @@ void scroll(){
 //-----------------
 extern Interpreter	interpreter;
 
-static list csparse(char* str, int len);
+static list csparse(char* str, size_t len);
 
 void newLine(){
 	line = phi();
@@ -1168,9 +1162,9 @@ list csparse0(){
 	}
 	return reverse(l);
 }
-list csparse(char* str, int len){
+list csparse(char* str, size_t len){
 	clp = str;
-	clpe = clp+len;
+	clpe = clp + len;
 	return csparse0();
 }
 list CStringToLine(obj str){
