@@ -4,17 +4,8 @@
 
 - (void) drawRect : (NSRect) rect 
 {
-//    [[NSColor whiteColor] set];
-//    NSRectFill([self bounds]);   // Equiv to [[NSBezierPath bezierPathWithRect:[self bounds]] fill]
-	NSMutableDictionary *dicAttr = [ NSMutableDictionary dictionary ];
-    NSFont *fontAttr;
-    [ dicAttr setObject : [ NSColor blackColor ]
-                forKey  : NSForegroundColorAttributeName ];
-                
-    fontAttr = [ NSFont fontWithName : @"Helvetica"
-                                size : 24 ];
-    [ dicAttr setObject : fontAttr
-                forKey  : NSFontAttributeName];
+    //[[NSColor whiteColor] set];
+    //NSRectFill([self bounds]);   // Equiv to [[NSBezierPath bezierPathWithRect:[self bounds]] fill]
     NSAttributedString* str = [[NSAttributedString alloc] initWithString:line attributes:dicAttr];
     //[str drawAtPoint : NSMakePoint( 10, 10 )];
     /*if (cursorOn){
@@ -70,6 +61,8 @@
         ShowCaret();
     } else HideCaret();
     Redraw();
+    
+    [backingStore drawAtPoint:NSMakePoint(10,10)];
 }
 
 - (id) initWithFrame:(NSRect)frameRect
@@ -81,6 +74,18 @@
     [self setFrameSize:NSMakeSize(500, 100)];
     initLines();
     newLine();
+
+    dicAttr = [ NSMutableDictionary dictionary ];
+    [ dicAttr setObject : [ NSColor blackColor ]
+                forKey  : NSForegroundColorAttributeName ];
+    
+    fontAttr = [ NSFont fontWithName : @"Helvetica"
+                                size : 24 ];
+    [ dicAttr setObject : fontAttr
+                forKey  : NSFontAttributeName];
+    backingStore = [[NSMutableAttributedString alloc] initWithString:@"" attributes:dicAttr];
+    selectedRange = NSMakeRange(0, 0);
+    markedRange = NSMakeRange(NSNotFound, 0);
     return self;
 }
 
