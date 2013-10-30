@@ -102,23 +102,21 @@
     if (key == 0x7F || key >= 0xF700 ||1){  // 0x7F is delete
         //[self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
         [[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
-        [self display];
-        return;
+    } else {
+        //[line appendString: str];
+        /*switch (key){
+         case NSLeftArrowFunctionKey:
+            key = arrowLeft; break;
+         case NSRightArrowFunctionKey:
+            key = arrowRight; break;
+         case NSUpArrowFunctionKey:
+            key = arrowUp; break;
+         case NSDownArrowFunctionKey:
+            key = arrowDown; break;
+         }*/
+        HandleTyping(key);
     }
     cursorOn = true;
-    //[line appendString: str];
-    /*switch (key){
-        case NSLeftArrowFunctionKey:
-            key = arrowLeft; break;
-        case NSRightArrowFunctionKey:
-            key = arrowRight; break;
-        case NSUpArrowFunctionKey:
-            key = arrowUp; break;
-        case NSDownArrowFunctionKey:
-            key = arrowDown; break;
-    }*/
-    HandleTyping(key);
-    
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
     if(baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
         NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine + FONTSIZE - clip.size.height);
