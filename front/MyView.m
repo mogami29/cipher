@@ -94,9 +94,9 @@
     NSString* str = [theEvent characters];
 	//BOOL bar = [str isEqualToString: @"\n"];
     unichar key = [str characterAtIndex:0];     // can be plural
-    if (key == 0x7F || key >= 0xF700){  // 0x7F is delete
-        [self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
-        //[[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
+    if (key == 0x7F || key >= 0xF700 ||1){  // 0x7F is delete
+        //[self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
+        [[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
         [self display];
         return;
     }
@@ -125,6 +125,17 @@
     }
     [self setFrameSize:NSMakeSize(500, viewHeight)];
     [self display];
+}
+
+- (void) insertText:(id)string
+{
+    //[line appendString: string];
+    insertCString([string UTF8String]);
+}
+
+- (void)insertNewline:(id)sender
+{
+    HandleTyping(CR);
 }
 
 - (void) deleteBackward:(id)sender
@@ -257,5 +268,170 @@
 - (BOOL)resignFirstResponder {
     return YES;
 }
+
+#pragma mark -
+
+- (void)doCommandBySelector:(SEL)aSelector {
+    [super doCommandBySelector:aSelector]; // NSResponder's implementation will do nicely
+}
+
+- (void)insertText:(id)aString replacementRange:(NSRange)replacementRange {
+    // Get a valid range
+    if (replacementRange.location == NSNotFound) {
+        if (markedRange.location != NSNotFound) {
+            replacementRange = markedRange;
+        } else {
+            replacementRange = selectedRange;
+        }
+    }
+    
+    // Add the text
+    [backingStore beginEditing];
+    // insert aString to backingstore and
+    //[self insertText:[backingStore string]];
+    [self insertText:aString ];
+    [backingStore setAttributedString:[[NSAttributedString alloc] initWithString:@"" attributes:dicAttr]];
+    [backingStore endEditing];
+    
+    // Redisplay
+    [self unmarkText];
+    selectedRange = NSMakeRange(0, 0);
+    [[self inputContext] invalidateCharacterCoordinates]; // recentering
+    [self setNeedsDisplay:YES];
+}
+
+- (void)setMarkedText:(id)aString selectedRange:(NSRange)newSelection replacementRange:(NSRange)replacementRange {
+    // Get a valid range
+    if (replacementRange.location == NSNotFound) {
+        if (markedRange.location != NSNotFound) {
+            replacementRange = markedRange;
+        } else {
+            replacementRange = selectedRange;
+        }
+    }
+    
+    // Add the text
+    [backingStore beginEditing];
+    if ([aString length] == 0) {
+        [backingStore deleteCharactersInRange:replacementRange];
+        [self unmarkText];
+    } else {
+        markedRange = NSMakeRange(replacementRange.location, [aString length]);
+        if ([aString isKindOfClass:[NSAttributedString class]]) {
+            [backingStore replaceCharactersInRange:replacementRange withAttributedString:aString];
+        } else {
+            [backingStore replaceCharactersInRange:replacementRange withString:aString];
+        }
+        [backingStore addAttributes:dicAttr range:markedRange];
+    }
+    [backingStore endEditing];
+    
+    // Redisplay
+    selectedRange.location = replacementRange.location + newSelection.location; // Just for now, only select the marked text
+    selectedRange.length = newSelection.length;
+    [[self inputContext] invalidateCharacterCoordinates]; // recentering
+    [self setNeedsDisplay:YES];
+}
+
+- (void)unmarkText {
+    markedRange = NSMakeRange(NSNotFound, 0);
+    [[self inputContext] discardMarkedText];
+}
+
+- (NSRange)selectedRange {
+    return selectedRange;
+}
+
+- (NSRange)markedRange {
+    return markedRange;
+}
+
+- (BOOL)hasMarkedText {
+    return (markedRange.location == NSNotFound ? NO : YES);
+}
+
+- (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange {
+    // We choose not to adjust the range, though we have the option
+    if (actualRange) {
+        *actualRange = aRange;
+    }
+    return [backingStore attributedSubstringFromRange:aRange];
+}
+
+- (NSArray *)validAttributesForMarkedText {
+    // We only allow these attributes to be set on our marked text (plus standard attributes)
+    // NSMarkedClauseSegmentAttributeName is important for CJK input, among other uses
+    // NSGlyphInfoAttributeName allows alternate forms of characters
+    return [NSArray arrayWithObjects:NSMarkedClauseSegmentAttributeName, NSGlyphInfoAttributeName, nil];
+}
+
+- (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange {
+/*    // Ask the layout manager
+    NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:aRange actualCharacterRange:actualRange];
+    NSRect glyphRect = [layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer];
+    glyphRect.origin.x += centerOffset;
+    
+    // Convert the rect to screen coordinates
+    glyphRect = [self convertRectToBase:glyphRect];
+    glyphRect.origin = [[self window] convertBaseToScreen:glyphRect.origin];
+    return glyphRect;
+*/
+    return NSMakeRect(0, 0,1,1);
+}
+
+- (NSUInteger)characterIndexForPoint:(NSPoint)aPoint {
+/*    // Convert the point from screen coordinates
+    NSPoint localPoint = [self convertPointFromBase:[[self window] convertScreenToBase:aPoint]];
+    localPoint.x -= centerOffset;
+    
+    // Ask the layout manager
+    NSUInteger glyphIndex = [layoutManager glyphIndexForPoint:localPoint inTextContainer:textContainer fractionOfDistanceThroughGlyph:NULL];
+    return [layoutManager characterIndexForGlyphAtIndex:glyphIndex];
+*/
+    return 0;
+}
+
+- (NSAttributedString *)attributedString {
+    // This method is optional, but our backing store is an attributed string anyway
+    return backingStore;
+}
+
+- (NSInteger)windowLevel {
+    // This method is optional but easy to implement
+    return [[self window] level];
+}
+/*
+- (CGFloat)fractionOfDistanceThroughGlyphForPoint:(NSPoint)aPoint {
+    // This method is optional but would help with mouse-related activities, such as selection
+    // Unfortunately we don't support selection
+    
+    // Convert the point from screen coordinates
+    NSPoint localPoint = [self convertPointFromBase:[[self window] convertScreenToBase:aPoint]];
+    localPoint.x -= centerOffset;
+    
+    // Ask the layout manager
+    CGFloat fraction = 0.5;
+    [layoutManager glyphIndexForPoint:localPoint inTextContainer:textContainer fractionOfDistanceThroughGlyph:&fraction];
+    return fraction;
+}
+
+- (CGFloat)baselineDeltaForCharacterAtIndex:(NSUInteger)anIndex {
+    // This method is optional but helps position other elements next to the characters, such as the box that allows you to choose which Chinese or Japanese characters you want to input.
+    
+    // Get the first glyph corresponding to this character
+    NSUInteger glyphIndex = [layoutManager glyphIndexForCharacterAtIndex:anIndex];
+    
+    if (glyphIndex != NSNotFound) {
+        // Ask the layout manager's typesetter
+        return [[layoutManager typesetter] baselineOffsetInLayoutManager:layoutManager glyphIndex:glyphIndex];
+    } else {
+        // Fall back to the layout manager and font
+        return [layoutManager defaultBaselineOffsetForFont:[defaultAttributes objectForKey:NSFontAttributeName]];
+    }
+}*/
+
+// No implementation of -drawsVerticallyForCharacterAtIndex:, which means all characters are assumed to be drawn horizontally.
+// This is consistent with the current behavior of NSLayoutManager.
+// If you are drawing vertically, you should implement this method.
 
 @end
