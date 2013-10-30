@@ -130,7 +130,7 @@
 - (void) insertText:(id)string
 {
     //[line appendString: string];
-    insertCString([string UTF8String]);
+    insertCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
 }
 
 - (void)insertNewline:(id)sender
@@ -181,7 +181,7 @@
 
 - (void)setString:(NSString *)string
 {
-    setCString([string UTF8String]);
+    setCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
 }
 
 - (void) cut:sender {
