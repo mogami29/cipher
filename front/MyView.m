@@ -134,6 +134,7 @@
 {
     //[line appendString: string];
     insertCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
+    // need update of framesize here
 }
 
 - (void)insertNewline:(id)sender
