@@ -883,7 +883,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 		}
 	}
 //	updateAround(!(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown));
-//	baseLine = curBase.y;
+	baseLine = curBase.y;
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
@@ -895,7 +895,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 }
 void handleCR(){
 	addLineToText(List2v(line));
-	baseLine = startOfThisLine - viewPosition + FONTSIZE*(2 + getNLine(line));//dame
+	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
 	scrollBy(0);	// newline
 //	interpret(interpreter, line);   // repair here 131013
 	scrollBy(FONTSIZE*2);
@@ -1061,7 +1061,7 @@ obj editline(obj v){
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine-viewPosition;
-	scrollBy(FONTSIZE*2+getNLine(line)*FONTSIZE);	// newline
+	scrollBy(FONTSIZE*2+getNLine(line)*LINEHEIGHT);	// newline
 	obj lin = listToCString(line);
 	newLine();
 	return lin;
@@ -1192,7 +1192,7 @@ void Redraw(){
     drawingTheEditingLine = true;
 	drawLine(&line, true);
     drawingTheEditingLine = false;
-	viewHeight = startOfThisLine + FONTSIZE*(2 + getNLine(line)) + 3*FONTSIZE;// too inacurate
+	viewHeight = startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line) + 3*FONTSIZE;// too inacurate
     if(caretState){
         MoveTo(cursorPosition.x, cursorPosition.y);
         Line(0,-FONTSIZE);
