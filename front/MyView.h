@@ -12,6 +12,7 @@
     NSRange selectedRange;
 }
 - (void) drawRect : (NSRect) rect;
+- (void) drawCaretAt : (NSPoint) pt;
 - (void) keyDown : (NSEvent *) theEvent;
 - (void) mouseDown:(NSEvent *) theEvent;
 - (void) startAnimation;

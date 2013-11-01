@@ -57,12 +57,23 @@
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
 
-    if (cursorOn) {
+/*    if (cursorOn) {
         ShowCaret();
     } else HideCaret();
+*/
+    theStr = backingStore;
+    caller = self;
     Redraw();
-    
-    [backingStore drawAtPoint:NSMakePoint(10,10)];
+}
+
+- (void) drawCaretAt:(NSPoint)pt
+{
+    if (cursorOn & selectedRange.length==0) {
+        CGFloat w = [backingStore attributedSubstringFromRange:NSMakeRange(0, selectedRange.location)].size.width;
+        NSPoint	point0 = {pt.x + w, pt.y };
+        NSPoint	point1 = {pt.x + w, pt.y - [fontAttr ascender]};
+        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    }
 }
 
 - (id) initWithFrame:(NSRect)frameRect
@@ -80,7 +91,7 @@
                 forKey  : NSForegroundColorAttributeName ];
     
     fontAttr = [ NSFont fontWithName : @"Helvetica"
-                                size : 24 ];
+                                size : FONTSIZE ];
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
     backingStore = [[NSMutableAttributedString alloc] initWithString:@"" attributes:dicAttr];

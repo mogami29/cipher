@@ -9,6 +9,9 @@
 extern WindowPtr currWindow;
 extern int viewHeight;
 extern float baseLine;
+extern NSMutableAttributedString* theStr;
+#import "MyView.h"
+extern MyView* caller;
 
 void draw_integer(long i);
 void drawSeparator(int length);

@@ -297,6 +297,10 @@ endline:	if(metend) {next = curr_mark; return;}
 	}
 }
 
+NSMutableAttributedString* theStr;
+#import "MyView.h"
+MyView* caller;
+
 insp click;
 NSPoint clickpnt;
 NSPoint curclick;
@@ -308,7 +312,13 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 			GetPen(&cursorPosition);
 			curBase = curbase;
 			crossed = true;
-		}
+
+            [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
+            CGFloat w = [theStr size].width;
+            w = curPt.x + w;
+            [caller drawCaretAt:curPt];
+            curPt.x = w;
+        }
 		if(! l) goto endline;
 
 		obj v= first(l);
