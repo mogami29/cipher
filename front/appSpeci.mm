@@ -80,10 +80,10 @@ struct insp {
 		pos = 0; }
 	inline void moveRightmost(list *l){
 		curstr = l;
-		pos = length(*l);	
+		pos = length(*l);
 		lpos = rest(l, pos);}
 	insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
-	insp():curstr(nil), pos(0){lpos = nil;}
+	insp():curstr(nil), pos(0), lpos(nil){};
 	void setpos(int p){
 		lpos = rest(curstr, p);
 		pos = p; }
@@ -92,6 +92,11 @@ struct insp {
 		return rest(curstr, pos);
 	}
 } beginOfSel, ins;		//insは現在のinsertion point
+
+inline bool equalsToCursor(list* curline, list l, int pos){
+    // assert((curline==ins.curstr && l == *ins.lpos) == (equal(insList, drawList) && pos == ins.pos));
+    return(curline==ins.curstr && l == *ins.lpos);
+}
 
 static NSPoint cursorBeforeVertMove;
 
@@ -251,7 +256,7 @@ inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
 		GetPen(&pt);
 		if(pt.x <= h) curr_mark = pos;
 		if(! l) goto endline;
-		if(&line==ins.curstr && l==*ins.lpos) crossed = true;
+		if(equalsToCursor(&line, l, pos)) crossed = true;
         
 		obj v = first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
@@ -299,7 +304,7 @@ NSPoint curclick;
 bool drawFragment0(list* line, list& l, int& pos, bool draw){
 	NSPoint pt;
 	for(; ; ){	// chars
-		if(line==ins.curstr && l == *ins.lpos){
+        if(equalsToCursor(line, l, pos)){
 			GetPen(&cursorPosition);
 			curBase = curbase;
 			crossed = true;
@@ -347,10 +352,10 @@ void drawLine(list*line, bool draw){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
-			if(line==ins.curstr && l == *ins.lpos){
+			if(equalsToCursor(line, l, pos) && 0){      //seems unnecessary
 				GetPen(&cursorPosition);
 				curBase = curbase;
-				crossed=true;
+				crossed = true;
 			}
 			if(! l) return;
 			//if(vv > windowHeight) break;
