@@ -222,19 +222,24 @@
 }
 
 - (void) cut:sender {
-    
-}
-
-// from paste board Getting Started
-- (void) copy:sender {
-    NSString *string = [self string];
+    NSString *string = DoCut();
     if (string != nil) {
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
         [pasteboard clearContents];
         NSArray *copiedObjects = [NSArray arrayWithObject:string];
         [pasteboard writeObjects:copiedObjects];
     }
-    NSLog(@"copy");
+}
+
+// from paste board Getting Started
+- (void) copy:sender {
+    NSString *string = copySelected();
+    if (string != nil) {
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        [pasteboard clearContents];
+        NSArray *copiedObjects = [NSArray arrayWithObject:string];
+        [pasteboard writeObjects:copiedObjects];
+    }
 }
 
 - (void) paste:sender {
@@ -246,9 +251,26 @@
     if (ok) {
         NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
         NSString *string = [objectsToPaste objectAtIndex:0];
-        insertCString([string UTF8String]);
+        [self insertText:string];
     }
     [self setNeedsDisplay:YES];
+}
+
+- (BOOL)validateUserInterfaceItem:(id < NSValidatedUserInterfaceItem >)anItem {
+    
+    if ([anItem action] == @selector(cut:)) {
+        return nowSelected;
+    }
+    if ([anItem action] == @selector(copy:)) {
+        return nowSelected;
+    }
+    if ([anItem action] == @selector(paste:)) {
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+        NSDictionary *options = [NSDictionary dictionary];
+        return [pasteboard canReadObjectForClasses:classArray options:options];
+    }
+    return [[self window] validateUserInterfaceItem:anItem];    // is asking to the window correct?
 }
 
 // taken from Circleview

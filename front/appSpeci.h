@@ -12,6 +12,7 @@ extern float baseLine;
 extern NSMutableAttributedString* theStr;
 #import "MyView.h"
 extern MyView* caller;
+extern bool nowSelected;
 
 void draw_integer(long i);
 void drawSeparator(int length);
@@ -33,9 +34,9 @@ void HandleShifted(char c);
 void HandleContentClick(Point pt);
 void DoUpdate(WindowPtr targetWindow);
 void DoUndo();
-void DoCopy();
+NSString* copySelected();
 void DoHide();
-void DoCut();
+NSString* DoCut();
 void insertCString(const char* str);
 void setCString(const char *);
 void DoSave();

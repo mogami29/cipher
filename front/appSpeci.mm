@@ -101,7 +101,7 @@ inline bool equalsToCursor(list* curline, list l, int pos){
 static NSPoint cursorBeforeVertMove;
 
 static NSPoint selectionCursorPosition;
-static bool 	nowSelected = false;
+bool 	nowSelected = false;
 
 // didBufのデータ形式の定義
 // 	list of insert_string("hoge"), move_to(list ins), delete(int n)
@@ -998,21 +998,20 @@ void DoUndo(){
 	release(doit);
 	updateAround(true);
 }
-void DoCopy(){
+NSString* copySelected(){
 	if(beginSelList != insList) {
 		//SysBeep(1);
-		return;
+		return nil;
 	}
 	int b = smaller(beginOfSel.pos, ins.pos);
 	int e = larger(beginOfSel.pos, ins.pos);
-	if(b==e) return;
+	if(b==e) return nil;
 
 	string rs = nullstr();
 	serialize(&rs, rest(*ins.curstr,b), rest(*ins.curstr,e));
-	// copying to clipboard : need repair 131013
-    //ZeroScrap();
-	//PutScrap(strlen(rs.s), 'TEXT', rs.s);
+    NSString* str = [[NSString alloc] initWithCString:rs.s encoding:NSShiftJISStringEncoding];
 	freestr(&rs);
+    return str;
 }
 
 void DoHide(){
@@ -1021,11 +1020,12 @@ void DoHide(){
 	// next, make switch possible, then make it Hide not Show
 }
 
-void DoCut(){
-	DoCopy();
+NSString* DoCut(){
+	NSString* str = copySelected();
 	putinUndobuf(cutSelected());
 	updateAround(true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
+    return str;
 }
 
 void  insertCString(const char* str){
