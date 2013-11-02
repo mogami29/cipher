@@ -315,9 +315,8 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 
             [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
             CGFloat w = [theStr size].width;
-            w = curPt.x + w;
             [caller drawCaretAt:curPt];
-            curPt.x = w;
+            curPt.x += w;
         }
 		if(! l) goto endline;
 
@@ -362,7 +361,7 @@ void drawLine(list*line, bool draw){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
-			if(equalsToCursor(line, l, pos) && 0){      //seems unnecessary
+			if(equalsToCursor(line, l, pos)){      //seems unnecessary
 				GetPen(&cursorPosition);
 				curBase = curbase;
 				crossed = true;
@@ -897,11 +896,11 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
-	beginOfSel = ins;	//for text selection
+/*	beginOfSel = ins;	//for text selection
 	//release(beginSelList);       possibly no need 131018
 	//beginSelList = retain(insList);
 	selectionCursorPosition = cursorPosition;
-	nowSelected = false;
+*/	nowSelected = false;
 }
 void handleCR(){
 	addLineToText(List2v(line));
@@ -919,8 +918,32 @@ void HandleTyping(char c){
 		return;
 	} else HandleTyping0(c);
 }
+
+void highlightSelected(){   // incomplete logic
+    if(nowSelected){
+        Rect r;
+        r.left = smaller(selectionCursorPosition.x, cursorPosition.x);
+        r.right= larger(selectionCursorPosition.x, cursorPosition.x);
+        r.top  = smaller(selectionCursorPosition.y, cursorPosition.y) - FONTSIZE;
+        r.bottom=larger(selectionCursorPosition.y, cursorPosition.y);
+        //[[[NSColor selectedControlColor] colorWithAlphaComponent:0.5] set];   was not useful
+        [[NSColor selectedControlColor] set];
+        [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusDarker];
+        NSBezierPath* path = [NSBezierPath bezierPath];
+        [path appendBezierPathWithRect:NSMakeRect(r.left, r.top, r.right - r.left, r.bottom - r.top)];
+        //[path appendBezierPathWithRect:NSMakeRect(r.left + 5, r.top + 5, r.right - r.left, r.bottom - r.top)];
+        [path fill];
+        [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
+    }
+}
 void HandleShifted(char c){
-	if(!nowSelected && beginSelList != insList) return;
+    if(!nowSelected){
+        beginOfSel = ins;	//for text selection
+        //release(beginSelList);       possibly no need 131018
+        beginSelList = retain(insList);
+        selectionCursorPosition = cursorPosition;
+    }
+    if(!nowSelected && beginSelList != insList) return;
 	HideCaret();
 	if(c==arrowLeft){
 		moveLeft();
@@ -933,19 +956,8 @@ void HandleShifted(char c){
 		moveDown();
 		win_normalize();
 	}
-	updateAround(true);
+	//updateAround(true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
-
-    // hiliting: need repair 131013
-	//UInt8 curMode = LMGetHiliteMode();
-	//LMSetHiliteMode(curMode & 0x7f);
-	Rect r;
-	r.left =	smaller(selectionCursorPosition.x, cursorPosition.x);
-	r.right=	larger(selectionCursorPosition.x, cursorPosition.x);
-	r.top =	smaller(selectionCursorPosition.y, cursorPosition.y)-FONTSIZE;
-	r.bottom=	larger(selectionCursorPosition.y, cursorPosition.y);
-	//InvertRect(&r);
-	//LMSetHiliteMode(curMode | 0x80);
 	nowSelected = true;
 }
 void getClickPosition(NSPoint pt){
@@ -1203,11 +1215,12 @@ void Redraw(){
 	drawLine(&line, true);
     drawingTheEditingLine = false;
 	viewHeight = startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line) + 3*FONTSIZE;// too inacurate
-    if(caretState){
+    /*if(caretState){
         MoveTo(cursorPosition.x, cursorPosition.y);
         Line(0,-FONTSIZE);
         Move(0, FONTSIZE);
-    }
+    }*/
+    highlightSelected();
 }
 
 

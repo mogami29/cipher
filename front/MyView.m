@@ -68,10 +68,11 @@
 
 - (void) drawCaretAt:(NSPoint)pt
 {
-    if (cursorOn & selectedRange.length==0) {
+    if (cursorOn && selectedRange.length==0) {
         CGFloat w = [backingStore attributedSubstringFromRange:NSMakeRange(0, selectedRange.location)].size.width;
         NSPoint	point0 = {pt.x + w, pt.y };
-        NSPoint	point1 = {pt.x + w, pt.y - [fontAttr ascender]};
+        NSPoint	point1 = {pt.x + w, pt.y - FONTSIZE};
+        [[NSColor blackColor] set];
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
 }
@@ -177,6 +178,27 @@
 {
     HandleTyping(arrowDown);
 }
+
+- (void)moveLeftAndModifySelection:(id)sender
+{
+    HandleShifted(arrowLeft);
+}
+
+- (void)moveRightAndModifySelection:(id)sender
+{
+    HandleShifted(arrowRight);
+}
+
+- (void)moveUpAndModifySelection:(id)sender
+{
+    HandleShifted(arrowUp);
+}
+
+- (void)moveDownAndModifySelection:(id)sender
+{
+    HandleShifted(arrowDown);
+}
+
 
 - (BOOL)isFlipped
 {
