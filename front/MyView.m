@@ -221,6 +221,11 @@
     setCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
 }
 
+- (void) undo:sender {
+    NSLog(@"undo");
+    DoUndo();
+}
+
 - (void) cut:sender {
     NSString *string = DoCut();
     if (string != nil) {
@@ -263,6 +268,9 @@
     }
     if ([anItem action] == @selector(copy:)) {
         return nowSelected;
+    }
+    if ([anItem action] == @selector(undo:)) {
+        return YES;
     }
     if ([anItem action] == @selector(paste:)) {
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
