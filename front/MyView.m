@@ -213,7 +213,7 @@
 
 - (NSString *)string
 {
-    return nil;
+    return serializedString();
 }
 
 - (void)setString:(NSString *)string

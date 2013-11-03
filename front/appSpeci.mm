@@ -1043,11 +1043,11 @@ void setCString(const char* str){
 	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
-void DoSave(){
-	static obj fn = String2v("j");
+NSString* serializedString(){
 	obj st = listToCString(line);
-	//write(ustr(st), strlen(ustr(st))+1, fn);  // restore needed 131014
-	release(st);
+    NSString* str = [[NSString alloc] initWithCString:ustr(st) encoding:NSShiftJISStringEncoding];
+    release(st);
+    return str;
 }
 
 void DoLatex(){

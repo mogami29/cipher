@@ -39,7 +39,7 @@ void DoHide();
 NSString* DoCut();
 void insertCString(const char* str);
 void setCString(const char *);
-void DoSave();
+NSString* serializedString();
 void DoLatex();
 void DoPrint();
 void ShowCaret();
