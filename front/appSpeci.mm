@@ -1,4 +1,4 @@
-/*	AppSpeci 2002 Tsuguo Mogami  */
+/*	AppSpeci 2002-06, 2013- Tsuguo Mogami  */
 #include "ciph.h"
 #include "value.h"
 #include "list.h"
@@ -33,6 +33,9 @@ typedef list text;
 // globals -> should be a instance vars
 WindowPtr	currWindow;
 
+#include <setjmp.h>
+jmp_buf jmpEnv;
+
 void assert_func(const char* file, int line){
 	scroll();
 	NSLog(@"assertion failure line %d in %s.", line, file);
@@ -41,13 +44,13 @@ void assert_func(const char* file, int line){
 
 void error_func(const char *str, const char* file, int line){
 	scroll();
-	NSLog(@"error: %s occured in line %d of file %s\n", str, line, file);
-	//longjmp(jmpEnv, 1);
+	myPrintf("error: %s occured in line %d of file %s\n", str, line, file);
+	longjmp(jmpEnv, 1);
 }
 
 void exit2shell(){
     NSLog(@"exit requested (but not done)");
-    //	longjmp(jmpEnv, 1);
+    longjmp(jmpEnv, 1);
 }
 
 int viewPosition = 0;
@@ -910,7 +913,10 @@ void handleCR(){
 	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
 	scrollBy(0);	// newline
 	obj tl = listToCString(line);
-	interpret(interpreter, ustr(tl));
+    if(setjmp(jmpEnv)==0){	//try
+        interpret(interpreter, ustr(tl));
+    } else {				//catch
+    }
     release(tl);
     scrollBy(FONTSIZE*2);
 	newLine();
