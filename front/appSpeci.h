@@ -16,13 +16,11 @@ extern bool nowSelected;
 
 void draw_integer(long i);
 void drawSeparator(int length);
-void scrollBy(int pixels);
 void scroll();			// in app.c
 void myPrintf(char *fmt,...);
 void print_str(char*s);
 int getKey(int mode);
 
-void addObjToText(struct value* line);	//taking obj
 #if __cplusplus
 extern "C" {
 #endif

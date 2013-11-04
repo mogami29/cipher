@@ -2,7 +2,9 @@
 #import "appSpeci.h"
 @implementation MyView
 
-- (void) drawRect : (NSRect) rect 
+#define larger(a, b) ((a) > (b) ? (a) : (b))
+
+- (void) drawRect : (NSRect) rect
 {
     //[[NSColor whiteColor] set];
     //NSRectFill([self bounds]);   // Equiv to [[NSBezierPath bezierPathWithRect:[self bounds]] fill]
@@ -138,7 +140,7 @@
         NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
         [self scrollPoint:newScrollOrigin];
     }
-    [self setFrameSize:NSMakeSize(500, viewHeight)];
+    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];
     [self display];
 }
 

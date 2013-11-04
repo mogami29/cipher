@@ -385,6 +385,16 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
+void showline(obj y){
+    NSPoint pt;
+    GetPen(&pt);
+    int baseLine = pt.y;
+    NSBezierPath *path = [NSBezierPath bezierPath];
+    [path moveToPoint:NSMakePoint(10, baseLine - udar(y).v[0])];
+    for(int i=1; i< udar(y).size; i++) [path lineToPoint:NSMakePoint(10+i*3, baseLine - udar(y).v[i])];
+    [path stroke];
+}
+
 void drawObj(obj line){		//set cursorPosition at the same time
 	char str[256];
 	if(type(line) ==STRING){
@@ -395,7 +405,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		print_image(line);
 		return;
 	} else if(type(line)==tLine){
-		//showline(line);   // restore needed 131014
+		showline(line);
 		return;
 	}
 	assert(line->type==LIST);
