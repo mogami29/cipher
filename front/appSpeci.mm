@@ -316,9 +316,9 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 			curBase = curbase;
 			crossed = true;
 
-            [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
+            if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
             CGFloat w = [theStr size].width;
-            [caller drawCaretAt:curPt];
+            if(draw) [caller drawCaretAt:curPt];
             curPt.x += w;
         }
 		if(! l) goto endline;
@@ -1049,11 +1049,12 @@ NSString* DoCut(){
     return str;
 }
 
-void  insertCString(const char* str){
-    list tt = csparse((char *)str, strlen(str));
+void insertCString(const char* str){    // was DoPaste
+    /*list tt = csparse((char *)str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
-    MoveTo(cursorPosition.x, cursorPosition.y);
+    MoveTo(cursorPosition.x, cursorPosition.y);     */
+    for(const char* p=str; *p; p++) HandleTyping(*p);
 }
 
 void setCString(const char* str){
