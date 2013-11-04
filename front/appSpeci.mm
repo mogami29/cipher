@@ -750,6 +750,8 @@ void initLines(){
     fontAttr = [ NSFont fontWithName : @"Helvetica" size : FONTSIZE ];
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
+
+    interpreter = create_interpreter();
 }
 
 void addObjToText(obj line){	//taking line
@@ -902,12 +904,15 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 	selectionCursorPosition = cursorPosition;
 */	nowSelected = false;
 }
+Interpreter	interpreter;
 void handleCR(){
 	addLineToText(List2v(line));
 	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
 	scrollBy(0);	// newline
-//	interpret(interpreter, line);   // repair here 131013
-	scrollBy(FONTSIZE*2);
+	obj tl = listToCString(line);
+	interpret(interpreter, ustr(tl));
+    release(tl);
+    scrollBy(FONTSIZE*2);
 	newLine();
 }
 void HandleTyping(char c){

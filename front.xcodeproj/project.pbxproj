@@ -12,6 +12,10 @@
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
 		0598486417EE906F008EEB70 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.m */; };
 		05A21B7918109E5900F512A6 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A21B7818109E5900F512A6 /* vector.cpp */; };
+		05A5A2FB182723DC00F813F4 /* eval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2F7182723DC00F813F4 /* eval.cpp */; };
+		05A5A2FC182723DC00F813F4 /* lib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2F9182723DC00F813F4 /* lib.cpp */; };
+		05A5A30018272E2D00F813F4 /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2FE18272E2D00F813F4 /* matrix.cpp */; };
+		05A5A30118272E2D00F813F4 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2FF18272E2D00F813F4 /* parser.cpp */; };
 		05AD7D6017EDAA5A006391A3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */; };
 		05AD7D6A17EDAA5A006391A3 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05AD7D6817EDAA5A006391A3 /* InfoPlist.strings */; };
 		05AD7D6C17EDAA5A006391A3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 05AD7D6B17EDAA5A006391A3 /* main.m */; };
@@ -39,16 +43,23 @@
 
 /* Begin PBXFileReference section */
 		051F9E061809FCB600289510 /* appSpeci.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = appSpeci.mm; sourceTree = "<group>"; };
-		0527D947181C807000E5B8E0 /* y.tab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = y.tab.h; path = "../../cipher-shell/cipher-shell/y.tab.h"; sourceTree = "<group>"; };
-		0527D948181C808200E5B8E0 /* tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenizer.cpp; path = "../../cipher-shell/cipher-shell/tokenizer.cpp"; sourceTree = "<group>"; };
+		0527D947181C807000E5B8E0 /* y.tab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = y.tab.h; path = "../cipher-shell/cipher-shell/y.tab.h"; sourceTree = "<group>"; };
+		0527D948181C808200E5B8E0 /* tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenizer.cpp; path = "../cipher-shell/cipher-shell/tokenizer.cpp"; sourceTree = "<group>"; };
 		059802FE18095BB1000E9157 /* ciph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ciph.h; path = "../../cipher-shell/cipher-shell/ciph.h"; sourceTree = "<group>"; };
-		0598030018095CE9000E9157 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = value.h; path = "../../cipher-shell/cipher-shell/value.h"; sourceTree = "<group>"; };
+		0598030018095CE9000E9157 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = value.h; path = "../cipher-shell/cipher-shell/value.h"; sourceTree = "<group>"; };
 		0598030218095D4C000E9157 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = "../../cipher-shell/cipher-shell/list.cpp"; sourceTree = "<group>"; };
 		0598030318095D4C000E9157 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = "../../cipher-shell/cipher-shell/list.h"; sourceTree = "<group>"; };
 		059803051809E89E000E9157 /* appSpeci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appSpeci.h; sourceTree = "<group>"; };
 		0598486217EE906F008EEB70 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
 		0598486317EE906F008EEB70 /* MyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyView.m; sourceTree = "<group>"; };
-		05A21B7818109E5900F512A6 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vector.cpp; path = "../../cipher-shell/cipher-shell/vector.cpp"; sourceTree = "<group>"; };
+		05A21B7818109E5900F512A6 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vector.cpp; path = "../cipher-shell/cipher-shell/vector.cpp"; sourceTree = "<group>"; };
+		05A5A2F7182723DC00F813F4 /* eval.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eval.cpp; path = "../cipher-shell/cipher-shell/eval.cpp"; sourceTree = "<group>"; };
+		05A5A2F8182723DC00F813F4 /* eval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eval.h; path = "../cipher-shell/cipher-shell/eval.h"; sourceTree = "<group>"; };
+		05A5A2F9182723DC00F813F4 /* lib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lib.cpp; path = "../cipher-shell/cipher-shell/lib.cpp"; sourceTree = "<group>"; };
+		05A5A2FA182723DC00F813F4 /* lib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lib.h; path = "../cipher-shell/cipher-shell/lib.h"; sourceTree = "<group>"; };
+		05A5A2FE18272E2D00F813F4 /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = "../cipher-shell/cipher-shell/matrix.cpp"; sourceTree = "<group>"; };
+		05A5A2FF18272E2D00F813F4 /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parser.cpp; path = "../cipher-shell/cipher-shell/parser.cpp"; sourceTree = "<group>"; };
+		05A5A30218272E4900F813F4 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vector.h; path = "../cipher-shell/cipher-shell/vector.h"; sourceTree = "<group>"; };
 		05AD7D5C17EDAA5A006391A3 /* front.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = front.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		05AD7D6217EDAA5A006391A3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -69,7 +80,7 @@
 		05AD7D8817EDAA5A006391A3 /* frontTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "frontTests-Info.plist"; sourceTree = "<group>"; };
 		05AD7D8A17EDAA5A006391A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		05AD7D8C17EDAA5A006391A3 /* frontTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = frontTests.m; sourceTree = "<group>"; };
-		05FF81C4180B7DF6002B4ACF /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = value.cpp; path = "../../cipher-shell/cipher-shell/value.cpp"; sourceTree = "<group>"; };
+		05FF81C4180B7DF6002B4ACF /* value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = value.cpp; path = "../cipher-shell/cipher-shell/value.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,10 +104,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		05A5A2FD1827241D00F813F4 /* cipher */ = {
+			isa = PBXGroup;
+			children = (
+				0527D947181C807000E5B8E0 /* y.tab.h */,
+				0527D948181C808200E5B8E0 /* tokenizer.cpp */,
+				05A5A2F8182723DC00F813F4 /* eval.h */,
+				05A5A2FF18272E2D00F813F4 /* parser.cpp */,
+				05A5A2F7182723DC00F813F4 /* eval.cpp */,
+				05A5A2FA182723DC00F813F4 /* lib.h */,
+				05A5A2F9182723DC00F813F4 /* lib.cpp */,
+				0598030018095CE9000E9157 /* value.h */,
+				05FF81C4180B7DF6002B4ACF /* value.cpp */,
+				05A5A30218272E4900F813F4 /* vector.h */,
+				05A21B7818109E5900F512A6 /* vector.cpp */,
+				05A5A2FE18272E2D00F813F4 /* matrix.cpp */,
+			);
+			name = cipher;
+			sourceTree = "<group>";
+		};
 		05AD7D5317EDAA5A006391A3 = {
 			isa = PBXGroup;
 			children = (
 				05AD7D6517EDAA5A006391A3 /* front */,
+				05A5A2FD1827241D00F813F4 /* cipher */,
 				05AD7D8617EDAA5A006391A3 /* frontTests */,
 				05AD7D5E17EDAA5A006391A3 /* Frameworks */,
 				05AD7D5D17EDAA5A006391A3 /* Products */,
@@ -144,11 +175,6 @@
 				051F9E061809FCB600289510 /* appSpeci.mm */,
 				0598030318095D4C000E9157 /* list.h */,
 				0598030218095D4C000E9157 /* list.cpp */,
-				0598030018095CE9000E9157 /* value.h */,
-				05FF81C4180B7DF6002B4ACF /* value.cpp */,
-				05A21B7818109E5900F512A6 /* vector.cpp */,
-				0527D947181C807000E5B8E0 /* y.tab.h */,
-				0527D948181C808200E5B8E0 /* tokenizer.cpp */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
@@ -288,9 +314,13 @@
 			files = (
 				051F9E071809FCB600289510 /* appSpeci.mm in Sources */,
 				0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */,
+				05A5A2FB182723DC00F813F4 /* eval.cpp in Sources */,
 				05FF81C5180B7DF6002B4ACF /* value.cpp in Sources */,
+				05A5A30118272E2D00F813F4 /* parser.cpp in Sources */,
 				05AD7D7317EDAA5A006391A3 /* Document.m in Sources */,
+				05A5A2FC182723DC00F813F4 /* lib.cpp in Sources */,
 				05AD7D6C17EDAA5A006391A3 /* main.m in Sources */,
+				05A5A30018272E2D00F813F4 /* matrix.cpp in Sources */,
 				0598486417EE906F008EEB70 /* MyView.m in Sources */,
 				0598030418095D4C000E9157 /* list.cpp in Sources */,
 				05A21B7918109E5900F512A6 /* vector.cpp in Sources */,
@@ -382,6 +412,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
+					"GUI=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -416,6 +447,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "GUI=1";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
