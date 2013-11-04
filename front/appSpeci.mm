@@ -789,7 +789,7 @@ void myPrintf(const char *fmt,...){
 	if(strlen(str)>255) assert_func("app.c", __LINE__);
 	addStringToText(str);
 	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
-	DrawString(str);
+	Move(StringWidth(str), 0);
 }
 
 void print_str(char*s){

@@ -109,8 +109,8 @@
 			children = (
 				0527D947181C807000E5B8E0 /* y.tab.h */,
 				0527D948181C808200E5B8E0 /* tokenizer.cpp */,
-				05A5A2F8182723DC00F813F4 /* eval.h */,
 				05A5A2FF18272E2D00F813F4 /* parser.cpp */,
+				05A5A2F8182723DC00F813F4 /* eval.h */,
 				05A5A2F7182723DC00F813F4 /* eval.cpp */,
 				05A5A2FA182723DC00F813F4 /* lib.h */,
 				05A5A2F9182723DC00F813F4 /* lib.cpp */,
