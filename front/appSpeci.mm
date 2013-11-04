@@ -385,7 +385,7 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
-void showline(obj y){
+void showLine(obj y){
     NSPoint pt;
     GetPen(&pt);
     int baseLine = pt.y;
@@ -404,8 +404,8 @@ void drawObj(obj line){		//set cursorPosition at the same time
 	} else if(type(line)==IMAGE || type(line)==tCImg){
 		print_image(line);
 		return;
-	} else if(type(line)==tLine){
-		showline(line);
+	} else if(type(line)==tPlot){
+		showLine(line);
 		return;
 	}
 	assert(line->type==LIST);
@@ -715,8 +715,8 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 */	MoveTo(LEFTMARGIN,baseLine);
 }
 
-void scrollBy(int pixels){
-	baseLine += pixels;
+void scrollBy(int points){
+	baseLine += points;
 	win_normalize();
 }
 
