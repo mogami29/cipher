@@ -396,10 +396,8 @@ void showLine(obj y){
 }
 
 void drawObj(obj line){		//set cursorPosition at the same time
-	char str[256];
 	if(type(line) ==STRING){
-		strcpy(str, ustr(line));
-		DrawString(str);
+		DrawString(ustr(line));
 		return;
 	} else if(type(line)==IMAGE || type(line)==tCImg){
 		print_image(line);
