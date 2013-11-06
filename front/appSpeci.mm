@@ -784,6 +784,11 @@ void addStringToText(char* string){
 
 #include <stdarg.h>
 #include <stdio.h>
+//bool recordingPrintf = 0;
+//string ks;    // kiroku string
+/*append_string(string *s, const char* str){
+ for(char* p=0; *p; p++) appendB(s, *p);
+ }*/
 
 void myPrintf(const char *fmt,...){
 	va_list	ap;
@@ -799,6 +804,7 @@ void myPrintf(const char *fmt,...){
 	va_end(ap);
 	if(strlen(str)>255) assert_func("app.c", __LINE__);
 	addStringToText(str);
+    //append_string(&ks, str); write string merge
 	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
 	Move(StringWidth(str), 0);
 }
