@@ -29,7 +29,7 @@ void initLines();
 void newLine();
 void HandleTyping(char c);
 void HandleShifted(char c);
-void HandleContentClick(Point pt);
+void HandleContentClick(NSPoint pt);
 void DoUpdate(WindowPtr targetWindow);
 void DoUndo();
 NSString* copySelected();

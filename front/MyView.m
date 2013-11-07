@@ -207,9 +207,29 @@
     return YES;
 }
 
-- (void) mouseDown:(NSEvent *)theEvent
+// from "Creating Custom View"
+- (void) mouseDown:(NSEvent *)event
 {
-    [line setString: @"hoge"];
+    NSPoint clickLocation;
+    
+    // convert the mouse-down location into the view coords
+    clickLocation = [self convertPoint:[event locationInWindow] fromView:nil];
+    HandleContentClick(clickLocation);
+    
+    /*
+    BOOL itemHit = NO;
+    // did the mouse-down occur in the item?
+    itemHit = [self isPointInItem:clickLocation];
+    
+    // Yes it did, note that we're starting to drag
+    if (itemHit) {
+        // flag the instance variable that indicates
+        // a drag was actually started
+        dragging = YES;
+        
+        // store the starting mouse-down location;
+        lastDragLocation = clickLocation;
+    }*/
     [self display];
 }
 
