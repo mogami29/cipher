@@ -814,12 +814,12 @@ void print_str(char*s){
 	NSPoint pt;
 	GetPen(&pt);
 	if(pt.x > LEFTMARGIN+colWidth) return;
-//	addStringToText(str);
+	addStringToText(str);
 //	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
 	int p=0;
 	for(; s[p] && p<250; p++) str[p] = s[p];
 	s[p] = NUL;
-	DrawString(str);
+//	DrawString(str);
 }
 
 int imbalanced(list line){
