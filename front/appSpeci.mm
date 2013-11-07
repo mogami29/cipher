@@ -915,11 +915,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
-/*	beginOfSel = ins;	//for text selection
-	//release(beginSelList);       possibly no need 131018
-	//beginSelList = retain(insList);
-	selectionCursorPosition = cursorPosition;
-*/	nowSelected = false;
+	nowSelected = false;
 }
 Interpreter	interpreter;
 void handleCR(){
