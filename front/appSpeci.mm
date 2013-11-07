@@ -725,7 +725,7 @@ void scroll(){
 //-----------------
 extern Interpreter	interpreter;
 
-static list csparse(char* str, size_t len);
+static list csparse(const char* str, size_t len);
 
 void newLine(){
 	line = phi();
@@ -1054,7 +1054,7 @@ NSString* DoCut(){
 }
 
 void insertCString(const char* str){    // was DoPaste
-    /*list tt = csparse((char *)str, strlen(str));
+    /*list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);     */
@@ -1063,7 +1063,7 @@ void insertCString(const char* str){    // was DoPaste
 
 void setCString(const char* str){
 	newLine();
-	line = csparse((char *)str, strlen(str));
+	line = csparse(str, strlen(str));
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	drawLine(&line, true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
@@ -1215,8 +1215,8 @@ list csparse0(){
 	}
 	return reverse(l);
 }
-list csparse(char* str, size_t len){
-	clp = str;
+list csparse(const char* str, size_t len){
+	clp = (char*)str;
 	clpe = clp + len;
 	return csparse0();
 }

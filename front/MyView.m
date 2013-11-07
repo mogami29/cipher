@@ -72,8 +72,8 @@
 {
     if (cursorOn && selectedRange.length==0) {
         CGFloat w = [backingStore attributedSubstringFromRange:NSMakeRange(0, selectedRange.location)].size.width;
-        NSPoint	point0 = {pt.x + w, pt.y };
-        NSPoint	point1 = {pt.x + w, pt.y - FONTSIZE};
+        NSPoint	point0 = {(int)(pt.x + w)+.5, pt.y };
+        NSPoint	point1 = {(int)(pt.x + w)+.5, pt.y - FONTSIZE};
         [[NSColor blackColor] set];
         [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
