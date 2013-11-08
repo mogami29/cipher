@@ -983,10 +983,11 @@ void HandleShifted(char c){
 }
 void getClickPosition(NSPoint pt){
 	clickpnt = pt;
-	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
+	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
 	if(!click.curstr) return;
+
 	ins = click;
 	release(insList);
 	insList = ins_list(&line, click.curstr);
@@ -994,6 +995,31 @@ void getClickPosition(NSPoint pt){
 }
 void HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
+}
+void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
+	clickpnt = pt;
+	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
+	click = insp(nil, 0);
+	drawLine(&line, false);
+	if(!click.curstr) return;   // not well understood in creation
+
+    if(!nowSelected){
+        beginOfSel = ins;       //for text selection
+        //release(beginSelList);       possibly no need 131018
+        beginSelList = retain(insList);
+        selectionCursorPosition = cursorPosition;
+    }
+    if(!nowSelected && beginSelList != insList) return; // not well understood in creation
+	HideCaret();
+
+	ins = click;
+	release(insList);
+	insList = ins_list(&line, click.curstr);
+	cursorPosition = curclick;
+
+	//updateAround(true);
+	MoveTo(cursorPosition.x, cursorPosition.y);
+	nowSelected = true;
 }
 void DoUpdate(WindowPtr targetWindow) {
 //	SetPortWindowPort(targetWindow);

@@ -30,6 +30,7 @@ void newLine();
 void HandleTyping(char c);
 void HandleShifted(char c);
 void HandleContentClick(NSPoint pt);
+void HandleDragTo(NSPoint pt);
 void DoUpdate(WindowPtr targetWindow);
 void DoUndo();
 NSString* copySelected();

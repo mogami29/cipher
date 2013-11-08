@@ -233,6 +233,26 @@
     [self display];
 }
 
+- (void) mouseDragged:(NSEvent *)event
+{
+    NSPoint newDragLocation = [self convertPoint:[event locationInWindow] fromView:nil];
+    HandleDragTo(newDragLocation);
+    /*
+    // offset the item by the change in mouse movement
+    // in the event
+    [self offsetLocationByX:(newDragLocation.x-lastDragLocation.x)
+                       andY:(newDragLocation.y-lastDragLocation.y)];
+    
+    // save the new drag location for the next drag event
+    lastDragLocation = newDragLocation;
+*/
+    // support automatic scrolling during a drag
+    // by calling NSView's autoscroll: method
+    [self autoscroll:event];
+
+    [self setNeedsDisplay:YES];
+}
+
 - (NSString *)string
 {
     return serializedString();
