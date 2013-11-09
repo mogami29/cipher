@@ -417,7 +417,7 @@ inline void set_insp(int pos){	// <-> move insertion
 	insList = nil;
 	ins = insp(&line, pos);
 }
-int findPreviousLetter(){		// いずれlistを返すように
+int findPreviousLetter(){
 	int p = 0;
 	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
@@ -569,6 +569,16 @@ void insertSubScriptAndMoveInto(){
 	pushInsertion();
 	ins.moveInto(&ul(vp));
 }
+obj peekPrevious(){
+    return first(rest(*(ins.curstr), ins.pos-1));
+}
+void moveToLast(){
+    ins.setpos(length(*ins.curstr));
+}
+bool isAtLast(){
+    assert(ins.pos <= length(*ins.curstr));
+    return ins.pos==length(*ins.curstr);
+}
 // -------------- controllers ------------
 void moveLeft(){
 	if(insList && ins.pos==0) {
@@ -577,24 +587,24 @@ void moveLeft(){
 		return;
 	}
 	if(ins.pos==0) return;
-	obj c = first(rest(*(ins.curstr), ins.pos-1));
+	obj c = peekPrevious();
 	if(c->type==SuperScript || c->type==SubScript || c->type==tShow){
 		pushInsertion();
 		ins.moveRightmost(&ul(c));
 		return;
 	} if(c->type==FRACTION){
 		moveIntoDenom((list_*)c);
-		ins.setpos(length(*ins.curstr));
+		moveToLast();
 		return;
 	}
 	ins.setpos(findPreviousLetter());
 }
 void moveRight(){
-	if(insList && ins.pos==length(*ins.curstr) ) {
+	if(insList && isAtLast()) {
 		moveToUpperLevel();
 		return;
 	}
-	if(ins.pos >= length(*ins.curstr)) return;
+	if(isAtLast()) return;
 	obj c = first(*ins.list_point());
 	if(c->type==SuperScript || c->type==SubScript || c->type==tShow){
 		ins.setpos(ins.pos+1);
@@ -753,7 +763,6 @@ void newLine(){
 
 void initLines(){
 	lines = phi();
-//	ins.curstr = &line;
 	ins = insp(&line, 0);
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
