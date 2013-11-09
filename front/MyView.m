@@ -268,6 +268,10 @@
     DoUndo();
 }
 
+- (void) redo:sender {
+    NSLog(@"redo");
+}
+
 - (void) cut:sender {
     NSString *string = DoCut();
     if (string != nil) {
@@ -312,6 +316,9 @@
         return nowSelected;
     }
     if ([anItem action] == @selector(undo:)) {
+        return YES;
+    }
+    if ([anItem action] == @selector(redo:)) {
         return YES;
     }
     if ([anItem action] == @selector(paste:)) {
