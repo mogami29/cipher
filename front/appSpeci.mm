@@ -76,29 +76,45 @@ struct insp {
 	int pos;            // position in curstr
 	list *curstr;       // current string
 	list *lpos;         // pos-th of curstr. アクセサ関数の中からのみ変更されている。
-
+    char* curcstr;
+    
 	inline void moveInto(list *l){
 		curstr = l;
 		lpos = l;
-		pos = 0; }
+		pos = 0;
+        curcstr = nil; }
 	inline void moveRightmost(list *l){
 		curstr = l;
 		pos = length(*l);
-		lpos = rest(l, pos);}
+		lpos = rest(l, pos);
+        curcstr = nil; }    // cstr until here
 	insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
-	insp():curstr(nil), pos(0), lpos(nil){};
+	insp():curstr(nil), pos(0), lpos(nil), curcstr(nil){};
 	void setpos(int p){
-		lpos = rest(curstr, p);
-		pos = p; }
-	list* list_point(){	// functionalize !
-		return lpos;
+		if(curstr){
+            lpos = rest(curstr, p);
+            pos = p;
+            curcstr = nil;
+        } else {
+            lpos = nil;
+            pos = p;
+        }
+    }
+	list* list_point(){
+        assert(lpos);   // not implemented for curCstr != nil
+        return lpos;
 		return rest(curstr, pos);
 	}
 } beginOfSel, ins;		//insは現在のinsertion point
 
 inline bool equalsToCursor(list* curline, list l, int pos){
+    if(!ins.curstr) return false;
     // assert((curline==ins.curstr && l == *ins.lpos) == (equal(insList, drawList) && pos == ins.pos));
     return(curline==ins.curstr && l == *ins.lpos);
+}
+inline bool equalsToCursor(char* curline, int pos){
+    if(!ins.curcstr) return false;
+    return(curline==ins.curcstr && pos == ins.pos);
 }
 
 static NSPoint cursorBeforeVertMove;
@@ -784,11 +800,17 @@ static void addLineToText(obj line){	//taking line
 	append(&lines, List2v(aLine));
 }
 
+obj cacheForUnitTest = nil;
+
 void addStringToText(char* string){
 	NSPoint pt;
 	GetPen(&pt);
-	list aLine = list3(String2v(string), Int(viewPosition+baseLine), Int(pt.x));
+    obj str = String2v(string);
+	list aLine = list3(str, Int(viewPosition+baseLine), Int(pt.x));
 	append(&lines, List2v(aLine));
+
+    if(cacheForUnitTest) release(cacheForUnitTest);
+    cacheForUnitTest = retain(str);
 }
 
 #include <stdarg.h>
