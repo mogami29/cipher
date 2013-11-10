@@ -119,7 +119,8 @@
         [self scrollPoint:newScrollOrigin];
     }
     [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];
-    [self display];
+    // larger(clip.size.height, ;
+    [self setNeedsDisplay:YES];
 }
 
 - (void) keyDown : (NSEvent *) theEvent
