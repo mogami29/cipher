@@ -108,6 +108,20 @@
     [self stopAnimation];
 }
 
+- (void) updateFrameSizeAndDraw {
+    NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
+    if(baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
+        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine + FONTSIZE - clip.size.height);
+        [self scrollPoint:newScrollOrigin];
+    }
+    if(baseLine - FONTSIZE < clip.origin.y) {
+        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
+        [self scrollPoint:newScrollOrigin];
+    }
+    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];
+    [self display];
+}
+
 - (void) keyDown : (NSEvent *) theEvent
 {
     NSString* str = [theEvent characters];
@@ -131,17 +145,7 @@
         HandleTyping(key);
     }
     cursorOn = true;
-    NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
-    if(baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
-        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine + FONTSIZE - clip.size.height);
-        [self scrollPoint:newScrollOrigin];
-    }
-    if(baseLine - FONTSIZE < clip.origin.y) {
-        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
-        [self scrollPoint:newScrollOrigin];
-    }
-    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];
-    [self display];
+    [self updateFrameSizeAndDraw];
 }
 
 - (void) insertText:(id)string
@@ -280,6 +284,7 @@
         NSArray *copiedObjects = [NSArray arrayWithObject:string];
         [pasteboard writeObjects:copiedObjects];
     }
+    [self updateFrameSizeAndDraw];
 }
 
 // from paste board Getting Started
@@ -304,7 +309,7 @@
         NSString *string = [objectsToPaste objectAtIndex:0];
         [self insertText:string];
     }
-    [self setNeedsDisplay:YES];
+    [self updateFrameSizeAndDraw];
 }
 
 - (BOOL)validateUserInterfaceItem:(id < NSValidatedUserInterfaceItem >)anItem {
