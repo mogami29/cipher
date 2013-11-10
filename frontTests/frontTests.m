@@ -33,19 +33,29 @@ void newLine();
 
 - (void)tearDown
 {
+    //dispose_interpreter(ip);
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
 }
 
 bool equal(const char* v1, const char* v2){ return !strcmp(v1, v2);}
 extern char* cacheForUnitTest;
+bool equals(char* x){return !strcmp(cacheForUnitTest, x);}
 
 - (void)testExample
 {
     interpret(ip, "4+3");
-    XCTAssert(equal(cacheForUnitTest, "7"));
+    XCTAssert(equals("7"));
 
-    //        XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+    interpret(ip, "define f(x)=x x+2x+1");
+    //XCTAssert(equals("x x+2 x+1"));
+    XCTAssert(equals("1"));
+
+    interpret(ip, "x=341+345 4");
+    XCTAssert(equals("1721"));
+
+    interpret(ip, "x=341+345 4");
+    XCTAssert(equals("1721"));
 }
 
 @end
