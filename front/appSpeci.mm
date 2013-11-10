@@ -800,7 +800,7 @@ static void addLineToText(obj line){	//taking line
 	append(&lines, List2v(aLine));
 }
 
-obj cacheForUnitTest = nil;
+char* cacheForUnitTest = nil;
 
 void addStringToText(char* string){
 	NSPoint pt;
@@ -809,8 +809,7 @@ void addStringToText(char* string){
 	list aLine = list3(str, Int(viewPosition+baseLine), Int(pt.x));
 	append(&lines, List2v(aLine));
 
-    if(cacheForUnitTest) release(cacheForUnitTest);
-    cacheForUnitTest = retain(str);
+    cacheForUnitTest = ustr(str);
 }
 
 #include <stdarg.h>
