@@ -392,10 +392,10 @@
 }
 
 #pragma mark -
-
+/*
 - (void)doCommandBySelector:(SEL)aSelector {
     [super doCommandBySelector:aSelector]; // NSResponder's implementation will do nicely
-}
+}*/
 
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange {
     // Get a valid range
