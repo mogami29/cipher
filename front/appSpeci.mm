@@ -215,6 +215,35 @@ void drawSubScript(obj v, bool draw){
 NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
+//the lowest 2 bits
+// 00: others
+// 01: direct integer
+// 10: not used
+// 11: a character
+#define dVal	3	// mask
+#define idInt	1
+#define idChar	3
+inline obj dInt(long i){return (obj)((i<<2)+1);}
+inline long rInt(obj v){return (long)v>>2;}
+//
+obj read(list& l){  // experimental. not in use still.
+	obj v = first(l);
+    if (type(v)==INT) {
+		// read
+		int c = uint(v);
+		if(c&0x80 && c<0x100){
+            if(! rest(l)) return NULL;//2 byte文字が1byteずつ挿入されるから
+            if(second(l)->type != INT) assert(0);
+            unsigned short s;
+            *(char*)&s = c;
+            *(((char*)&s)+1) = uint(second(l));
+            c = s;
+        } else if (c>=0x100) assert(0);
+        return dInt(c);
+    }
+    return v;
+}
+
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
@@ -1305,13 +1334,3 @@ void Redraw(){
 
 
 
-//the lowest 2 bits
-// 00: others
-// 01: direct integer
-// 10: not used
-// 11: a character
-#define dVal	3	// mask
-#define idInt	1
-#define idChar	3
-//inline obj dInt(int i){return (obj)((i<<2)+1);}
-//inline int rInt(obj v){return (int)v>>2;}
