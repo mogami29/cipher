@@ -376,7 +376,8 @@ void drawLine(list*line, bool draw){
 	for(int col=0; col < nCols; col++){	// columns
 		for(; ; ){				// lines by CR
 			GetPen(&curbase);	// get baseline of the line
-			if(drawFragment0(line, l, pos, draw)){
+            NSRect clip = [[caller superview] bounds];    // the clipview
+			if(drawFragment0(line, l, pos, draw && vv > clip.origin.y - FONTSIZE)){    // the clip condition not much useful because string.size is as slow as draw
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
@@ -386,7 +387,7 @@ void drawLine(list*line, bool draw){
 				crossed = true;
 			}
 			if(! l) return;
-			//if(vv > windowHeight) break;
+			if(vv > clip.origin.y + clip.size.height) break;
 		}
 		//vv += -windowHeight + FONTSIZE;
 		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
