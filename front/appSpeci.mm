@@ -935,7 +935,7 @@ void HandleTyping0(char c){
 	}
 	
 sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
-		if(type(undobuf) !=tMove){
+		if(undobuf && type(undobuf) !=tMove){
 			undoBuf = cons(undobuf, undoBuf);
 			undobuf = create(tMove, cons(Int(ins.pos), retain(insList)));
 		}
