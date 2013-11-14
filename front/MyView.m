@@ -9,14 +9,6 @@
     //[[NSColor whiteColor] set];
     //NSRectFill([self bounds]);   // Equiv to [[NSBezierPath bezierPathWithRect:[self bounds]] fill]
     NSAttributedString* str = [[NSAttributedString alloc] initWithString:line attributes:dicAttr];
-    //[str drawAtPoint : NSMakePoint( 10, 10 )];
-    /*if (cursorOn){
-        CGFloat w = [str size].width;
-        
-        NSPoint	point0 = {w + 10, 10 - [fontAttr descender]};
-        NSPoint	point1 = {w + 10, 10 - [fontAttr descender] + [fontAttr ascender]};
-        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
-    }*/
     
     // taken from Core Text:Common Operations
     // Initialize a graphics context and set the text matrix to a known value.
@@ -133,16 +125,6 @@
         [[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
     } else {
         //[line appendString: str];
-        /*switch (key){
-         case NSLeftArrowFunctionKey:
-            key = arrowLeft; break;
-         case NSRightArrowFunctionKey:
-            key = arrowRight; break;
-         case NSUpArrowFunctionKey:
-            key = arrowUp; break;
-         case NSDownArrowFunctionKey:
-            key = arrowDown; break;
-         }*/
         HandleTyping(key);
     }
     cursorOn = true;
