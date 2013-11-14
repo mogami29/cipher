@@ -221,16 +221,16 @@ void drawACharOrABox(list& l, int& pos, bool draw){
     if (type(v)==INT) {
 		char buf[8];
 		// read
-		*buf=0;
 		int c = uint(v);
-		buf[++*buf] = c;
-		if(c&0x80){
-			if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
-			if(second(l)->type != INT) return;
-			buf[++*buf] = uint(second(l));
-		}
-        buf[*buf + 1] = 0;      // P-string manipulation
-		float width = StringWidth(buf+1);
+		buf[0] = c;
+		buf[1] = NULL;
+		if(c&0x80 && c<0x100){
+            if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
+            if(second(l)->type != INT) return;
+            buf[1] = uint(second(l));
+            buf[2] = NULL;
+        } else if (c>=0x100) assert(0);
+		float width = StringWidth(buf);
 		if(c=='\t') width = StringWidth("    ");
 		//draw:
 		if(c=='\t') {
@@ -239,7 +239,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		}
 		GetPen(&pt);
 		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
-        else	DrawString(buf+1);
+        else	DrawString(buf);
 		return;
     }
     drawList = cons(Int(pos+1), drawList);
