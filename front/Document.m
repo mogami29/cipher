@@ -31,8 +31,19 @@
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     if (loadedData) {
-        NSString* string = [[NSString alloc] initWithData:loadedData encoding:NSUTF8StringEncoding];
-        [myView setString:string];
+        NSString* string = [[NSString alloc] initWithData:loadedData encoding:NSShiftJISStringEncoding];
+        if (string) {       // it seems to return nil for other encoding
+            [myView setString:string];
+        } else {
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert addButtonWithTitle:@"OK"];
+            [alert setMessageText:@"Only SJIS encoded text can be opened."];
+            [alert setAlertStyle:NSWarningAlertStyle];
+            if ([alert runModal] == NSAlertFirstButtonReturn) {
+                // OK clicked, nothing can be done
+                [self close];
+            }
+        }
         loadedData = nil;
     }
 }
@@ -46,7 +57,7 @@
 {
     // Insert code here to write your document to data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning nil.
     if ([typeName isEqualToString:@"PlainText"])
-        return [[myView string] dataUsingEncoding:NSUTF8StringEncoding];
+        return [[myView string] dataUsingEncoding:NSShiftJISStringEncoding];
     // You can also choose to override -fileWrapperOfType:error:, -writeToURL:ofType:error:, or -writeToURL:ofType:forSaveOperation:originalContentsURL:error: instead.
     NSException *exception = [NSException exceptionWithName:@"UnimplementedMethod" reason:[NSString stringWithFormat:@"%@ is unimplemented", NSStringFromSelector(_cmd)] userInfo:nil];
     @throw exception;
