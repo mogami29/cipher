@@ -268,6 +268,13 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 	return;
 }
 
+void step(list& l, int& pos){
+    obj v = first(l);
+    if(type(v)==INT && uint(v)&0x80 && uint(v)<0x100 && rest(l) && second(l)->type==INT){
+        pos++; l=rest(l);
+    }
+    pos++, l=rest(l);
+}
 
 inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
 	NSPoint pt;
@@ -280,10 +287,7 @@ inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
 		obj v = first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
 		drawACharOrABox(l, pos, false);
-		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
-			pos++; l=rest(l);
-		}
-		pos++, l=rest(l);
+        step(l, pos);
 
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth) goto newline; //wrap
@@ -342,11 +346,8 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 		obj v= first(l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l); goto newline;};	//newlineifneccesary
 		drawACharOrABox(l, pos, draw);
-		if(type(v)==INT && uint(v)&0x80 && rest(l) && second(l)->type==INT){
-			pos++; l=rest(l);
-		}
-		pos++, l=rest(l);
-
+        step(l, pos);
+        
 		GetPen(&pt);
 		if(pt.x > 50+colWidth) goto newline;    //wrap
 		if(pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
