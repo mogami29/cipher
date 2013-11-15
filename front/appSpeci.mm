@@ -419,6 +419,9 @@ void drawFragment(obj line, bool draw){      // drawLine()   ?
 node<int>* yposOfSoftLines = nil;
 node<list*>* pointerToSoftLines = nil;
 
+void rememberYPos(int y, obj v){     // v want to be either obj or list*
+}
+
 void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
@@ -434,6 +437,7 @@ void drawLine(list*line, bool draw){
 			if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
+                rememberYPos(vv, nil);  // can't be list*
 			}
 			if(equalsToCursor(line, l, pos)){      //seems unnecessary
 				GetPen(&cursorPosition);
@@ -493,6 +497,7 @@ void Redraw(){
 		int h;
 		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
 		MoveTo(h, position-viewPosition);
+        rememberYPos(position-viewPosition, first(aLine));
 		drawObj(first(aLine));
 	}*/
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
