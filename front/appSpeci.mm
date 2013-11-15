@@ -395,6 +395,10 @@ void drawFragment(obj line, bool draw){      // drawLine()   ?
 	int pos=0;
 	drawFragment0(&ul(line), l, pos, draw);
 }
+
+node<int>* yposOfSoftLines = nil;
+node<list*>* pointerToSoftLines = nil;
+
 void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
@@ -432,7 +436,7 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
-void showLine(obj y){
+void showLine(obj y){           // plotting
     NSPoint pt;
     GetPen(&pt);
     int baseLine = pt.y;
@@ -455,6 +459,33 @@ void drawObj(obj line){		//set cursorPosition at the same time
 	}
 	assert(line->type==LIST);
 	drawLine(&ul(line), true);
+}
+
+int viewHeight = 100;
+static int getNLine(list line);
+static void highlightSelected();
+
+void Redraw(){
+	for(list l=lines; l; l=rest(l)){
+		assert(type(first(l))==LIST);
+		list aLine = ul(first(l));
+		int position = uint(second(aLine));
+		int h;
+		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
+		MoveTo(h, position-viewPosition);
+		drawObj(first(aLine));
+	}
+	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
+    drawingTheEditingLine = true;
+	drawLine(&line, true);
+    drawingTheEditingLine = false;
+	viewHeight = startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line) + 3*FONTSIZE;// too inacurate
+    /*if(caretState){
+     MoveTo(cursorPosition.x, cursorPosition.y);
+     Line(0,-FONTSIZE);
+     Move(0, FONTSIZE);
+     }*/
+    highlightSelected();
 }
 
 //------accessors of the current line -----------------
@@ -1306,30 +1337,6 @@ list csparse(const char* str, size_t len){
 list CStringToLine(obj str){
 	assert(str->type==STRING);
 	return csparse(ustr(str), strlen(ustr(str)));
-}
-int viewHeight = 100;
-
-void Redraw(){
-	for(list l=lines; l; l=rest(l)){
-		assert(type(first(l))==LIST);
-		list aLine = ul(first(l));
-		int position = uint(second(aLine));
-		int h;
-		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
-		MoveTo(h, position-viewPosition);
-		drawObj(first(aLine));
-	}
-	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
-    drawingTheEditingLine = true;
-	drawLine(&line, true);
-    drawingTheEditingLine = false;
-	viewHeight = startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line) + 3*FONTSIZE;// too inacurate
-    /*if(caretState){
-        MoveTo(cursorPosition.x, cursorPosition.y);
-        Line(0,-FONTSIZE);
-        Move(0, FONTSIZE);
-    }*/
-    highlightSelected();
 }
 
 
