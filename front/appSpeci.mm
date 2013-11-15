@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+void showPlot(obj y);
 void	drawLine(list*line, bool draw);
 static float getWidth(obj string);
 static void drawFragment(obj line, bool draw);
@@ -54,7 +55,7 @@ void exit2shell(){
 }
 
 int viewPosition = 0;
-static list lines;
+//static list lines;
 //---------current line with insertion point object---------------------------
 
 static text line;
@@ -170,6 +171,7 @@ float StringWidth(const char * str){    // takes pascal string
 }
 void DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
+    assert(s1);
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
@@ -222,7 +224,8 @@ static bool crossed;
 // 11: a character
 #define dVal	3	// mask
 #define idInt	1
-#define idChar	3
+#define idStr	2
+//#define idChar	3
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
 //
@@ -247,6 +250,12 @@ obj read(list& l){  // experimental. not in use still.
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
+/*    if((long)v&dVal) {
+        assert(((long)v&dVal)==idStr);
+        char* s = ((char*)v) -idStr;
+        DrawString(s);
+        return;
+    }*/
     if (type(v)==INT) {
 		char buf[8];
 		// read
@@ -292,6 +301,17 @@ void drawACharOrABox(list& l, int& pos, bool draw){
     case tHide:
 		DrawString("△");
 		break;
+    case STRING:
+        DrawString(ustr(v));
+        break;
+    case IMAGE:
+    case tCImg:
+        print_image(v);
+        break;
+    case tPlot:
+        Move(0, 200);
+        showPlot(v);
+        break;
 	}
     vrInt(pop(&drawList));
 	return;
@@ -436,7 +456,7 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
-void showLine(obj y){           // plotting
+void showPlot(obj y){           // plotting
     NSPoint pt;
     GetPen(&pt);
     int baseLine = pt.y;
@@ -454,7 +474,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		print_image(line);
 		return;
 	} else if(type(line)==tPlot){
-		showLine(line);
+		showPlot(line);
 		return;
 	}
 	assert(line->type==LIST);
@@ -466,7 +486,7 @@ static int getNLine(list line);
 static void highlightSelected();
 
 void Redraw(){
-	for(list l=lines; l; l=rest(l)){
+/*	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
 		list aLine = ul(first(l));
 		int position = uint(second(aLine));
@@ -474,7 +494,7 @@ void Redraw(){
 		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
 		MoveTo(h, position-viewPosition);
 		drawObj(first(aLine));
-	}
+	}*/
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
     drawingTheEditingLine = true;
 	drawLine(&line, true);
@@ -517,6 +537,17 @@ int findPreviousLine(){//returns -1 if none
 			p = i+1;
 		}
 	return pp;
+}
+int findBeginOfThisLine(){
+	int p = 0, curr_pos;
+	if(insList) curr_pos = uint(*last(insList));
+	else curr_pos = ins.pos;
+	int i = 0;
+	for(list l=line; l && i<curr_pos; l=rest(l), i++)
+		if(first(l)->type==INT && uint(first(l))==CR) {
+			p = i+1;
+		}
+	return p;
 }
 list deleteALetter0(){
 	int p = findPreviousLetter();
@@ -804,6 +835,7 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 void scrollBy(int points){
 	baseLine += points;
 	win_normalize();
+    insert(Int(CR));
 }
 
 void scroll(){
@@ -815,7 +847,8 @@ extern Interpreter	interpreter;
 
 static list csparse(const char* str, size_t len);
 
-void newLine(){
+void newLine(){}
+void newLine0(){
 	line = phi();
 	ins.moveInto(&line);
 	insList = nil;
@@ -840,7 +873,7 @@ void newLine(){
 }
 
 void initLines(){
-	lines = phi();
+//	lines = phi();
 	ins = insp(&line, 0);
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
@@ -850,28 +883,29 @@ void initLines(){
                 forKey  : NSFontAttributeName];
 
     interpreter = create_interpreter();
+
+    newLine0();
 }
 
-void addObjToText(obj line){	//taking line
-	list aLine = list2(line, Int(baseLine+viewPosition));
-	append(&lines, List2v(aLine));
+void addObjToText(obj v){	//taking line
+//	list aLine = list2(v, Int(baseLine+viewPosition));
+//	append(&lines, List2v(aLine));
+    insert(v);
 }
 
 static void addLineToText(obj line){	//taking line
+    return;     // used in edit and readline, needs repair of those functions
 	list aLine = list2(line, Int(startOfThisLine));
-	append(&lines, List2v(aLine));
+//	append(&lines, List2v(aLine));
 }
 
 char* cacheForUnitTest = nil;
 
 void addStringToText(char* string){
-	NSPoint pt;
-	GetPen(&pt);
     obj str = String2v(string);
-	list aLine = list3(str, Int(viewPosition+baseLine), Int(pt.x));
-	append(&lines, List2v(aLine));
-
-    cacheForUnitTest = ustr(str);
+//    assert(((long)string & dVal)==0);
+    insert(str);
+    cacheForUnitTest = string;
 }
 
 #include <stdarg.h>
@@ -1011,10 +1045,10 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 }
 Interpreter	interpreter;
 void handleCR(){
-	addLineToText(List2v(line));
+//	addLineToText(List2v(line));
 	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
+	obj tl = listToCString(rest(line, findBeginOfThisLine()));
 	scrollBy(0);	// newline
-	obj tl = listToCString(line);
     if(setjmp(jmpEnv)==0){	//try
         interpret(interpreter, ustr(tl));
     } else {				//catch
@@ -1024,7 +1058,7 @@ void handleCR(){
 	newLine();
 }
 void HandleTyping(char c){
-	if(c==CR && !insList && !imbalanced(line)){
+	if(c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
 		ShowCaret();
