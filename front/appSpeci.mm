@@ -302,7 +302,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		DrawString("△");
 		break;
     case STRING:
-        DrawString(ustr(v));
+        DrawString(ustr(v));    // Draw Should be suppressed in the future
         break;
     case IMAGE:
     case tCImg:
@@ -401,6 +401,9 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 		if(pt.x > 50+colWidth) goto newline;    //wrap
 		if(pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
 			click = insp(line, pos);
+            //click.curstr = line;
+            //click.lpos = &(l->d);
+            //click.pos = pos+1;  // temporary
 			curclick = pt;
 		}
 	}
@@ -416,12 +419,52 @@ void drawFragment(obj line, bool draw){      // drawLine()   ?
 	drawFragment0(&ul(line), l, pos, draw);
 }
 
-node<int>* yposOfSoftLines = nil;
-node<list*>* pointerToSoftLines = nil;
+typedef node<int>* intlist;
+typedef node<list>* listlist;
+node<int>* yposOfLines = nil;
+node<list>* pointerToLines = nil;
+template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
+
+node<int>* cons(int v, node<int>* l){
+	node<int>* nn = (node<int>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+node<list>* cons(list v, node<list>* l){
+	node<list>* nn = (node<list>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+/*template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
+	node<T>* nn = (node<T>*)node_alloc<obj>();
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}*/
+template <class T> void surface_free(node<T>* p){
+	node<T>* next;
+	for( ; p; p=next){
+		next = p->d;
+		assert(p->refcount);
+		node_free((node<obj>*)p);
+	}
+}
+
+template <class T> T& first(node<T>* l){ return l->a;}
 
 void rememberYPos(int y, obj v){     // v want to be either obj or list*
 }
 
+int find(list l, list line){
+    int p = 0;
+    for (; line; line=rest(line), p++) if(l==line) break;
+    return p;
+}
 void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
@@ -431,21 +474,39 @@ void drawLine(list*line, bool draw){
 
 	float vv = pt.y;
 	for(int col=0; col < nCols; col++){	// columns
-		for(; ; ){				// lines by CR
+		intlist* il = &yposOfLines;
+        listlist* ll = &pointerToLines;
+        NSRect clip = [[caller superview] bounds];  // better to use drawRect
+        for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
 			GetPen(&curbase);	// get baseline of the line
-            NSRect clip = [[caller superview] bounds];    // better to use drawRect
-			if(drawFragment0(line, l, pos, draw)){
+            if(*il==nil) {
+                *il = cons((int)vv, nil);
+                *ll = cons(l, nil);
+			} else if(/*first(*il) != vv ||*/ first(*ll) != l){
+                // invalidate
+                surface_free(*il);
+                surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
+                *il = cons((int)vv, nil);
+                *ll = cons(l, nil);
+            } else if((*il)->d && first((*il)->d) < clip.origin.y - FONTSIZE){
+                l = first((*ll)->d);
+                pos = find(l, *line);
+                vv = first((*il)->d);
+                MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);
+                goto skipthisline;
+            }
+            if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
-                rememberYPos(vv, nil);  // can't be list*
 			}
 			if(equalsToCursor(line, l, pos)){      //seems unnecessary
 				GetPen(&cursorPosition);
 				curBase = curbase;
 				crossed = true;
 			}
+        skipthisline:
 			if(! l) return;
-			if(vv > clip.origin.y + clip.size.height) break;
+			if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
 		}
 		//vv += -windowHeight + FONTSIZE;
 		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
@@ -1132,7 +1193,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
-	if(!click.curstr) return;   // not well understood in creation
+	if(!click.curstr) return;
 
     if(!nowSelected){
         beginOfSel = ins;       //for text selection
