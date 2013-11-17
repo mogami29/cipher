@@ -34,9 +34,11 @@
         CGContextSetTextPosition(context, 10, 10 + ypos);
         CTLineDraw(aline, context);
         
+        CFRelease(aline);
         // Move the index beyond the line break.
         start += count;
     }//*/
+    CFRelease(typesetter);
 
     if (cursorOn){
         CGFloat ascent, descent, leading;
