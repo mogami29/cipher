@@ -464,18 +464,18 @@ int find(list l, list line){
     for (; line; line=rest(line), p++) if(l==line) break;
     return p;
 }
+NSRect updateRect;
 void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
     drawList = phi();   // may have trouble with tShow
 	NSPoint pt;
 	GetPen(&pt);
-
+    NSRect clip = draw ? updateRect : [[caller superview] bounds];
 	float vv = pt.y;
 	for(int col=0; col < nCols; col++){	// columns
 		intlist* il = &yposOfLines;
         listlist* ll = &pointerToLines;
-        NSRect clip = [[caller superview] bounds];  // better to use drawRect
         //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)clickpnt.y);
         for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
 			GetPen(&curbase);	// get baseline of the line
@@ -550,8 +550,9 @@ int viewHeight = 100;
 static int getNLine(list line);
 static void highlightSelected();
 
-void Redraw(){
-/*	for(list l=lines; l; l=rest(l)){
+void Redraw(NSRect rect){
+    updateRect = rect;
+    /*	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
 		list aLine = ul(first(l));
 		int position = uint(second(aLine));
@@ -1214,7 +1215,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	MoveTo(cursorPosition.x, cursorPosition.y);
 	nowSelected = true;
 }
-void DoUpdate(WindowPtr targetWindow) {
+/*void DoUpdate(WindowPtr targetWindow) {
 //	SetPortWindowPort(targetWindow);
 //	BeginUpdate(targetWindow);
 //	EraseRect(&targetWindow->portRect);
@@ -1222,7 +1223,7 @@ void DoUpdate(WindowPtr targetWindow) {
 //	DrawGrowIcon(targetWindow);
 //	DrawControls(targetWindow);
 //	EndUpdate(targetWindow);
-}
+}*/
 void DoUndo(){
 	obj doit=retain(undobuf);
 	if(type(doit)==tDel){

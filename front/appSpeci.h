@@ -43,7 +43,7 @@ void DoLatex();
 void DoPrint();
 void ShowCaret();
 void HideCaret();
-void Redraw();
+void Redraw(NSRect rect);
 #if __cplusplus
 }   // Extern C
 #endif

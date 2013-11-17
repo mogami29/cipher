@@ -59,7 +59,7 @@
 */
     theStr = backingStore;
     caller = self;
-    Redraw();
+    Redraw(rect);
 }
 
 - (void) drawCaretAt:(NSPoint)pt
