@@ -77,7 +77,6 @@
 {
     self = [super initWithFrame:frameRect];
     line = [[NSMutableString alloc] init];
-    cursorOn = 1;
     [self startAnimation];
     [self setFrameSize:NSMakeSize(500, 100)];
     initLines();
@@ -335,12 +334,12 @@
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
     [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
     
+    cursorOn = 1;
 //    lastTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
 - (void) stopAnimation {
     [timer invalidate];
-//    [timer release];
     timer = nil;
 }
 
