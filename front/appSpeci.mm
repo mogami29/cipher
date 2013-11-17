@@ -399,11 +399,10 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
         
 		GetPen(&pt);
 		if(pt.x > 50+colWidth) goto newline;    //wrap
-		if(pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
-			click = insp(line, pos);
-            //click.curstr = line;
-            //click.lpos = &(l->d);
-            //click.pos = pos+1;  // temporary
+		if(!draw && pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
+            click.curstr = line;
+            click.pos = pos;
+			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
 			curclick = pt;
 		}
 	}
@@ -477,6 +476,7 @@ void drawLine(list*line, bool draw){
 		intlist* il = &yposOfLines;
         listlist* ll = &pointerToLines;
         NSRect clip = [[caller superview] bounds];  // better to use drawRect
+        //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)clickpnt.y);
         for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
 			GetPen(&curbase);	// get baseline of the line
             if(*il==nil) {
@@ -1178,6 +1178,7 @@ void getClickPosition(NSPoint pt){
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
+    click = insp(click.curstr, click.pos);  // setting lpos has been postponed since drawFragment0()
 	if(!click.curstr) return;
 
 	ins = click;
