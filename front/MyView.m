@@ -66,6 +66,7 @@
 {
     if (cursorOn && selectedRange.length==0) {
         CGFloat w = [backingStore attributedSubstringFromRange:NSMakeRange(0, selectedRange.location)].size.width;
+        caretPosition = NSMakePoint((int)(pt.x + w), pt.y);
         NSPoint	point0 = {(int)(pt.x + w)+.5, pt.y };
         NSPoint	point1 = {(int)(pt.x + w)+.5, pt.y - FONTSIZE};
         [[NSColor blackColor] set];
@@ -358,7 +359,7 @@
     cursorOn = !cursorOn;
     //    lastTime = thisTime;
     [self setNeedsDisplay:YES];
-    // use later: - (void)setNeedsDisplayInRect:(NSRect)invalidRect
+    //[self setNeedsDisplayInRect:NSMakeRect(caretPosition.x, caretPosition.y - FONTSIZE, 1, FONTSIZE)];
 }
 
 // From TextInputView
