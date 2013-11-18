@@ -1189,6 +1189,7 @@ void getClickPosition(NSPoint pt){
 }
 void HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
+    nowSelected = false;
 }
 void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	clickpnt = pt;
