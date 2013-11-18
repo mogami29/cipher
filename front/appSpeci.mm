@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+void showPlot(obj y);
 void	drawLine(list*line, bool draw);
 static float getWidth(obj string);
 static void drawFragment(obj line, bool draw);
@@ -54,7 +55,7 @@ void exit2shell(){
 }
 
 int viewPosition = 0;
-static list lines;
+//static list lines;
 //---------current line with insertion point object---------------------------
 
 static text line;
@@ -170,6 +171,7 @@ float StringWidth(const char * str){    // takes pascal string
 }
 void DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
+    assert(s1);
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
@@ -222,7 +224,8 @@ static bool crossed;
 // 11: a character
 #define dVal	3	// mask
 #define idInt	1
-#define idChar	3
+#define idStr	2
+//#define idChar	3
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
 //
@@ -247,6 +250,12 @@ obj read(list& l){  // experimental. not in use still.
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
+/*    if((long)v&dVal) {
+        assert(((long)v&dVal)==idStr);
+        char* s = ((char*)v) -idStr;
+        DrawString(s);
+        return;
+    }*/
     if (type(v)==INT) {
 		char buf[8];
 		// read
@@ -292,6 +301,17 @@ void drawACharOrABox(list& l, int& pos, bool draw){
     case tHide:
 		DrawString("△");
 		break;
+    case STRING:
+            if(draw) DrawString(ustr(v)); else Move(StringWidth(ustr(v)), 0);
+        break;
+    case IMAGE:
+    case tCImg:
+        print_image(v);
+        break;
+    case tPlot:
+        Move(0, 200);
+        showPlot(v);
+        break;
 	}
     vrInt(pop(&drawList));
 	return;
@@ -368,7 +388,7 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
             if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
             CGFloat w = [theStr size].width;
             if(draw) [caller drawCaretAt:curPt];
-            curPt.x += w;
+            Move(w, 0);
         }
 		if(! l) goto endline;
 
@@ -379,8 +399,10 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
         
 		GetPen(&pt);
 		if(pt.x > 50+colWidth) goto newline;    //wrap
-		if(pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
-			click = insp(line, pos);
+		if(!draw && pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
+            click.curstr = line;
+            click.pos = pos;
+			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
 			curclick = pt;
 		}
 	}
@@ -396,32 +418,96 @@ void drawFragment(obj line, bool draw){      // drawLine()   ?
 	drawFragment0(&ul(line), l, pos, draw);
 }
 
-node<int>* yposOfSoftLines = nil;
-node<list*>* pointerToSoftLines = nil;
+typedef node<int>* intlist;
+typedef node<list>* listlist;
+node<int>* yposOfLines = nil;
+node<list>* pointerToLines = nil;
+template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
 
+node<int>* cons(int v, node<int>* l){
+	node<int>* nn = (node<int>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+node<list>* cons(list v, node<list>* l){
+	node<list>* nn = (node<list>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+/*template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
+	node<T>* nn = (node<T>*)node_alloc<obj>();
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}*/
+template <class T> void surface_free(node<T>* p){
+	node<T>* next;
+	for( ; p; p=next){
+		next = p->d;
+		assert(p->refcount);
+		node_free((node<obj>*)p);
+	}
+}
+
+template <class T> T& first(node<T>* l){ return l->a;}
+
+void rememberYPos(int y, obj v){     // v want to be either obj or list*
+}
+
+int find(list l, list line){
+    int p = 0;
+    for (; line; line=rest(line), p++) if(l==line) break;
+    return p;
+}
+NSRect updateRect;
 void drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
     drawList = phi();   // may have trouble with tShow
 	NSPoint pt;
 	GetPen(&pt);
-
+    NSRect clip = draw ? updateRect : [[caller superview] bounds];
 	float vv = pt.y;
 	for(int col=0; col < nCols; col++){	// columns
-		for(; ; ){				// lines by CR
+		intlist* il = &yposOfLines;
+        listlist* ll = &pointerToLines;
+        //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)clickpnt.y);
+        for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
 			GetPen(&curbase);	// get baseline of the line
-            NSRect clip = [[caller superview] bounds];    // better to use drawRect
-			if(drawFragment0(line, l, pos, draw)){
+            if(*il==nil) {
+                *il = cons((int)vv, nil);
+                *ll = cons(l, nil);
+			} else if(/*first(*il) != vv ||*/ first(*ll) != l){
+                // invalidate
+                surface_free(*il);
+                surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
+                *il = cons((int)vv, nil);
+                *ll = cons(l, nil);
+            } else if((*il)->d && first((*il)->d) < clip.origin.y - FONTSIZE){
+                l = first((*ll)->d);
+                pos = find(l, *line);
+                vv = first((*il)->d);
+                MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);
+                goto skipthisline;
+            }
+            if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
-			if(equalsToCursor(line, l, pos)){      //seems unnecessary
+			if(equalsToCursor(line, l, pos)){
 				GetPen(&cursorPosition);
 				curBase = curbase;
 				crossed = true;
+                if(draw) [caller drawCaretAt:curPt];
 			}
+        skipthisline:
 			if(! l) return;
-			if(vv > clip.origin.y + clip.size.height) break;
+			if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
 		}
 		//vv += -windowHeight + FONTSIZE;
 		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
@@ -436,7 +522,7 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
-void showLine(obj y){           // plotting
+void showPlot(obj y){           // plotting
     NSPoint pt;
     GetPen(&pt);
     int baseLine = pt.y;
@@ -454,7 +540,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		print_image(line);
 		return;
 	} else if(type(line)==tPlot){
-		showLine(line);
+		showPlot(line);
 		return;
 	}
 	assert(line->type==LIST);
@@ -465,16 +551,18 @@ int viewHeight = 100;
 static int getNLine(list line);
 static void highlightSelected();
 
-void Redraw(){
-	for(list l=lines; l; l=rest(l)){
+void Redraw(NSRect rect){
+    updateRect = rect;
+    /*	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
 		list aLine = ul(first(l));
 		int position = uint(second(aLine));
 		int h;
 		if(rest(rest(aLine))) h = uint(third(aLine)); else h = LEFTMARGIN;;
 		MoveTo(h, position-viewPosition);
+        rememberYPos(position-viewPosition, first(aLine));
 		drawObj(first(aLine));
-	}
+	}*/
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
     drawingTheEditingLine = true;
 	drawLine(&line, true);
@@ -517,6 +605,17 @@ int findPreviousLine(){//returns -1 if none
 			p = i+1;
 		}
 	return pp;
+}
+int findBeginOfThisLine(){
+	int p = 0, curr_pos;
+	if(insList) curr_pos = uint(*last(insList));
+	else curr_pos = ins.pos;
+	int i = 0;
+	for(list l=line; l && i<curr_pos; l=rest(l), i++)
+		if(first(l)->type==INT && uint(first(l))==CR) {
+			p = i+1;
+		}
+	return p;
 }
 list deleteALetter0(){
 	int p = findPreviousLetter();
@@ -804,6 +903,7 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 void scrollBy(int points){
 	baseLine += points;
 	win_normalize();
+    insert(Int(CR));
 }
 
 void scroll(){
@@ -815,7 +915,8 @@ extern Interpreter	interpreter;
 
 static list csparse(const char* str, size_t len);
 
-void newLine(){
+void newLine(){}
+void newLine0(){
 	line = phi();
 	ins.moveInto(&line);
 	insList = nil;
@@ -840,7 +941,7 @@ void newLine(){
 }
 
 void initLines(){
-	lines = phi();
+//	lines = phi();
 	ins = insp(&line, 0);
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
@@ -850,28 +951,29 @@ void initLines(){
                 forKey  : NSFontAttributeName];
 
     interpreter = create_interpreter();
+
+    newLine0();
 }
 
-void addObjToText(obj line){	//taking line
-	list aLine = list2(line, Int(baseLine+viewPosition));
-	append(&lines, List2v(aLine));
+void addObjToText(obj v){	//taking line
+//	list aLine = list2(v, Int(baseLine+viewPosition));
+//	append(&lines, List2v(aLine));
+    insert(v);
 }
 
 static void addLineToText(obj line){	//taking line
+    return;     // used in edit and readline, needs repair of those functions
 	list aLine = list2(line, Int(startOfThisLine));
-	append(&lines, List2v(aLine));
+//	append(&lines, List2v(aLine));
 }
 
 char* cacheForUnitTest = nil;
 
 void addStringToText(char* string){
-	NSPoint pt;
-	GetPen(&pt);
     obj str = String2v(string);
-	list aLine = list3(str, Int(viewPosition+baseLine), Int(pt.x));
-	append(&lines, List2v(aLine));
-
-    cacheForUnitTest = ustr(str);
+//    assert(((long)string & dVal)==0);
+    insert(str);
+    cacheForUnitTest = string;
 }
 
 #include <stdarg.h>
@@ -1011,10 +1113,10 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 }
 Interpreter	interpreter;
 void handleCR(){
-	addLineToText(List2v(line));
+//	addLineToText(List2v(line));
 	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
+	obj tl = listToCString(rest(line, findBeginOfThisLine()));
 	scrollBy(0);	// newline
-	obj tl = listToCString(line);
     if(setjmp(jmpEnv)==0){	//try
         interpret(interpreter, ustr(tl));
     } else {				//catch
@@ -1024,7 +1126,7 @@ void handleCR(){
 	newLine();
 }
 void HandleTyping(char c){
-	if(c==CR && !insList && !imbalanced(line)){
+	if(c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
 		ShowCaret();
@@ -1078,6 +1180,7 @@ void getClickPosition(NSPoint pt){
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
+    click = insp(click.curstr, click.pos);  // setting lpos has been postponed since drawFragment0()
 	if(!click.curstr) return;
 
 	ins = click;
@@ -1094,7 +1197,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
-	if(!click.curstr) return;   // not well understood in creation
+	if(!click.curstr) return;
 
     if(!nowSelected){
         beginOfSel = ins;       //for text selection
@@ -1114,7 +1217,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	MoveTo(cursorPosition.x, cursorPosition.y);
 	nowSelected = true;
 }
-void DoUpdate(WindowPtr targetWindow) {
+/*void DoUpdate(WindowPtr targetWindow) {
 //	SetPortWindowPort(targetWindow);
 //	BeginUpdate(targetWindow);
 //	EraseRect(&targetWindow->portRect);
@@ -1122,7 +1225,7 @@ void DoUpdate(WindowPtr targetWindow) {
 //	DrawGrowIcon(targetWindow);
 //	DrawControls(targetWindow);
 //	EndUpdate(targetWindow);
-}
+}*/
 void DoUndo(){
 	obj doit=retain(undobuf);
 	if(type(doit)==tDel){

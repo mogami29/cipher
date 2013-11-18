@@ -3,6 +3,7 @@
 {
     NSMutableString* line;
 	int cursorOn;
+    NSPoint caretPosition;
 	NSTimer *timer;
 
     NSMutableDictionary *dicAttr;

@@ -1,5 +1,5 @@
 //app.cÇ∆appspeci.cÇÃã§í ÉwÉbÉ_Å[
-#define FONTSIZE 18
+#define FONTSIZE 14
 #define LINEHEIGHT (FONTSIZE*3/2)
 #define LEFTMARGIN 50
 #define colWidth 450
@@ -43,7 +43,7 @@ void DoLatex();
 void DoPrint();
 void ShowCaret();
 void HideCaret();
-void Redraw();
+void Redraw(NSRect rect);
 #if __cplusplus
 }   // Extern C
 #endif
