@@ -358,8 +358,9 @@
     //NSTimeInterval thisTime = [NSDate timeIntervalSinceReferenceDate];
     cursorOn = !cursorOn;
     //    lastTime = thisTime;
-    [self setNeedsDisplay:YES];
-    //[self setNeedsDisplayInRect:NSMakeRect(caretPosition.x, caretPosition.y - FONTSIZE, 1, FONTSIZE)];
+    //if ([[self window] isKeyWindow])  // NSWindowDidResignKeyNotification notification may be useful too
+    //[self setNeedsDisplay:YES];
+    [self setNeedsDisplayInRect:NSMakeRect(caretPosition.x, caretPosition.y - FONTSIZE, 1, FONTSIZE)];
 }
 
 // From TextInputView
