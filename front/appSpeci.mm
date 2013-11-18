@@ -302,7 +302,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		DrawString("△");
 		break;
     case STRING:
-        DrawString(ustr(v));    // Draw Should be suppressed in the future
+            if(draw) DrawString(ustr(v)); else Move(StringWidth(ustr(v)), 0);
         break;
     case IMAGE:
     case tCImg:
@@ -388,7 +388,7 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
             if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
             CGFloat w = [theStr size].width;
             if(draw) [caller drawCaretAt:curPt];
-            curPt.x += w;
+            Move(w, 0);
         }
 		if(! l) goto endline;
 
@@ -499,10 +499,11 @@ void drawLine(list*line, bool draw){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
 			}
-			if(equalsToCursor(line, l, pos)){      //seems unnecessary
+			if(equalsToCursor(line, l, pos)){
 				GetPen(&cursorPosition);
 				curBase = curbase;
 				crossed = true;
+                if(draw) [caller drawCaretAt:curPt];
 			}
         skipthisline:
 			if(! l) return;

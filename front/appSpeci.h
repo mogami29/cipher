@@ -1,5 +1,5 @@
 //app.c‚Æappspeci.c‚Ì‹¤’Êƒwƒbƒ_[
-#define FONTSIZE 18
+#define FONTSIZE 14
 #define LINEHEIGHT (FONTSIZE*3/2)
 #define LEFTMARGIN 50
 #define colWidth 450
