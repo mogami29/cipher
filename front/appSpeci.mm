@@ -972,9 +972,13 @@ char* cacheForUnitTest = nil;
 
 void addStringToText(char* string){
     obj str = val(copyString(string));
-//    assert(((long)string & dVal)==0);
     insert(str);
-    cacheForUnitTest = string;
+    cacheForUnitTest = ustr(str);
+/*
+    char* str = copyString(string);
+    assert(((long)str & dVal)==0);
+    insert((obj)((long)str & idStr));
+    cacheForUnitTest = ustr(str);*/
 }
 
 #include <stdarg.h>
