@@ -971,7 +971,7 @@ static void addLineToText(obj line){	//taking line
 char* cacheForUnitTest = nil;
 
 void addStringToText(char* string){
-    obj str = String2v(string);
+    obj str = val(copyString(string));
 //    assert(((long)string & dVal)==0);
     insert(str);
     cacheForUnitTest = string;
