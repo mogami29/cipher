@@ -476,7 +476,6 @@ void drawLine(list*line, bool draw){
 	for(int col=0; col < nCols; col++){	// columns
 		intlist* il = &yposOfLines;
         listlist* ll = &pointerToLines;
-        //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)clickpnt.y);
         for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
 			GetPen(&curbase);	// get baseline of the line
             if(*il==nil) {
@@ -495,6 +494,7 @@ void drawLine(list*line, bool draw){
                 MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);
                 goto skipthisline;
             }
+            //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)vv);
             if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
@@ -567,13 +567,14 @@ void Redraw(NSRect rect){
     drawingTheEditingLine = true;
 	drawLine(&line, true);
     drawingTheEditingLine = false;
-	viewHeight = startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line) + 3*FONTSIZE;// too inacurate
+	viewHeight = larger(startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line), cursorPosition.y) + 3*FONTSIZE;// too inacurate
     /*if(caretState){
      MoveTo(cursorPosition.x, cursorPosition.y);
      Line(0,-FONTSIZE);
      Move(0, FONTSIZE);
      }*/
     highlightSelected();
+    baseLine = cursorPosition.y;
 }
 
 //------accessors of the current line -----------------
@@ -794,7 +795,7 @@ void moveRight(){
 		return;
 	}
 	if(type(c)==INT && (uint(c)&0x80)) ins.setpos(ins.pos+1);
-	if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
+	//if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
 	ins.setpos(ins.pos+1);
 }
 list cutSelected(){
@@ -897,7 +898,7 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 		ScrollRect(&rect, 0, -move, updateRgn);
 	}
 	DisposeRgn(updateRgn);
-*/	MoveTo(LEFTMARGIN,baseLine);
+*/	//MoveTo(LEFTMARGIN,baseLine);
 }
 
 void scrollBy(int points){
@@ -922,9 +923,9 @@ void newLine0(){
 	insList = nil;
     
 	startOfThisLine = baseLine+viewPosition;
-	cursorPosition.x = LEFTMARGIN;
-	cursorPosition.y = baseLine;
-	MoveTo(LEFTMARGIN, baseLine);
+	//cursorPosition.x = LEFTMARGIN;
+	//cursorPosition.y = baseLine;
+	//MoveTo(LEFTMARGIN, baseLine);
     
 	cursorBeforeVertMove = cursorPosition;
     
@@ -1058,7 +1059,7 @@ void HandleTyping0(char c){
 	if(c==CR){
 		if(! insList){
 			insert(Int(CR));
-			baseLine+=LINEHEIGHT;
+			//baseLine+=LINEHEIGHT;
 		} else moveToUpperLevel();
 		goto sho;
 	} else if(c==BS){
@@ -1105,7 +1106,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 		}
 	}
 //	updateAround(!(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown));
-	baseLine = curBase.y;
+//	baseLine = cursorPosition.y;
 	ShowCaret();
 	
 	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
@@ -1114,7 +1115,7 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 Interpreter	interpreter;
 void handleCR(){
 //	addLineToText(List2v(line));
-	baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
+	//baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
 	obj tl = listToCString(rest(line, findBeginOfThisLine()));
 	scrollBy(0);	// newline
     if(setjmp(jmpEnv)==0){	//try
@@ -1326,7 +1327,7 @@ obj editline(obj v){
 	MoveTo(cursorPosition.x, cursorPosition.y);
 	while(! getKey(onlyCR)) ;
 	addLineToText(List2v(line));
-	baseLine = startOfThisLine-viewPosition;
+	//baseLine = startOfThisLine-viewPosition;      // 131118 in question
 	scrollBy(FONTSIZE*2+getNLine(line)*LINEHEIGHT);	// newline
 	obj lin = listToCString(line);
 	newLine();

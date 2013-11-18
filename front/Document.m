@@ -15,6 +15,7 @@
     self = [super init];
     if (self) {
         // Add your subclass-specific initialization here.
+        loadedData = nil;
     }
     return self;
 }
@@ -45,6 +46,7 @@
             }
         }
         loadedData = nil;
+        [self close];   // doing it wrong
     }
 }
 
