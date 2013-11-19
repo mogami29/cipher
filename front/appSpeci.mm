@@ -62,7 +62,6 @@ static text line;
 static int startOfThisLine;	//絶対座標, multiple lineのときの始め。
 
 static NSPoint cursorPosition;
-static NSPoint curBase;
 float baseLine = 50;// ほかに使っているのはplot()
                 // baseLine ~ カーソル位置。描画なしでの予測と解釈できる
                 // line編集中はcursorPositionと同時に変更を行う。
@@ -214,7 +213,6 @@ void drawSubScript(obj v, bool draw){
 	Move(0,-FONTSIZE/3);
 }
 // CRは行末に付属すると考える。
-NSPoint curbase;	// curBaseはcursorのbaseline, curbaseは現在描画中のbaseline
 static bool crossed;
 
 //the lowest 2 bits
@@ -382,7 +380,6 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
 	for(; ; ){	// chars
         if(equalsToCursor(line, l, pos)){
 			GetPen(&cursorPosition);
-			curBase = curbase;
 			crossed = true;
 
             if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
@@ -477,7 +474,6 @@ void drawLine(list*line, bool draw){
 		intlist* il = &yposOfLines;
         listlist* ll = &pointerToLines;
         for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
-			GetPen(&curbase);	// get baseline of the line
             if(*il==nil) {
                 *il = cons((int)vv, nil);
                 *ll = cons(l, nil);
@@ -500,7 +496,6 @@ void drawLine(list*line, bool draw){
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
                 if(equalsToCursor(line, l, pos)){
                     GetPen(&cursorPosition);
-                    curBase = curbase;
                     crossed = true;
                     if(draw) [caller drawCaretAt:curPt];
                 }
