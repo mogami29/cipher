@@ -498,12 +498,12 @@ void drawLine(list*line, bool draw){
             if(drawFragment0(line, l, pos, draw)){
 				vv += LINEHEIGHT;
 				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
-			}
-			if(equalsToCursor(line, l, pos)){
-				GetPen(&cursorPosition);
-				curBase = curbase;
-				crossed = true;
-                if(draw) [caller drawCaretAt:curPt];
+                if(equalsToCursor(line, l, pos)){
+                    GetPen(&cursorPosition);
+                    curBase = curbase;
+                    crossed = true;
+                    if(draw) [caller drawCaretAt:curPt];
+                }
 			}
         skipthisline:
 			if(! l) return;
@@ -1196,6 +1196,7 @@ void getClickPosition(NSPoint pt){
 void HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
     nowSelected = false;
+    ShowCaret();
 }
 void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	clickpnt = pt;
@@ -1211,7 +1212,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
         selectionCursorPosition = cursorPosition;
     }
     if(!nowSelected && beginSelList != insList) return; // not well understood in creation
-	HideCaret();
+//	HideCaret();
 
 	ins = click;
 	release(insList);
