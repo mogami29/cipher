@@ -399,7 +399,7 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
         
 		GetPen(&pt);
 		if(pt.x > 50+colWidth) goto newline;    //wrap
-		if(!draw && pt.y < clickpnt.y + FONTSIZE/2 && pt.x < clickpnt.x){
+		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
             click.curstr = line;
             click.pos = pos;
 			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
@@ -471,7 +471,7 @@ void drawLine(list*line, bool draw){
     drawList = phi();   // may have trouble with tShow
 	NSPoint pt;
 	GetPen(&pt);
-    NSRect clip = draw ? updateRect : [[caller superview] bounds];
+    NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
 	for(int col=0; col < nCols; col++){	// columns
 		intlist* il = &yposOfLines;
@@ -507,7 +507,7 @@ void drawLine(list*line, bool draw){
 			}
         skipthisline:
 			if(! l) return;
-			if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
+			if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
 		}
 		//vv += -windowHeight + FONTSIZE;
 		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
