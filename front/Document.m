@@ -46,7 +46,6 @@
             }
         }
         loadedData = nil;
-        [self close];   // doing it wrong
     }
 }
 

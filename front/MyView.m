@@ -48,9 +48,9 @@
             ypos = ypos - [fontAttr descender] + [fontAttr ascender]*1.5 + [fontAttr leading];
             w = 0;
         }
-        NSPoint	point0 = {w + 10, 10 + ypos };
+/*        NSPoint	point0 = {w + 10, 10 + ypos };
         NSPoint	point1 = {w + 10, 10 + ypos - [fontAttr ascender]};
-        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];*/
     }
 
 /*    if (cursorOn) {
@@ -477,13 +477,12 @@
     NSRange glyphRange = [layoutManager glyphRangeForCharacterRange:aRange actualCharacterRange:actualRange];
     NSRect glyphRect = [layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer];
     glyphRect.origin.x += centerOffset;
-    
+*/  NSRect glyphRect =  {caretPosition.x, caretPosition.y -FONTSIZE/2, 1, 1};
+
     // Convert the rect to screen coordinates
     glyphRect = [self convertRectToBase:glyphRect];
     glyphRect.origin = [[self window] convertBaseToScreen:glyphRect.origin];
     return glyphRect;
-*/
-    return NSMakeRect(0, 0,1,1);
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)aPoint {
