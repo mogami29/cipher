@@ -397,7 +397,7 @@ bool drawFragment0(list* line, list& l, int& pos, bool draw){
         step(l, pos);
         
 		GetPen(&pt);
-		if(pt.x > 50+colWidth) goto newline;    //wrap
+		if(pt.x > LEFTMARGIN+colWidth) goto newline;    //wrap
 		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
             click.curstr = line;
             click.pos = pos;
@@ -490,19 +490,19 @@ void drawLine(list*line, bool draw){
             vv = first((*il)->d);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
-            }
+        }
         if(drawFragment0(line, l, pos, draw)){
             vv += LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
-            if(equalsToCursor(line, l, pos)){
-                GetPen(&cursorPosition);
+            if(equalsToCursor(line, l, pos)) continue;
+/*                GetPen(&cursorPosition);
                 crossed = true;
                 
                 if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
                 CGFloat w = [theStr size].width;
                 if(draw) [caller drawCaretAt:curPt];
                 Move(w, 0);
-            }
+            }*/
         }
     skipthisline:
         if(! l) return;
