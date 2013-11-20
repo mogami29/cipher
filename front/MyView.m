@@ -74,6 +74,10 @@
     }
 }
 
+- (void) setMode:(CRmode)m {
+    setMode(m);
+}
+
 - (id) initWithFrame:(NSRect)frameRect
 {
     self = [super initWithFrame:frameRect];

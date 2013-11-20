@@ -7,6 +7,7 @@
 //
 
 #import "Document.h"
+#include "appSpeci.h"
 
 @implementation Document
 
@@ -45,6 +46,7 @@
                 [self close];
             }
         }
+        setMode(editor);
         loadedData = nil;
     }
 }

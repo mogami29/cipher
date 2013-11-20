@@ -1125,8 +1125,15 @@ void handleCR(){
     scrollBy(FONTSIZE*2);
 	newLine();
 }
+
+static CRmode mode = session;
+
+void setMode(CRmode m){
+    mode = m;
+}
+
 void HandleTyping(char c){
-	if(c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
+	if(mode==session && c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
 		ShowCaret();
@@ -1298,8 +1305,6 @@ NSString* serializedString(){
 void DoLatex(){
 	assert(0);
 }
-
-static int CRmode = 0;
 
 obj edit(obj fn){	// open edit save
 	long bytes;

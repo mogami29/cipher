@@ -21,9 +21,14 @@ void myPrintf(char *fmt,...);
 void print_str(char*s);
 int getKey(int mode);
 
+typedef enum {
+    session,
+    editor
+} CRmode;
 #if __cplusplus
 extern "C" {
 #endif
+void setMode(CRmode m);
 void addStringToText(char* string);
 void initLines();
 void newLine();
