@@ -358,11 +358,13 @@ void findInsertionCloseTo(float h, int &next, int &prev){
 	for(; l;){
 		if(getInsertionCloseTo0(l, pos, h, curr_mark)==1) goto newline;
 			else goto endline;
-newline:	NSPoint pt;
+newline:
+        NSPoint pt;
 		GetPen(&pt);
 		MoveTo(LEFTMARGIN, pt.y+LINEHEIGHT);
 		if(! crossed) prev = curr_mark;
-endline:	if(metend) {next = curr_mark; return;}
+endline:
+        if(metend) {next = curr_mark; return;}
 		if(crossed) metend = true;
 	}
 }
@@ -497,7 +499,11 @@ void drawLine(list*line, bool draw){
                 if(equalsToCursor(line, l, pos)){
                     GetPen(&cursorPosition);
                     crossed = true;
+                    
+                    if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
+                    CGFloat w = [theStr size].width;
                     if(draw) [caller drawCaretAt:curPt];
+                    Move(w, 0);
                 }
 			}
         skipthisline:
