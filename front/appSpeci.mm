@@ -1146,22 +1146,27 @@ void HandleTyping(char c){
 	} else HandleTyping0(c);
 }
 
-void highlightSelected(){   // incomplete logic
-    if(nowSelected){
+void highlightSelected(){
+    if(!nowSelected) return;
+    //[[[NSColor selectedControlColor] colorWithAlphaComponent:0.5] set];   was not useful
+    [[NSColor selectedControlColor] set];
+    [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusDarker];
+    NSBezierPath* path = [NSBezierPath bezierPath];
+    NSPoint s = selectionCursorPosition, e = cursorPosition;
+    if(s.y == e.y ){
         Rect r;
-        r.left = smaller(selectionCursorPosition.x, cursorPosition.x);
-        r.right= larger(selectionCursorPosition.x, cursorPosition.x);
-        r.top  = smaller(selectionCursorPosition.y, cursorPosition.y) - FONTSIZE;
-        r.bottom=larger(selectionCursorPosition.y, cursorPosition.y);
-        //[[[NSColor selectedControlColor] colorWithAlphaComponent:0.5] set];   was not useful
-        [[NSColor selectedControlColor] set];
-        [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusDarker];
-        NSBezierPath* path = [NSBezierPath bezierPath];
+        r.left = smaller(s.x, e.x);
+        r.right= larger(s.x, e.x);
+        r.top  = smaller(s.y, e.y) - FONTSIZE;
+        r.bottom=larger(s.y, e.y);
         [path appendBezierPathWithRect:NSMakeRect(r.left, r.top, r.right - r.left, r.bottom - r.top)];
-        //[path appendBezierPathWithRect:NSMakeRect(r.left + 5, r.top + 5, r.right - r.left, r.bottom - r.top)];
-        [path fill];
-        [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
+    } else {
+        if(s.y > e.y) {s=cursorPosition; e=selectionCursorPosition;}
+        [path appendBezierPathWithRect:NSMakeRect(s.x, s.y - FONTSIZE - [fontAttr descender], viewWidth - s.x, e.y - s.y)];
+        [path appendBezierPathWithRect:NSMakeRect(0, s.y - [fontAttr descender], e.x, e.y - s.y)];
     }
+    [path fill];
+    [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
 }
 void HandleShifted(char c){
     if(!nowSelected){
