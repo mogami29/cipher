@@ -135,6 +135,8 @@
     }
     cursorOn = true;
     [self updateFrameSizeAndDraw];
+    [self display];
+	if(!(key==NSUpArrowFunctionKey || key==NSUpArrowFunctionKey)) setCursorBeforeVertMove();
 }
 
 - (void) insertText:(id)string

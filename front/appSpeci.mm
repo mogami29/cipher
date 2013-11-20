@@ -1111,8 +1111,10 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 //	baseLine = cursorPosition.y;
 	ShowCaret();
 	
-	if(!(c==arrowUp||c==arrowDown)) cursorBeforeVertMove = cursorPosition;		// keep position for short line
 	nowSelected = false;
+}
+void setCursorBeforeVertMove(){
+    cursorBeforeVertMove = cursorPosition;
 }
 Interpreter	interpreter;
 void handleCR(){

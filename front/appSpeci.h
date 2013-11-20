@@ -49,6 +49,7 @@ void DoPrint();
 void ShowCaret();
 void HideCaret();
 void Redraw(NSRect rect);
+void setCursorBeforeVertMove();
 #if __cplusplus
 }   // Extern C
 #endif
