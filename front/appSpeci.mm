@@ -472,47 +472,44 @@ void drawLine(list*line, bool draw){
 	GetPen(&pt);
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
-	for(int col=0; col < nCols; col++){	// columns
-		intlist* il = &yposOfLines;
-        listlist* ll = &pointerToLines;
-        for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
-            if(*il==nil) {
-                *il = cons((int)vv, nil);
-                *ll = cons(l, nil);
-			} else if(/*first(*il) != vv ||*/ first(*ll) != l){
-                // invalidate
-                surface_free(*il);
-                surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
-                *il = cons((int)vv, nil);
-                *ll = cons(l, nil);
-            } else if((*il)->d && first((*il)->d) < clip.origin.y - FONTSIZE){
-                l = first((*ll)->d);
-                pos = find(l, *line);
-                vv = first((*il)->d);
-                MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);
-                goto skipthisline;
+    intlist* il = &yposOfLines;
+    listlist* ll = &pointerToLines;
+    for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
+        if(*il==nil) {
+            *il = cons((int)vv, nil);
+            *ll = cons(l, nil);
+        } else if(/*first(*il) != vv ||*/ first(*ll) != l){
+            // invalidate
+            surface_free(*il);
+            surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
+            *il = cons((int)vv, nil);
+            *ll = cons(l, nil);
+        } else if((*il)->d && first((*il)->d) < clip.origin.y - FONTSIZE){
+            l = first((*ll)->d);
+            pos = find(l, *line);
+            vv = first((*il)->d);
+            MoveTo(LEFTMARGIN, vv);
+            goto skipthisline;
             }
-            //NSLog(@"%i,%i,%i", (int)clip.origin.y, (int)clip.size.height, (int)vv);
-            if(drawFragment0(line, l, pos, draw)){
-				vv += LINEHEIGHT;
-				MoveTo(LEFTMARGIN+(colWidth+colSep)*col, vv);	
-                if(equalsToCursor(line, l, pos)){
-                    GetPen(&cursorPosition);
-                    crossed = true;
-                    
-                    if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
-                    CGFloat w = [theStr size].width;
-                    if(draw) [caller drawCaretAt:curPt];
-                    Move(w, 0);
-                }
-			}
-        skipthisline:
-			if(! l) return;
-			if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
-		}
-		//vv += -windowHeight + FONTSIZE;
-		MoveTo(LEFTMARGIN+(colWidth+colSep)*(col+1), vv);
-	}
+        if(drawFragment0(line, l, pos, draw)){
+            vv += LINEHEIGHT;
+            MoveTo(LEFTMARGIN, vv);
+            if(equalsToCursor(line, l, pos)){
+                GetPen(&cursorPosition);
+                crossed = true;
+                
+                if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
+                CGFloat w = [theStr size].width;
+                if(draw) [caller drawCaretAt:curPt];
+                Move(w, 0);
+            }
+        }
+    skipthisline:
+        if(! l) return;
+        if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
+    }
+    //vv += -windowHeight + FONTSIZE;
+    MoveTo(LEFTMARGIN, vv);
 }
 
 float getWidth(obj str){
