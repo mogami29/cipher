@@ -197,12 +197,12 @@ void drawFraction(list_* f, bool draw){
 	MoveTo(pt.x+width+2, pt.y);
 }
 void drawSuperScript(obj v, bool draw){
-	Move(0,-FONTSIZE*2/3);
+	Move(0,-FONTSIZE*1/2);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SuperScript);
 	drawFragment(v, draw);
 	TextSize(FONTSIZE);
-	Move(0,FONTSIZE*2/3);
+	Move(0,FONTSIZE*1/2);
 }
 void drawSubScript(obj v, bool draw){
 	Move(0,+FONTSIZE/3);
@@ -239,7 +239,7 @@ obj read(list& l){  // experimental. not in use still.
             *(char*)&s = c;
             *(((char*)&s)+1) = uint(second(l));
             c = s;
-        } else if (c>=0x100) assert(0);
+        }
         return dInt(c);
     }
     return v;

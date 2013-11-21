@@ -156,6 +156,11 @@
     HandleTyping(BS);
 }
 
+- (void) insertTab:(id)sender
+{
+    HandleTyping('\t');
+}
+
 - (void) moveLeft:(id)sender    // what is moveBackward?
 {
     HandleTyping(arrowLeft);
