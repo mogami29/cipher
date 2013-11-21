@@ -142,7 +142,8 @@
 - (void) insertText:(id)string
 {
     //[line appendString: string];
-    insertCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
+    const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
+    if (s) insertCString(s);    // yen mark results in null pointer
     // need update of framesize here
 }
 

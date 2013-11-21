@@ -236,15 +236,21 @@ obj read(list& l){  // experimental. not in use still.
             if(! rest(l)) return NULL;//2 byte文字が1byteずつ挿入されるから
             if(second(l)->type != INT) assert(0);
             unsigned short s;
-            *(char*)&s = c;
-            *(((char*)&s)+1) = uint(second(l));
-            c = s;
+            c = (c<<8) + uint(second(l));
         }
         return dInt(c);
     }
     return v;
 }
-
+void toString(char* buf, int c){
+    buf[0] = c;
+    buf[1] = NULL;
+    if(c&0x80){
+        buf[0] = c >> 8;
+        buf[1] = c & 0xff;
+        buf[2] = NULL;
+    }
+}
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
@@ -254,6 +260,14 @@ void drawACharOrABox(list& l, int& pos, bool draw){
         DrawString(s);
         return;
     }*/
+    /* v = read(l);
+     if((long)v&dVal) {
+     assert(((long)v&dVal)==idInt);
+     uint c = rInt(v);
+     NSString* s = [[NSString alloc] initWithCharacters:&c length:1];
+     DrawString(s);
+     return;
+     }*/
     if (type(v)==INT) {
 		char buf[8];
 		// read
