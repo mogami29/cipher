@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 void showPlot(obj y);
-void	drawLine(list*line, bool draw);
+void drawLine(list*line, bool draw);
 static float getWidth(obj string);
 static void drawFragment(obj line, bool draw);
 static int findPreviousLine();
@@ -1372,7 +1372,7 @@ obj editline(obj v){
 }
 
 static void append(string*rs, const char*s){
-	for(; *s; s++) appendS(rs, *s);
+	for(; *s; s++) appendS(rs, *(unsigned char*)s);
 }
 
 static void serialize(string*rs, list l, list end){
