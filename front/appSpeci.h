@@ -33,6 +33,7 @@ void setMode(CRmode m);
 void addStringToText(char* string);
 void initLines();
 void newLine();
+void removeSelected();
 void HandleTyping(char c);
 void HandleShifted(char c);
 void HandleContentClick(NSPoint pt);

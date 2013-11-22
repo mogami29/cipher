@@ -409,6 +409,7 @@
     // insert aString to backingstore and
     //[self insertText:[backingStore string]];
     [self insertText:aString ];
+    removeSelected();
     [backingStore setAttributedString:[[NSAttributedString alloc] initWithString:@"" attributes:dicAttr]];
     [backingStore endEditing];
     
@@ -444,6 +445,7 @@
         [backingStore addAttributes:dicAttr range:markedRange];
     }
     [backingStore endEditing];
+    removeSelected();
     
     // Redisplay
     selectedRange.location = replacementRange.location + newSelection.location; // Just for now, only select the marked text

@@ -280,15 +280,12 @@ void drawACharOrABox(list& l, int& pos, bool draw){
             buf[1] = uint(second(l));
             buf[2] = NULL;
         } else if (c>=0x100) assert(0);
-		float width = StringWidth(buf);
-		if(c=='\t') width = StringWidth("    ");
 		//draw:
 		if(c=='\t') {
-			DrawString("    ");
+			if(draw) DrawString("    "); else Move(StringWidth("    "), 0);
 			return;
 		}
-		GetPen(&pt);
-		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
+		if(!draw || pt.y < -FONTSIZE) Move(StringWidth(buf), 0);
         else	DrawString(buf);
 		return;
     }
@@ -1070,6 +1067,10 @@ void updateAround(bool erase){
 	//InvalRect(&r);
 //	DoUpdate(currWindow);
 }
+void removeSelected(){
+    if(nowSelected) putinUndobuf(cutSelected());
+	nowSelected = false;
+}
 void HandleTyping0(char c){
 	HideCaret();
 	if(c==CR){
@@ -1108,7 +1109,7 @@ void HandleTyping0(char c){
 		list l = deleteALetter0();
 		insertFraction(l, nil);
 	} else {
-		if(nowSelected) putinUndobuf(cutSelected());
+        removeSelected();
 //		assert(c | 0xff == -1);
 		insert(Int(c & 0xff));
 		if(c & 0x80) halfchar = c;
