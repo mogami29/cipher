@@ -161,20 +161,26 @@ void TextSize(float s){
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
 }
-float StringWidth(const char * str){    // takes pascal string
-    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    assert(s1);
+float StringWidth(NSString* s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     CGFloat w = [attStr size].width;
     return w;
 }
-void DrawString(const char * str){
-    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    assert(s1);
+void DrawString(NSString *s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
     curPt.x += w;
+}
+float StringWidth(const char * str){
+    NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
+    assert(s1);
+    return StringWidth(s1);
+}
+void DrawString(const char * str){
+    NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
+    assert(s1);
+    DrawString(s1);
 }
 
 void drawFraction(list_* f, bool draw){
@@ -227,20 +233,25 @@ static bool crossed;
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
 //
-obj read(list& l){  // experimental. not in use still.
+bool isWide(unichar c){return (c & 0xF800) == 0xD8;}
+
+NSString* read(list& l){  // experimental. not in use still.
 	obj v = first(l);
-    if (type(v)==INT) {
-		// read
-		int c = uint(v);
-		if(c&0x80 && c<0x100){
-            if(! rest(l)) return NULL;//2 byte文字が1byteずつ挿入されるから
-            if(second(l)->type != INT) assert(0);
-            unsigned short s;
-            c = (c<<8) + uint(second(l));
-        }
-        return dInt(c);
+    assert(type(v)==INT);
+    unichar buf[3];
+    // read
+    int c = uint(v);
+    int len = 1;
+    buf[0] = c;
+    //buf[1] = NULL;
+    if(isWide(c)){
+        if(! rest(l)) return nil;
+        if(second(l)->type != INT) return nil;
+        buf[1] = uint(second(l));
+        //buf[2] = NULL;
+        len = 2;
     }
-    return v;
+    return [[NSString alloc] initWithCharacters:buf length:len];
 }
 void toString(char* buf, int c){
     buf[0] = c;
@@ -269,19 +280,10 @@ void drawACharOrABox(list& l, int& pos, bool draw){
      return;
      }*/
     if (type(v)==INT) {
-		char buf[8];
-		// read
-		int c = uint(v);
-		buf[0] = c;
-		buf[1] = NULL;
-		if(c&0x80 && c<0x100){
-            if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
-            if(second(l)->type != INT) return;
-            buf[1] = uint(second(l));
-            buf[2] = NULL;
-        } else if (c>=0x100) assert(0);
-		float width = StringWidth(buf);
-		if(c=='\t') width = StringWidth("    ");
+        int c = uint(v);
+        NSString* s = read(l);
+		float width = StringWidth(s);
+		if(c=='\t') width = StringWidth(@"    ");
 		//draw:
 		if(c=='\t') {
 			DrawString("    ");
@@ -289,7 +291,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		}
 		GetPen(&pt);
 		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
-        else	DrawString(buf);
+        else	DrawString(s);
 		return;
     }
     drawList = cons(Int(pos+1), drawList);
@@ -331,10 +333,17 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 
 void step(list& l, int& pos){
     obj v = first(l);
-    if(type(v)==INT && uint(v)&0x80 && uint(v)<0x100 && rest(l) && second(l)->type==INT){
+    if(type(v)==INT && isWide(uint(v)) && rest(l) && second(l)->type==INT){
         pos++; l=rest(l);
     }
     pos++, l=rest(l);
+}
+void step(list& l){
+    obj v = first(l);
+    if(type(v)==INT && isWide(uint(v)) && rest(l) && second(l)->type==INT){
+        l=rest(l);
+    }
+    l=rest(l);
 }
 
 inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
@@ -601,7 +610,7 @@ int findPreviousLetter(){
 	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
 		p = i;
-		if(type(first(l))==INT && (uint(first(l))&0x80)) {
+		if(type(first(l))==INT && isWide(uint(first(l)))) {
 			l=rest(l); i++;
 		}
 	}
@@ -806,7 +815,7 @@ void moveRight(){
 		moveIntoDenom((list_*)c);
 		return;
 	}
-	if(type(c)==INT && (uint(c)&0x80)) ins.setpos(ins.pos+1);
+	if(type(c)==INT && isWide(uint(c))) ins.setpos(ins.pos+1);
 	//if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
 	ins.setpos(ins.pos+1);
 }
@@ -1070,7 +1079,7 @@ void updateAround(bool erase){
 	//InvalRect(&r);
 //	DoUpdate(currWindow);
 }
-void HandleTyping0(char c){
+void HandleTyping0(unichar c){
 	HideCaret();
 	if(c==CR){
 		if(! insList){
@@ -1109,9 +1118,8 @@ void HandleTyping0(char c){
 		insertFraction(l, nil);
 	} else {
 		if(nowSelected) putinUndobuf(cutSelected());
-//		assert(c | 0xff == -1);
-		insert(Int(c & 0xff));
-		if(c & 0x80) halfchar = c;
+		insert(Int(c));
+		if(isWide(c)) halfchar = c;     // 1311 possibly no need
 		else halfchar = 0;
 	}
 	
@@ -1151,7 +1159,7 @@ void setMode(CRmode m){
     mode = m;
 }
 
-void HandleTyping(char c){
+void HandleTyping(unichar c){
 	if(mode==session && c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
@@ -1182,7 +1190,7 @@ void highlightSelected(){
     [path fill];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
 }
-void HandleShifted(char c){
+void HandleShifted(unichar c){
     if(!nowSelected){
         beginOfSel = ins;	//for text selection
         //release(beginSelList);       possibly no need 131018
@@ -1284,7 +1292,7 @@ NSString* copySelected(){
 
 	string rs = nullstr();
 	serialize(&rs, rest(*ins.curstr,b), rest(*ins.curstr,e));
-    NSString* str = [[NSString alloc] initWithCString:rs.s encoding:NSShiftJISStringEncoding];
+    NSString* str = [[NSString alloc] initWithCString:rs.s encoding:NSUTF8StringEncoding];
 	freestr(&rs);
     return str;
 }
@@ -1303,15 +1311,15 @@ NSString* DoCut(){
     return str;
 }
 
-void insertCString(const char* str){    // was DoPaste
+void insertCString(const char* str){    // was DoPaste. assume UTF16
     /*list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);     */
-    for(const char* p=str; *p; p++) HandleTyping(*p);
+    for(const unichar* p=(unichar*)str; *p; p++) HandleTyping(*p);
 }
 
-void setCString(const char* str){
+void setCString(const char* str){   // UTF8
 	newLine();
 	line = csparse(str, strlen(str));
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
@@ -1321,7 +1329,7 @@ void setCString(const char* str){
 
 NSString* serializedString(){
 	obj st = listToCString(line);
-    NSString* str = [[NSString alloc] initWithCString:ustr(st) encoding:NSShiftJISStringEncoding];
+    NSString* str = [[NSString alloc] initWithCString:ustr(st) encoding:NSUTF8StringEncoding];
     release(st);
     return str;
 }
@@ -1368,12 +1376,13 @@ static void append(string*rs, const char*s){
 }
 
 static void serialize(string*rs, list l, list end){
-	for(; l != end; l=rest(l)){
+	for(; l != end; step(l)){
 		obj v = first(l);
 		switch(type(v)){
-		case INT:
-			appendS(rs, uint(v));
-			break;
+        case INT: {
+            NSString* s = read(l);
+            append(rs, [s UTF8String]);
+            break; }
 		case SuperScript:
 			appendS(rs, '^');
 			appendS(rs, '{');
@@ -1410,11 +1419,11 @@ static char* clpe;	// end
 list csparse0();
 
 list putchar(int c, list l){
-	if((c&0xff00)==0) {
+	if(c <= 0xFFFF) {
 		l = cons(Int(c), l);
 	} else {
-		l = cons(Int(c >> 8), l);
-		l = cons(Int(c & 0xff), l);
+		l = cons(Int((c >> 10) - 1), l);
+		l = cons(Int(c & 0x03FF), l);
 	}
 	return l;
 }
@@ -1430,7 +1439,7 @@ list csparen(){
 	else clp++;
 	return l;
 }
-bool getchar(char**pp, int c){
+bool getchar(char**pp, int c){  // UTF8?
 	if(readchar(*pp)!=c) return false;
 	*pp = next(*pp);
 	return true;
@@ -1463,7 +1472,7 @@ list csparse0(){
 	}
 	return reverse(l);
 }
-list csparse(const char* str, size_t len){
+list csparse(const char* str, size_t len){  //UTF8
 	clp = (char*)str;
 	clpe = clp + len;
 	return csparse0();
