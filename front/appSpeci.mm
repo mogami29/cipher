@@ -144,10 +144,14 @@ void MoveTo(float h, float v){
     curPt.y = v;
 }
 void Line(float h, float v){
-    // Put NSBezierCurve here
-    NSPoint	point0 = {(float)curPt.x, (float)curPt.y};
-    NSPoint	point1 = {(float)curPt.x + h, (float)curPt.y + v};
-    [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    float w = 0.5;
+    NSPoint	point0 = {(float)curPt.x, (int)curPt.y + w/2};
+    NSPoint	point1 = {(float)curPt.x + h, (int)curPt.y + v + w/2};
+    //[NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    NSBezierPath *path = [NSBezierPath bezierPath];
+    [path moveToPoint:point0];
+    [path lineToPoint:point1];
+    [path stroke];
     curPt.x += h;
     curPt.y += v;
 }
@@ -1100,7 +1104,7 @@ void HandleTyping0(char c){
 	}
 
 	static int halfchar = 0;
-	if(c=='~' && ! halfchar){
+	if(c=='^' && ! halfchar){
 		insertSuperScriptAndMoveInto();
 	} else if(c=='_' && ! halfchar){
 		insertSubScriptAndMoveInto();
