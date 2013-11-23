@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 void showPlot(obj y);
-void	drawLine(list*line, bool draw);
+void drawLine(list*line, bool draw);
 static float getWidth(obj string);
 static void drawFragment(obj line, bool draw);
 static int findPreviousLine();
@@ -1308,12 +1308,11 @@ NSString* DoCut(){
     return str;
 }
 
-void insertCString(const char* str){    // was DoPaste
-    /*list tt = csparse(str, strlen(str));
+void pasteCString(const char* str){    // was DoPaste
+    list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
-    MoveTo(cursorPosition.x, cursorPosition.y);     */
-    for(const char* p=str; *p; p++) HandleTyping(*p);
+    MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
 void setCString(const char* str){

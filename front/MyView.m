@@ -143,7 +143,8 @@
 {
     //[line appendString: string];
     const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
-    if (s) insertCString(s);    // yen mark results in null pointer
+    if (!s) return;    // yen mark results in null pointer
+    for(const char* p=s; *p; p++) HandleTyping(*p);
     // need update of framesize here
 }
 
@@ -284,7 +285,7 @@
     [self updateFrameSizeAndDraw];
 }
 
-// from paste board Getting Started
+// from Paste board Getting Started
 - (void) copy:sender {
     NSString *string = copySelected();
     if (string != nil) {
@@ -304,7 +305,9 @@
     if (ok) {
         NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
         NSString *string = [objectsToPaste objectAtIndex:0];
-        [self insertText:string];
+        const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
+        assert(s);    // yen mark results in null pointer
+        pasteCString(s);
     }
     [self updateFrameSizeAndDraw];
 }
