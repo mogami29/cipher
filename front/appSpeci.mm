@@ -286,15 +286,12 @@ void drawACharOrABox(list& l, int& pos, bool draw){
     if (type(v)==INT) {
         int c = uint(v);
         NSString* s = read(l);
-		float width = StringWidth(s);
-		if(c=='\t') width = StringWidth(@"    ");
 		//draw:
 		if(c=='\t') {
 			if(draw) DrawString("    "); else Move(StringWidth("    "), 0);
 			return;
 		}
-		GetPen(&pt);
-		if(!draw || pt.y < -FONTSIZE) Move(width, 0);
+		if(!draw || pt.y < -FONTSIZE) Move(StringWidth(s), 0);
         else	DrawString(s);
 		return;
     }
@@ -1116,6 +1113,10 @@ void updateAround(bool erase){
 	//InvalRect(&r);
 //	DoUpdate(currWindow);
 }
+void removeSelected(){
+    if(nowSelected) putinUndobuf(cutSelected());
+	nowSelected = false;
+}
 void HandleTyping0(unichar c){
 	HideCaret();
 	if(c==CR){
@@ -1154,7 +1155,7 @@ void HandleTyping0(unichar c){
 		list l = deleteALetter0();
 		insertFraction(l, nil);
 	} else {
-		if(nowSelected) putinUndobuf(cutSelected());
+		removeSelected();
 		insert(Int(c));
 		if(isWide(c)) halfchar = c;     // 1311 possibly no need
 		else halfchar = 0;
@@ -1348,12 +1349,11 @@ NSString* DoCut(){
     return str;
 }
 
-void insertCString(const char* str){    // was DoPaste. assume UTF16
-    /*list tt = csparse(str, strlen(str));
+void pasteCString(const char* str){    // assumes UTF16
+    list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
-    MoveTo(cursorPosition.x, cursorPosition.y);     */
-    for(const unichar* p=(unichar*)str; *p; p++) HandleTyping(*p);
+    MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
 void setCString(const char* str){   // UTF8
