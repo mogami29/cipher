@@ -681,6 +681,13 @@ static void pushInsertion(){
 static int popInsertion(){
 	return vrInt(pop(&insList));
 }
+void moveIntoNum(list_* fr){
+	pushInsertion();
+    //	ins.pos = 2;
+    //	pushInsertion();
+	insList = cons(Int(1), insList);
+	ins.moveInto(&ul(em0(fr)));
+}
 void moveIntoDenom(list_* fr){
 	pushInsertion();
 //	ins.pos = 2;
@@ -840,6 +847,19 @@ void moveUp(){
 			return;
 		}
 	}
+    obj c = first(*ins.list_point());
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos+1);
+        moveIntoNum((list_*)c);
+        return;
+    }
+	c = peekPrevious();
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos);
+        moveIntoNum((list_*)c);
+        moveToLast();
+        return;
+    }
 	int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(pv == -1) return;
@@ -858,6 +878,19 @@ void moveDown(){
 			return;
 		}
 	}
+	obj c = first(*ins.list_point());
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos+1);
+        moveIntoDenom((list_*)c);
+        return;
+    }
+	c = peekPrevious();
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos);
+        moveIntoDenom((list_*)c);
+        moveToLast();
+        return;
+    }
 	int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(nx==-1) return;
