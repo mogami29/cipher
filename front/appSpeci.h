@@ -42,7 +42,7 @@ void DoUndo();
 NSString* copySelected();
 void DoHide();
 NSString* DoCut();
-void insertCString(const char* str);
+void pasteCString(const char* str);
 void setCString(const char *);
 NSString* serializedString();
 void DoLatex();

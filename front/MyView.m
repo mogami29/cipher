@@ -284,7 +284,7 @@
     [self updateFrameSizeAndDraw];
 }
 
-// from paste board Getting Started
+// from Paste board Getting Started
 - (void) copy:sender {
     NSString *string = copySelected();
     if (string != nil) {
@@ -304,7 +304,9 @@
     if (ok) {
         NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
         NSString *string = [objectsToPaste objectAtIndex:0];
-        [self insertText:string];
+        const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
+        assert(s);    // yen mark results in null pointer
+        pasteCString(s);
     }
     [self updateFrameSizeAndDraw];
 }
@@ -370,9 +372,8 @@
     //NSTimeInterval thisTime = [NSDate timeIntervalSinceReferenceDate];
     cursorOn = !cursorOn;
     //    lastTime = thisTime;
-    //if ([[self window] isKeyWindow])  // NSWindowDidResignKeyNotification notification may be useful too
-    //[self setNeedsDisplay:YES];
-    [self setNeedsDisplayInRect:NSMakeRect(caretPosition.x, caretPosition.y - FONTSIZE, 1, FONTSIZE)];
+    if ([[self window] isKeyWindow])  // NSWindowDidResignKeyNotification notification may be useful too
+        [self setNeedsDisplayInRect:NSMakeRect(caretPosition.x, caretPosition.y - FONTSIZE, 1, FONTSIZE)];
 }
 
 // From TextInputView
@@ -409,6 +410,7 @@
     // insert aString to backingstore and
     //[self insertText:[backingStore string]];
     [self insertText:aString ];
+    removeSelected();
     [backingStore setAttributedString:[[NSAttributedString alloc] initWithString:@"" attributes:dicAttr]];
     [backingStore endEditing];
     
@@ -444,6 +446,7 @@
         [backingStore addAttributes:dicAttr range:markedRange];
     }
     [backingStore endEditing];
+    removeSelected();
     
     // Redisplay
     selectedRange.location = replacementRange.location + newSelection.location; // Just for now, only select the marked text

@@ -144,10 +144,14 @@ void MoveTo(float h, float v){
     curPt.y = v;
 }
 void Line(float h, float v){
-    // Put NSBezierCurve here
-    NSPoint	point0 = {(float)curPt.x, (float)curPt.y};
-    NSPoint	point1 = {(float)curPt.x + h, (float)curPt.y + v};
-    [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    float w = 0.5;
+    NSPoint	point0 = {(float)curPt.x, (int)curPt.y + w/2};
+    NSPoint	point1 = {(float)curPt.x + h, (int)curPt.y + v + w/2};
+    //[NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+    NSBezierPath *path = [NSBezierPath bezierPath];
+    [path moveToPoint:point0];
+    [path lineToPoint:point1];
+    [path stroke];
     curPt.x += h;
     curPt.y += v;
 }
@@ -286,7 +290,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		if(c=='\t') width = StringWidth(@"    ");
 		//draw:
 		if(c=='\t') {
-			DrawString("    ");
+			if(draw) DrawString("    "); else Move(StringWidth("    "), 0);
 			return;
 		}
 		GetPen(&pt);
@@ -689,6 +693,13 @@ static void pushInsertion(){
 static int popInsertion(){
 	return vrInt(pop(&insList));
 }
+void moveIntoNum(list_* fr){
+	pushInsertion();
+    //	ins.pos = 2;
+    //	pushInsertion();
+	insList = cons(Int(1), insList);
+	ins.moveInto(&ul(em0(fr)));
+}
 void moveIntoDenom(list_* fr){
 	pushInsertion();
 //	ins.pos = 2;
@@ -848,6 +859,19 @@ void moveUp(){
 			return;
 		}
 	}
+    obj c = first(*ins.list_point());
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos+1);
+        moveIntoNum((list_*)c);
+        return;
+    }
+	c = peekPrevious();
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos);
+        moveIntoNum((list_*)c);
+        moveToLast();
+        return;
+    }
 	int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(pv == -1) return;
@@ -866,6 +890,19 @@ void moveDown(){
 			return;
 		}
 	}
+	obj c = first(*ins.list_point());
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos+1);
+        moveIntoDenom((list_*)c);
+        return;
+    }
+	c = peekPrevious();
+    if(c->type==FRACTION){
+        ins.setpos(ins.pos);
+        moveIntoDenom((list_*)c);
+        moveToLast();
+        return;
+    }
 	int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(nx==-1) return;
@@ -1108,7 +1145,7 @@ void HandleTyping0(unichar c){
 	}
 
 	static int halfchar = 0;
-	if(c=='~' && ! halfchar){
+	if(c=='^' && ! halfchar){
 		insertSuperScriptAndMoveInto();
 	} else if(c=='_' && ! halfchar){
 		insertSubScriptAndMoveInto();
