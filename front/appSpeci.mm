@@ -1459,8 +1459,8 @@ list putchar(int c, list l){
 	if(c <= 0xFFFF) {
 		l = cons(Int(c), l);
 	} else {
-		l = cons(Int((c >> 10) - 1), l);
-		l = cons(Int(c & 0x03FF), l);
+		l = cons(Int(0xD8 | ((c >> 10) - 0x40)), l);
+		l = cons(Int(0xDC | (c & 0x03FF)), l);
 	}
 	return l;
 }
@@ -1481,6 +1481,20 @@ bool getchar(char**pp, int c){  // UTF8?
 	*pp = next(*pp);
 	return true;
 }
+int readchar2(char* st){    // UTF8
+    if(!(*st & 0x80)) return *st;
+    int c = *st & 0x3F;
+    for(int i = 0x20; c-i >= 0; i = i>>1) c -= i;
+    for(st++; (*st & 0xC0) == 0x80; st++) c = c<<6 | (*st & 0x3F);
+	return c;
+}
+char* next2(char* st){    // UTF8
+    if(!(*st & 0x80)) return st+1;
+//    int c = *st & 0x3F;
+//    for(int i = 0x20; c-i >= 0; i = i>>1) c -= i;
+    for(st++; (*st & 0xC0) == 0x80; st++);
+	return st;
+}
 list csparse0(){
 	list l = nil;
 	int bracelevel = 0;
@@ -1500,11 +1514,11 @@ list csparse0(){
 			list de = csparen();
 			l = cons(render(FRACTION, list2(List2v(nu), List2v(de))) ,l);
 		} else {
-			int c = readchar(clp);
+			int c = readchar2(clp);
 			if( c =='{' ) bracelevel++;
 			if( c =='}' ) {bracelevel--; if(bracelevel < 0) break;}
 			l = putchar(c, l);
-			clp = next(clp);
+			clp = next2(clp);
 		}
 	}
 	return reverse(l);
