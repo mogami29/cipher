@@ -181,10 +181,28 @@ void DrawString(const char * str){
     curPt.x += w;
 }
 
+//the lowest 2 bits
+// 00: others
+// 01: direct integer
+// 10: not used
+// 11: a character
+#define dVal	3	// mask
+#define idInt	1
+#define idStr	2
+//#define idChar	3
+inline obj dInt(long i){return (obj)((i<<2)+1);}
+inline long rInt(obj v){return (long)v>>2;}
+/*ValueType typeD(obj v){
+    if(((long)v & dVal) == 0) return v->type;
+    else return 0;
+}
+#define type typeD
+*/
+
 void drawFraction(list_* f, bool draw){
 	NSPoint pt;
 	GetPen(&pt);
-	assert(f->type==FRACTION);
+	assert(type(f)==FRACTION);
 	float numerWidth = getWidth(em0(f));
 	float denomWidth = getWidth(em1(f));
 	float width = 2 + larger(numerWidth, denomWidth) +2;
@@ -219,18 +237,6 @@ void drawSubScript(obj v, bool draw){
 // CRは行末に付属すると考える。
 static bool crossed;
 
-//the lowest 2 bits
-// 00: others
-// 01: direct integer
-// 10: not used
-// 11: a character
-#define dVal	3	// mask
-#define idInt	1
-#define idStr	2
-//#define idChar	3
-inline obj dInt(long i){return (obj)((i<<2)+1);}
-inline long rInt(obj v){return (long)v>>2;}
-//
 obj read(list& l){  // experimental. not in use still.
 	obj v = first(l);
     if (type(v)==INT) {
@@ -238,7 +244,7 @@ obj read(list& l){  // experimental. not in use still.
 		int c = uint(v);
 		if(c&0x80 && c<0x100){
             if(! rest(l)) return NULL;//2 byte文字が1byteずつ挿入されるから
-            if(second(l)->type != INT) assert(0);
+            if(type(second(l)) != INT) assert(0);
             unsigned short s;
             c = (c<<8) + uint(second(l));
         }
@@ -280,7 +286,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 		buf[1] = NULL;
 		if(c&0x80 && c<0x100){
             if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
-            if(second(l)->type != INT) return;
+            if(type(second(l)) != INT) return;
             buf[1] = uint(second(l));
             buf[2] = NULL;
         } else if (c>=0x100) assert(0);
@@ -332,7 +338,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 
 void step(list& l, int& pos){
     obj v = first(l);
-    if(type(v)==INT && uint(v)&0x80 && uint(v)<0x100 && rest(l) && second(l)->type==INT){
+    if(type(v)==INT && uint(v)&0x80 && uint(v)<0x100 && rest(l) && type(second(l))==INT){
         pos++; l=rest(l);
     }
     pos++, l=rest(l);
@@ -556,7 +562,7 @@ void drawObj(obj line){		//set cursorPosition at the same time
 		showPlot(line);
 		return;
 	}
-	assert(line->type==LIST);
+	assert(type(line)==LIST);
 	drawLine(&ul(line), true);
 }
 
@@ -614,7 +620,7 @@ int findPreviousLine(){//returns -1 if none
 	else curr_pos = ins.pos;
 	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++) 
-		if(first(l)->type==INT && uint(first(l))==CR) {
+		if(type(first(l))==INT && uint(first(l))==CR) {
 			pp = p;
 			p = i+1;
 		}
@@ -626,7 +632,7 @@ int findBeginOfThisLine(){
 	else curr_pos = ins.pos;
 	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++)
-		if(first(l)->type==INT && uint(first(l))==CR) {
+		if(type(first(l))==INT && uint(first(l))==CR) {
 			p = i+1;
 		}
 	return p;
@@ -642,7 +648,7 @@ list deleteALetter0(){
 }
 static void putinUndobuf(list l){
 	if(!undobuf) undobuf = (obj)create(tIns, phi());
-	else if(undobuf->type!=tIns){
+	else if(type(undobuf)!=tIns){
 		release(undobuf);
 		undobuf = (obj)create(tIns, phi());
 	}
@@ -657,7 +663,7 @@ static int peekPreviousLetter(){	// not good for 2-bytes
 	if(ins.pos==0) return NUL;
 	int p = findPreviousLetter();
 	obj vp = first(rest(*ins.curstr, p));
-	if(vp->type!=INT) return NUL;
+	if(type(vp)!=INT) return NUL;
 	return uint(vp);
 }
 inline void insert0(obj v){
@@ -668,7 +674,7 @@ inline void insert0(obj v){
 void insert(obj v){
 	insert0(v);
 	if(!undobuf) undobuf = create(tDel, 1);
-	else if(undobuf && undobuf->type==tDel){
+	else if(undobuf && type(undobuf)==tDel){
 		(uint(undobuf))++;
 	} else {
 		release(undobuf);
@@ -703,7 +709,7 @@ void insertFraction(list num, list denom){
 list* curr_str(list l){
 	if(! l) return &line;
 	obj v = first(rest(*curr_str(rest(l)), uint(first(l))-1));
-	assert(v->type==FRACTION || v->type==SubScript || v->type==SuperScript || v->type==LIST);
+	assert(type(v)==FRACTION || type(v)==SubScript || type(v)==SuperScript || type(v)==LIST);
 	return &ul(v);
 }
 list ins_list(list*scan, list*cstr){	// finding insList from curstr
@@ -711,7 +717,7 @@ list ins_list(list*scan, list*cstr){	// finding insList from curstr
 	list l = *scan;
 	for(int i=0; l; l=rest(l), i++) {
 		obj v=first(l);
-		if(v->type==INT) continue;
+		if(type(v)==INT) continue;
 		if( &ul(v)==cstr) return list1(Int(i+1));
 		else if (list ll = ins_list(&ul(v), cstr)) return merge(ll, list1(Int(i+1)));
 	}
@@ -722,7 +728,7 @@ list ins_list(list*scan, list*cstr){	// finding insList from curstr
 	List l = *scan;
 	for(; l; l=rest(l)) {
 		obj v=first(l);
-		if(v->type==INT) continue;
+		if(type(v)==INT) continue;
 		if( &ul(v)==ins.curstr) return scan;
 		if(list*ll = upper_str(&ul(v))) return ll;
 	}
@@ -735,7 +741,7 @@ static list isInFracRecur(){
 	for(;; l=rest(l)){
 		if(! rest(l)) return nil;
 		obj v = first(rest(*curr_str(rest(rest(l))), uint(second(l))-1));
-		if(v->type==FRACTION) return l;
+		if(type(v)==FRACTION) return l;
 	}
 }
 static bool isInFrac(){
@@ -751,7 +757,7 @@ void moveToUpperLevel(){
 }
 int getNLine(list l){//line数-1,CRの数を数える
 	int i=0;
-	for(; l; l=rest(l)) if(first(l)->type==INT && uint(first(l))==CR) i++;
+	for(; l; l=rest(l)) if(type(first(l))==INT && uint(first(l))==CR) i++;
 	return i;
 }
 void insertSuperScriptAndMoveInto(){
@@ -786,11 +792,11 @@ void moveLeft(){
 	}
 	if(ins.pos==0) return;
 	obj c = peekPrevious();
-	if(c->type==SuperScript || c->type==SubScript || c->type==tShow){
+	if(type(c)==SuperScript || type(c)==SubScript || type(c)==tShow){
 		pushInsertion();
 		ins.moveRightmost(&ul(c));
 		return;
-	} if(c->type==FRACTION){
+	} if(type(c)==FRACTION){
 		moveIntoDenom((list_*)c);
 		moveToLast();
 		return;
@@ -804,12 +810,12 @@ void moveRight(){
 	}
 	if(isAtLast()) return;
 	obj c = first(*ins.list_point());
-	if(c->type==SuperScript || c->type==SubScript || c->type==tShow){
+	if(type(c)==SuperScript || type(c)==SubScript || type(c)==tShow){
 		ins.setpos(ins.pos+1);
 		pushInsertion();
 		ins.moveInto(&ul(c));
 		return;
-	} if(c->type==FRACTION){
+	} if(type(c)==FRACTION){
 		ins.setpos(ins.pos+1);
 		moveIntoDenom((list_*)c);
 		return;
@@ -848,13 +854,13 @@ void moveUp(){
 		}
 	}
     obj c = first(*ins.list_point());
-    if(c->type==FRACTION){
+    if(type(c)==FRACTION){
         ins.setpos(ins.pos+1);
         moveIntoNum((list_*)c);
         return;
     }
 	c = peekPrevious();
-    if(c->type==FRACTION){
+    if(type(c)==FRACTION){
         ins.setpos(ins.pos);
         moveIntoNum((list_*)c);
         moveToLast();
@@ -879,13 +885,13 @@ void moveDown(){
 		}
 	}
 	obj c = first(*ins.list_point());
-    if(c->type==FRACTION){
+    if(type(c)==FRACTION){
         ins.setpos(ins.pos+1);
         moveIntoDenom((list_*)c);
         return;
     }
 	c = peekPrevious();
-    if(c->type==FRACTION){
+    if(type(c)==FRACTION){
         ins.setpos(ins.pos);
         moveIntoDenom((list_*)c);
         moveToLast();
@@ -1070,7 +1076,7 @@ void print_str(char*s){
 int imbalanced(list line){
 	int paren=0,brace=0;
 	for(list l=line; l; l=rest(l)){
-		switch(first(l)->type){
+		switch(type(first(l))){
         case INT:{
 			char c=uint(first(l));
 			if(c=='(') paren++;
@@ -1506,7 +1512,7 @@ list csparse(const char* str, size_t len){
 	return csparse0();
 }
 list CStringToLine(obj str){
-	assert(str->type==STRING);
+	assert(type(str)==STRING);
 	return csparse(ustr(str), strlen(ustr(str)));
 }
 
