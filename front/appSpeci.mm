@@ -16,6 +16,7 @@ static int findPreviousLine();
 static list CStringToLine(obj str);
 static void serialize(string*rs, list l, list end);
 static void win_normalize();
+char* listToCString(list l);
 //-----
 inline int_* create(ValueType t, int i){
 	int_* r = (int_*)alloc();
@@ -193,10 +194,20 @@ void DrawString(const char * str){
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
 /*ValueType typeD(obj v){
-    if(((long)v & dVal) == 0) return v->type;
-    else return 0;
+    if(((long)v & dVal) == 0) return type(v);
+    else return (ValuType)-((long)v & dVal);
 }
 #define type typeD
+ obj retainD(obj v){
+ if(((long)v & dVal) == 0) return retain(v);
+ else return v;
+ }
+ #define retain retainD
+ int vrInt(obj v){
+ if(((long)v & dVal) == 0) return vrInt(v);
+ else return (long)v >>2;
+ }
+ #define vrInt vrIntD
 */
 
 void drawFraction(list_* f, bool draw){
@@ -1029,7 +1040,7 @@ void addStringToText(char* string){
 /*
     char* str = copyString(string);
     assert(((long)str & dVal)==0);
-    insert((obj)((long)str & idStr));
+    insert((obj)((long)str | idStr));
     cacheForUnitTest = ustr(str);*/
 }
 
@@ -1178,7 +1189,7 @@ Interpreter	interpreter;
 void handleCR(){
 //	addLineToText(List2v(line));
 	//baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
-	obj tl = listToCString(rest(line, findBeginOfThisLine()));
+	obj tl = val(listToCString(rest(line, findBeginOfThisLine())));
 	scrollBy(0);	// newline
     if(setjmp(jmpEnv)==0){	//try
         interpret(interpreter, ustr(tl));
@@ -1363,9 +1374,9 @@ void setCString(const char* str){
 }
 
 NSString* serializedString(){
-	obj st = listToCString(line);
-    NSString* str = [[NSString alloc] initWithCString:ustr(st) encoding:NSShiftJISStringEncoding];
-    release(st);
+	char* st = listToCString(line);
+    NSString* str = [[NSString alloc] initWithCString:st encoding:NSShiftJISStringEncoding];
+    free(st);
     return str;
 }
 
@@ -1385,9 +1396,9 @@ obj edit(obj fn){	// open edit save
 	while(! getKey(shiftCR)) ;
 	addLineToText(List2v(line));
 
-	obj st = listToCString(line);
-	//write(ustr(st), strlen(ustr(st))+1, fn);    // restore needed 131014
-	release(st);
+	char* st = listToCString(line);
+	//write(st, strlen(st)+1, fn);    // restore needed 131014
+	free(st);
 	return nil;
 }
 
@@ -1401,7 +1412,7 @@ obj editline(obj v){
 	addLineToText(List2v(line));
 	//baseLine = startOfThisLine-viewPosition;      // 131118 in question
 	scrollBy(FONTSIZE*2+getNLine(line)*LINEHEIGHT);	// newline
-	obj lin = listToCString(line);
+	obj lin = val(listToCString(line));
 	newLine();
 	return lin;
 }
@@ -1442,10 +1453,10 @@ static void serialize(string*rs, list l, list end){
 	}
 }
 
-obj listToCString(list l){
+char* listToCString(list l){
 	string rs = nullstr();
 	serialize(&rs, l, nil);
-	return val(rs.s);
+	return rs.s;
 }
 
 static char* clp;	//
