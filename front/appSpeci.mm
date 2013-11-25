@@ -254,18 +254,23 @@ void drawSubScript(obj v, bool draw){
 // CRは行末に付属すると考える。
 static bool crossed;
 
-obj read(list& l){  // experimental. not in use still.
+bool isWide(unichar c){return (c & 0xF800) == 0xD8;}
+
+NSString* read(list& l){  // experimental. not in use still.
 	obj v = first(l);
-    if (type(v)==INT) {
-		// read
-		int c = uint(v);
-		if(c&0x80 && c<0x100){
-            if(! rest(l)) return NULL;//2 byte文字が1byteずつ挿入されるから
-            if(type(second(l)) != INT) assert(0);
-            unsigned short s;
-            c = (c<<8) + uint(second(l));
-        }
-        return dInt(c);
+    assert(type(v)==INT);
+    unichar buf[3];
+    // read
+    int c = uint(v);
+    int len = 1;
+    buf[0] = c;
+    //buf[1] = NULL;
+    if(isWide(c)){
+        if(! rest(l)) return nil;
+        if(second(l)->type != INT) return nil;
+        buf[1] = uint(second(l));
+        //buf[2] = NULL;
+        len = 2;
     }
     return [[NSString alloc] initWithCharacters:buf length:len];
 }
@@ -296,17 +301,8 @@ void drawACharOrABox(list& l, int& pos, bool draw){
      return;
      }*/
     if (type(v)==INT) {
-		char buf[8];
-		// read
-		int c = uint(v);
-		buf[0] = c;
-		buf[1] = NULL;
-		if(c&0x80 && c<0x100){
-            if(! rest(l)) return;//2 byte文字が1byteずつ挿入されるから
-            if(type(second(l)) != INT) return;
-            buf[1] = uint(second(l));
-            buf[2] = NULL;
-        } else if (c>=0x100) assert(0);
+        int c = uint(v);
+        NSString* s = read(l);
 		//draw:
 		if(c=='\t') {
 			if(draw) DrawString("    "); else Move(StringWidth("    "), 0);
@@ -355,7 +351,7 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 
 void step(list& l, int& pos){
     obj v = first(l);
-    if(type(v)==INT && uint(v)&0x80 && uint(v)<0x100 && rest(l) && type(second(l))==INT){
+    if(type(v)==INT && isWide(uint(v)) && rest(l) && type(second(l))==INT){
         pos++; l=rest(l);
     }
     pos++, l=rest(l);
@@ -610,7 +606,7 @@ void Redraw(NSRect rect){
     drawingTheEditingLine = true;
 	drawLine(&line, true);
     drawingTheEditingLine = false;
-	viewHeight = larger(startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line), cursorPosition.y) + 3*FONTSIZE;// too inacurate
+	viewHeight = larger(viewHeight, larger(startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line), cursorPosition.y) + 3*FONTSIZE);// too inacurate
     /*if(caretState){
      MoveTo(cursorPosition.x, cursorPosition.y);
      Line(0,-FONTSIZE);
@@ -800,6 +796,11 @@ void insertSubScriptAndMoveInto(){
 obj peekPrevious(){
     return first(rest(*(ins.curstr), ins.pos-1));
 }
+obj peekNext(){
+    list* l =ins.list_point();
+    if(l) return first(*l);
+    else return nil;
+}
 void moveToLast(){
     ins.setpos(length(*ins.curstr));
 }
@@ -877,8 +878,8 @@ void moveUp(){
 			return;
 		}
 	}
-    obj c = first(*ins.list_point());
-    if(type(c)==FRACTION){
+    obj c = peekNext();
+    if(c && type(c)==FRACTION){
         ins.setpos(ins.pos+1);
         moveIntoNum((list_*)c);
         return;
@@ -908,7 +909,7 @@ void moveDown(){
 			return;
 		}
 	}
-	obj c = first(*ins.list_point());
+	obj c = peekNext();
     if(type(c)==FRACTION){
         ins.setpos(ins.pos+1);
         moveIntoDenom((list_*)c);
@@ -1387,7 +1388,7 @@ void setCString(const char* str){   // UTF8
 
 NSString* serializedString(){
 	char* st = listToCString(line);
-    NSString* str = [[NSString alloc] initWithCString:st encoding:NSShiftJISStringEncoding];
+    NSString* str = [[NSString alloc] initWithCString:st encoding:NSUTF8StringEncoding];
     free(st);
     return str;
 }
