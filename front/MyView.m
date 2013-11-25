@@ -142,9 +142,9 @@
 - (void) insertText:(id)string
 {
     //[line appendString: string];
-    const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
-    if (!s) return;    // yen mark results in null pointer
-    for(const char* p=s; *p; p++) HandleTyping(*p);
+    const char * s = [string cStringUsingEncoding:NSUTF16LittleEndianStringEncoding];
+    if (!s) return;
+    for(const unichar* p = (unichar*)s; *p; p++) HandleTyping(*p);
     // need update of framesize here
 }
 
@@ -262,7 +262,7 @@
 
 - (void)setString:(NSString *)string
 {
-    setCString([string cStringUsingEncoding:NSShiftJISStringEncoding]);
+    setCString([string cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
 - (void) undo:sender {
@@ -305,7 +305,7 @@
     if (ok) {
         NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
         NSString *string = [objectsToPaste objectAtIndex:0];
-        const char * s = [string cStringUsingEncoding:NSShiftJISStringEncoding];
+        const char * s = [string cStringUsingEncoding:NSUTF8StringEncoding];
         assert(s);    // yen mark results in null pointer
         pasteCString(s);
     }

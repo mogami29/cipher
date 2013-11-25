@@ -60,7 +60,7 @@
 {
     // Insert code here to write your document to data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning nil.
     if ([typeName isEqualToString:@"PlainText"]){
-        NSData *data = [[myView string] dataUsingEncoding:NSShiftJISStringEncoding];
+        NSData *data = [[myView string] dataUsingEncoding:NSShiftJISStringEncoding allowLossyConversion:YES];
         if (data) return data;
         // else shouldBeTrouble With Encoding
     }

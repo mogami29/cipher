@@ -166,20 +166,26 @@ void TextSize(float s){
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
 }
-float StringWidth(const char * str){    // takes pascal string
-    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    assert(s1);
+float StringWidth(NSString* s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     CGFloat w = [attStr size].width;
     return w;
 }
-void DrawString(const char * str){
-    NSString* s1 = [[NSString alloc] initWithCString:str encoding:NSShiftJISStringEncoding];
-    assert(s1);
+void DrawString(NSString *s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
     curPt.x += w;
+}
+float StringWidth(const char * str){
+    NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
+    assert(s1);
+    return StringWidth(s1);
+}
+void DrawString(const char * str){
+    NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
+    assert(s1);
+    DrawString(s1);
 }
 
 //the lowest 2 bits
@@ -261,7 +267,7 @@ obj read(list& l){  // experimental. not in use still.
         }
         return dInt(c);
     }
-    return v;
+    return [[NSString alloc] initWithCharacters:buf length:len];
 }
 void toString(char* buf, int c){
     buf[0] = c;
@@ -306,8 +312,8 @@ void drawACharOrABox(list& l, int& pos, bool draw){
 			if(draw) DrawString("    "); else Move(StringWidth("    "), 0);
 			return;
 		}
-		if(!draw || pt.y < -FONTSIZE) Move(StringWidth(buf), 0);
-        else	DrawString(buf);
+		if(!draw || pt.y < -FONTSIZE) Move(StringWidth(s), 0);
+        else	DrawString(s);
 		return;
     }
     drawList = cons(Int(pos+1), drawList);
@@ -353,6 +359,13 @@ void step(list& l, int& pos){
         pos++; l=rest(l);
     }
     pos++, l=rest(l);
+}
+void step(list& l){
+    obj v = first(l);
+    if(type(v)==INT && isWide(uint(v)) && rest(l) && second(l)->type==INT){
+        l=rest(l);
+    }
+    l=rest(l);
 }
 
 inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
@@ -619,7 +632,7 @@ int findPreviousLetter(){
 	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
 		p = i;
-		if(type(first(l))==INT && (uint(first(l))&0x80)) {
+		if(type(first(l))==INT && isWide(uint(first(l)))) {
 			l=rest(l); i++;
 		}
 	}
@@ -831,7 +844,7 @@ void moveRight(){
 		moveIntoDenom((list_*)c);
 		return;
 	}
-	if(type(c)==INT && (uint(c)&0x80)) ins.setpos(ins.pos+1);
+	if(type(c)==INT && isWide(uint(c))) ins.setpos(ins.pos+1);
 	//if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
 	ins.setpos(ins.pos+1);
 }
@@ -1125,7 +1138,7 @@ void removeSelected(){
     if(nowSelected) putinUndobuf(cutSelected());
 	nowSelected = false;
 }
-void HandleTyping0(char c){
+void HandleTyping0(unichar c){
 	HideCaret();
 	if(c==CR){
 		if(! insList){
@@ -1163,10 +1176,9 @@ void HandleTyping0(char c){
 		list l = deleteALetter0();
 		insertFraction(l, nil);
 	} else {
-        removeSelected();
-//		assert(c | 0xff == -1);
-		insert(Int(c & 0xff));
-		if(c & 0x80) halfchar = c;
+		removeSelected();
+		insert(Int(c));
+		if(isWide(c)) halfchar = c;     // 1311 possibly no need
 		else halfchar = 0;
 	}
 	
@@ -1206,7 +1218,7 @@ void setMode(CRmode m){
     mode = m;
 }
 
-void HandleTyping(char c){
+void HandleTyping(unichar c){
 	if(mode==session && c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
@@ -1237,7 +1249,7 @@ void highlightSelected(){
     [path fill];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
 }
-void HandleShifted(char c){
+void HandleShifted(unichar c){
     if(!nowSelected){
         beginOfSel = ins;	//for text selection
         //release(beginSelList);       possibly no need 131018
@@ -1339,7 +1351,7 @@ NSString* copySelected(){
 
 	string rs = nullstr();
 	serialize(&rs, rest(*ins.curstr,b), rest(*ins.curstr,e));
-    NSString* str = [[NSString alloc] initWithCString:rs.s encoding:NSShiftJISStringEncoding];
+    NSString* str = [[NSString alloc] initWithCString:rs.s encoding:NSUTF8StringEncoding];
 	freestr(&rs);
     return str;
 }
@@ -1358,14 +1370,14 @@ NSString* DoCut(){
     return str;
 }
 
-void pasteCString(const char* str){    // was DoPaste
+void pasteCString(const char* str){    // assumes UTF16
     list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
-void setCString(const char* str){
+void setCString(const char* str){   // UTF8
 	newLine();
 	line = csparse(str, strlen(str));
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
@@ -1418,16 +1430,17 @@ obj editline(obj v){
 }
 
 static void append(string*rs, const char*s){
-	for(; *s; s++) appendS(rs, *s);
+	for(; *s; s++) appendS(rs, *(unsigned char*)s);
 }
 
 static void serialize(string*rs, list l, list end){
-	for(; l != end; l=rest(l)){
+	for(; l != end; step(l)){
 		obj v = first(l);
 		switch(type(v)){
-		case INT:
-			appendS(rs, uint(v));
-			break;
+        case INT: {
+            NSString* s = read(l);
+            append(rs, [s UTF8String]);
+            break; }
 		case SuperScript:
 			appendS(rs, '^');
 			appendS(rs, '{');
@@ -1464,11 +1477,11 @@ static char* clpe;	// end
 list csparse0();
 
 list putchar(int c, list l){
-	if((c&0xff00)==0) {
+	if(c <= 0xFFFF) {
 		l = cons(Int(c), l);
 	} else {
-		l = cons(Int(c >> 8), l);
-		l = cons(Int(c & 0xff), l);
+		l = cons(Int(0xD8 | ((c >> 10) - 0x40)), l);
+		l = cons(Int(0xDC | (c & 0x03FF)), l);
 	}
 	return l;
 }
@@ -1484,10 +1497,24 @@ list csparen(){
 	else clp++;
 	return l;
 }
-bool getchar(char**pp, int c){
+bool getchar(char**pp, int c){  // UTF8?
 	if(readchar(*pp)!=c) return false;
 	*pp = next(*pp);
 	return true;
+}
+int readchar2(char* st){    // UTF8
+    if(!(*st & 0x80)) return *st;
+    int c = *st & 0x3F;
+    for(int i = 0x20; c-i >= 0; i = i>>1) c -= i;
+    for(st++; (*st & 0xC0) == 0x80; st++) c = c<<6 | (*st & 0x3F);
+	return c;
+}
+char* next2(char* st){    // UTF8
+    if(!(*st & 0x80)) return st+1;
+//    int c = *st & 0x3F;
+//    for(int i = 0x20; c-i >= 0; i = i>>1) c -= i;
+    for(st++; (*st & 0xC0) == 0x80; st++);
+	return st;
 }
 list csparse0(){
 	list l = nil;
@@ -1508,16 +1535,16 @@ list csparse0(){
 			list de = csparen();
 			l = cons(render(FRACTION, list2(List2v(nu), List2v(de))) ,l);
 		} else {
-			int c = readchar(clp);
+			int c = readchar2(clp);
 			if( c =='{' ) bracelevel++;
 			if( c =='}' ) {bracelevel--; if(bracelevel < 0) break;}
 			l = putchar(c, l);
-			clp = next(clp);
+			clp = next2(clp);
 		}
 	}
 	return reverse(l);
 }
-list csparse(const char* str, size_t len){
+list csparse(const char* str, size_t len){  //UTF8
 	clp = (char*)str;
 	clpe = clp + len;
 	return csparse0();
