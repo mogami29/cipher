@@ -210,6 +210,20 @@ obj retainD(obj v){
     else return v;
 }
 //#define retain retainD
+/*void releaseD(obj v){
+    if((long)v & dVal) return;
+    else release(v);
+}
+void releaseD(L p){
+	L next;
+	for( ; p; p=next){
+		next = rest(p);
+		if((p->refcount)-1) {--(p->refcount); return;}
+		releaseD(p->a);
+		node_free(p);
+	}
+}
+#define release releaseD*/
 long vrIntD(obj v){
     if(((long)v & dVal) == 0) return vrInt(v);
     else return (long)v >>2;
@@ -290,18 +304,10 @@ void toString(char* buf, int c){
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
-    if(((long)v&dVal)==idStr) {
+    /*if(((long)v&dVal)==idStr) {
         char* s = ((char*)v) -idStr;
         DrawString(s);
         return;
-    }
-    /* v = read(l);
-     if((long)v&dVal) {
-     assert(((long)v&dVal)==idInt);
-     unichar c = rInt(v);
-     NSString* s = [[NSString alloc] initWithCharacters:&c length:1];
-     DrawString(s);
-     return;
      }*/
     if (type(v)==INT) {
         int c = uint(v);
