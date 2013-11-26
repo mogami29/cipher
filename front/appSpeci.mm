@@ -199,22 +199,26 @@ void DrawString(const char * str){
 //#define idChar	3
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
-/*ValueType typeD(obj v){
+ValueType typeD(obj v){
     if(((long)v & dVal) == 0) return type(v);
-    else return (ValuType)-((long)v & dVal);
+    if(((long)v & dVal) == idInt) return INT;
+    return (ValueType)-((long)v & dVal);
 }
 #define type typeD
- obj retainD(obj v){
- if(((long)v & dVal) == 0) return retain(v);
- else return v;
- }
- #define retain retainD
- int vrInt(obj v){
- if(((long)v & dVal) == 0) return vrInt(v);
- else return (long)v >>2;
- }
- #define vrInt vrIntD
-*/
+obj retainD(obj v){
+    if(((long)v & dVal) == 0) return retain(v);
+    else return v;
+}
+//#define retain retainD
+long vrIntD(obj v){
+    if(((long)v & dVal) == 0) return vrInt(v);
+    else return (long)v >>2;
+}
+#define vrInt vrIntD
+
+#define uint(v) ((long)v & dVal ? rInt(v) : ((int_*)v)->intv)
+//#define Int dInt
+//*/
 
 void drawFraction(list_* f, bool draw){
 	NSPoint pt;
@@ -267,7 +271,7 @@ NSString* read(list& l){  // experimental. not in use still.
     //buf[1] = NULL;
     if(isWide(c)){
         if(! rest(l)) return nil;
-        if(second(l)->type != INT) return nil;
+        if(type(second(l)) != INT) return nil;
         buf[1] = uint(second(l));
         //buf[2] = NULL;
         len = 2;
@@ -286,16 +290,15 @@ void toString(char* buf, int c){
 void drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
-/*    if((long)v&dVal) {
-        assert(((long)v&dVal)==idStr);
+    if(((long)v&dVal)==idStr) {
         char* s = ((char*)v) -idStr;
         DrawString(s);
         return;
-    }*/
+    }
     /* v = read(l);
      if((long)v&dVal) {
      assert(((long)v&dVal)==idInt);
-     uint c = rInt(v);
+     unichar c = rInt(v);
      NSString* s = [[NSString alloc] initWithCharacters:&c length:1];
      DrawString(s);
      return;
@@ -358,7 +361,7 @@ void step(list& l, int& pos){
 }
 void step(list& l){
     obj v = first(l);
-    if(type(v)==INT && isWide(uint(v)) && rest(l) && second(l)->type==INT){
+    if(type(v)==INT && isWide(uint(v)) && rest(l) && type(second(l))==INT){
         l=rest(l);
     }
     l=rest(l);
@@ -695,7 +698,7 @@ void insert(obj v){
 	insert0(v);
 	if(!undobuf) undobuf = create(tDel, 1);
 	else if(undobuf && type(undobuf)==tDel){
-		(uint(undobuf))++;
+		(((int_*)undobuf)->intv)++;
 	} else {
 		release(undobuf);
 		undobuf = create(tDel, 1);
@@ -1055,7 +1058,7 @@ void addStringToText(char* string){
     char* str = copyString(string);
     assert(((long)str & dVal)==0);
     insert((obj)((long)str | idStr));
-    cacheForUnitTest = ustr(str);*/
+    cacheForUnitTest = ustr(str);//*/
 }
 
 #include <stdarg.h>
@@ -1479,7 +1482,7 @@ list csparse0();
 
 list putchar(int c, list l){
 	if(c <= 0xFFFF) {
-		l = cons(Int(c), l);
+		l = cons(dInt(c), l);
 	} else {
 		l = cons(Int(0xD8 | ((c >> 10) - 0x40)), l);
 		l = cons(Int(0xDC | (c & 0x03FF)), l);
