@@ -60,6 +60,7 @@
     theStr = backingStore;
     caller = self;
     Redraw(rect);
+    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
 }
 
 - (void) drawCaretAt:(NSPoint)pt

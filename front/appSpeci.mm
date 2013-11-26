@@ -507,6 +507,8 @@ int find(list l, list line){
     for (; line; line=rest(line), p++) if(l==line) break;
     return p;
 }
+int viewHeight = 100;
+static int getNLine(list line);
 NSRect updateRect;
 void drawLine(list*line, bool draw){
 	list l = *line;
@@ -554,6 +556,7 @@ void drawLine(list*line, bool draw){
     }
     //vv += -windowHeight + FONTSIZE;
     MoveTo(LEFTMARGIN, vv);
+    viewHeight = larger(viewHeight, vv + FONTSIZE + LINEHEIGHT*getNLine(l));
 }
 
 float getWidth(obj str){
@@ -589,8 +592,6 @@ void drawObj(obj line){		//set cursorPosition at the same time
 	drawLine(&ul(line), true);
 }
 
-int viewHeight = 100;
-static int getNLine(list line);
 static void highlightSelected();
 
 void Redraw(NSRect rect){
