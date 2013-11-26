@@ -562,7 +562,8 @@ void drawLine(list*line, bool draw){
     }
     //vv += -windowHeight + FONTSIZE;
     MoveTo(LEFTMARGIN, vv);
-    viewHeight = larger(viewHeight, vv + FONTSIZE + LINEHEIGHT*getNLine(l));
+    viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(l));
+    if(!l) viewHeight = vv + FONTSIZE*3;
 }
 
 float getWidth(obj str){
@@ -808,7 +809,7 @@ obj peekPrevious(){
 }
 obj peekNext(){
     list* l =ins.list_point();
-    if(l) return first(*l);
+    if(*l) return first(*l);
     else return nil;
 }
 void moveToLast(){

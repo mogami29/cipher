@@ -267,7 +267,6 @@
 }
 
 - (void) undo:sender {
-    NSLog(@"undo");
     DoUndo();
 }
 

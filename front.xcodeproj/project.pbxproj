@@ -47,8 +47,8 @@
 		0527D948181C808200E5B8E0 /* tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenizer.cpp; path = "../cipher-shell/cipher-shell/tokenizer.cpp"; sourceTree = "<group>"; };
 		059802FE18095BB1000E9157 /* ciph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ciph.h; path = "../../cipher-shell/cipher-shell/ciph.h"; sourceTree = "<group>"; };
 		0598030018095CE9000E9157 /* value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = value.h; path = "../cipher-shell/cipher-shell/value.h"; sourceTree = "<group>"; };
-		0598030218095D4C000E9157 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = "../../cipher-shell/cipher-shell/list.cpp"; sourceTree = "<group>"; };
-		0598030318095D4C000E9157 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = "../../cipher-shell/cipher-shell/list.h"; sourceTree = "<group>"; };
+		0598030218095D4C000E9157 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = "../cipher-shell/cipher-shell/list.cpp"; sourceTree = "<group>"; };
+		0598030318095D4C000E9157 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = "../cipher-shell/cipher-shell/list.h"; sourceTree = "<group>"; };
 		059803051809E89E000E9157 /* appSpeci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appSpeci.h; sourceTree = "<group>"; };
 		0598486217EE906F008EEB70 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
 		0598486317EE906F008EEB70 /* MyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyView.m; sourceTree = "<group>"; };
@@ -116,6 +116,8 @@
 				05A5A2F9182723DC00F813F4 /* lib.cpp */,
 				0598030018095CE9000E9157 /* value.h */,
 				05FF81C4180B7DF6002B4ACF /* value.cpp */,
+				0598030318095D4C000E9157 /* list.h */,
+				0598030218095D4C000E9157 /* list.cpp */,
 				05A5A30218272E4900F813F4 /* vector.h */,
 				05A21B7818109E5900F512A6 /* vector.cpp */,
 				05A5A2FE18272E2D00F813F4 /* matrix.cpp */,
@@ -173,8 +175,6 @@
 				059802FE18095BB1000E9157 /* ciph.h */,
 				059803051809E89E000E9157 /* appSpeci.h */,
 				051F9E061809FCB600289510 /* appSpeci.mm */,
-				0598030318095D4C000E9157 /* list.h */,
-				0598030218095D4C000E9157 /* list.cpp */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
