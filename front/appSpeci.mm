@@ -1338,12 +1338,12 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 //	EndUpdate(targetWindow);
 }*/
 void DoUndo(){
-	obj doit=retain(undobuf);
+	obj doit=retainD(undobuf);
 	if(type(doit)==tDel){
 		int n = uint(doit);
 		for(int i=0; i<n; i++) deleteALetter();
 	} else if(type(doit)==tIns){
-		for(list l=ul(doit); l; l=rest(l)) insert(retain(first(l)));
+		for(list l=ul(doit); l; l=rest(l)) insert(retainD(first(l)));
 	} else if(type(doit)==tMove) {
 		release(insList);
 		insList = rest(ul(doit));
@@ -1384,7 +1384,7 @@ NSString* DoCut(){
 
 void pasteCString(const char* str){    // assumes UTF16
     list tt = csparse(str, strlen(str));
-    for(list l=tt; l; l=rest(l)) insert(retain(first(l)));
+    for(list l=tt; l; l=rest(l)) insert(retainD(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
 }
