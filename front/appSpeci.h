@@ -7,13 +7,13 @@
 #define colSep 30
 #define nCols 1
 #define viewWidth 500
-extern WindowPtr currWindow;
+/*extern WindowPtr currWindow;
 extern int viewHeight;
 extern float baseLine;
 extern NSMutableAttributedString* theStr;
 #import "MyView.h"
 extern MyView* caller;
-extern bool nowSelected;
+extern bool nowSelected;*/
 
 void draw_integer(long i);
 void drawSeparator(int length);
@@ -29,7 +29,7 @@ typedef enum {
 #if __cplusplus
 extern "C" {
 #endif
-void setMode(CRmode m);
+/*void setMode(CRmode m);
 void addStringToText(char* string);
 void initLines();
 void newLine();
@@ -51,7 +51,7 @@ void DoPrint();
 void ShowCaret();
 void HideCaret();
 void Redraw(NSRect rect);
-void setCursorBeforeVertMove();
+void setCursorBeforeVertMove();*/
 #if __cplusplus
 }   // Extern C
 #endif

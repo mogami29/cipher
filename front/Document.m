@@ -46,7 +46,7 @@
                 [self close];
             }
         }
-        setMode(editor);
+        [myView setMode:editor];
         loadedData = nil;
     }
 }
