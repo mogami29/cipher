@@ -122,6 +122,16 @@
     [self setNeedsDisplay:YES];
 }
 
+// from Printing Programming Guide for Mac
+- (IBAction)printDocument:(id)sender {
+    NSPrintOperation *op;
+    op = [NSPrintOperation printOperationWithView:self];
+    if (op)
+        [op runOperation];
+    else
+        ;// handle error here
+}
+
 - (void) keyDown : (NSEvent *) theEvent
 {
     NSString* str = [theEvent characters];
