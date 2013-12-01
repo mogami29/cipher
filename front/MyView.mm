@@ -88,7 +88,7 @@
     self = [super initWithFrame:frameRect];
     line = [[NSMutableString alloc] init];
     [self startAnimation];
-    [self setFrameSize:NSMakeSize(500, 100)];
+    //[self setFrameSize:NSMakeSize(500, 100)];
     text = new MathText;
     text->initLines();
     text->newLine();

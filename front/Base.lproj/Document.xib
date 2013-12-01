@@ -30,8 +30,8 @@
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <customView id="eV5-BL-nzg" customClass="MyView">
-                                    <rect key="frame" x="0.0" y="0.0" width="507" height="413"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="507" height="901"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 </customView>
                             </subviews>
                         </clipView>
@@ -40,7 +40,7 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="QZL-wV-gzm">
-                            <rect key="frame" x="492" y="1" width="16" height="900"/>
+                            <rect key="frame" x="493" y="1" width="15" height="900"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
