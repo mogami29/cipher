@@ -7,7 +7,6 @@
 //
 
 #import "Document.h"
-#include "appSpeci.h"
 
 @implementation Document
 

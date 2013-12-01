@@ -1,7 +1,9 @@
 #import "MyView.h"
+#include "ciph.h"
+#include "value.h"
+#include "list.h"
 #import "appSpeci.h"
 
-#include "appSpeci.mm.h"
 @implementation MyView
 
 #define larger(a, b) ((a) > (b) ? (a) : (b))

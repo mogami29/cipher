@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		051F9E071809FCB600289510 /* appSpeci.mm.h in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm.h */; };
+		051F9E071809FCB600289510 /* appSpeci.mm in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm */; };
 		0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0527D948181C808200E5B8E0 /* tokenizer.cpp */; };
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
 		0598486417EE906F008EEB70 /* MyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.mm */; };
@@ -42,7 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		051F9E061809FCB600289510 /* appSpeci.mm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appSpeci.mm.h; sourceTree = "<group>"; };
+		051F9E061809FCB600289510 /* appSpeci.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = appSpeci.mm; sourceTree = "<group>"; };
 		0527D947181C807000E5B8E0 /* y.tab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = y.tab.h; path = "../cipher-shell/cipher-shell/y.tab.h"; sourceTree = "<group>"; };
 		0527D948181C808200E5B8E0 /* tokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenizer.cpp; path = "../cipher-shell/cipher-shell/tokenizer.cpp"; sourceTree = "<group>"; };
 		059802FE18095BB1000E9157 /* ciph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ciph.h; path = "../../cipher-shell/cipher-shell/ciph.h"; sourceTree = "<group>"; };
@@ -174,7 +174,7 @@
 				0598486317EE906F008EEB70 /* MyView.mm */,
 				059802FE18095BB1000E9157 /* ciph.h */,
 				059803051809E89E000E9157 /* appSpeci.h */,
-				051F9E061809FCB600289510 /* appSpeci.mm.h */,
+				051F9E061809FCB600289510 /* appSpeci.mm */,
 				05AD7D7417EDAA5A006391A3 /* Document.xib */,
 				05AD7D7717EDAA5A006391A3 /* MainMenu.xib */,
 				05AD7D7A17EDAA5A006391A3 /* Images.xcassets */,
@@ -312,7 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				051F9E071809FCB600289510 /* appSpeci.mm.h in Sources */,
+				051F9E071809FCB600289510 /* appSpeci.mm in Sources */,
 				0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */,
 				05A5A2FB182723DC00F813F4 /* eval.cpp in Sources */,
 				05FF81C5180B7DF6002B4ACF /* value.cpp in Sources */,
