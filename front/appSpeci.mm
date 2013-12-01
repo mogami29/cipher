@@ -37,7 +37,6 @@ public:
 	frac();
 	~frac() {}
 };
-typedef list text;
 
 
 #include <setjmp.h>
@@ -120,11 +119,12 @@ void MathText::MoveTo(float h, float v){
     curPt.y = v;
 }
 void MathText::Line(float h, float v){
-    float w = 0.5;
+    const float w = 0.5;
     NSPoint	point0 = {(float)curPt.x, (int)curPt.y + w/2};
     NSPoint	point1 = {(float)curPt.x + h, (int)curPt.y + v + w/2};
     //[NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     NSBezierPath *path = [NSBezierPath bezierPath];
+    [path setLineWidth:w];
     [path moveToPoint:point0];
     [path lineToPoint:point1];
     [path stroke];
@@ -721,6 +721,7 @@ void MathText::insertSubScriptAndMoveInto(){
 	ins.moveInto(&ul(vp));
 }
 obj MathText::peekPrevious(){
+    if(ins.pos-1 < 0) return nil;
     return first(rest(*(ins.curstr), ins.pos-1));
 }
 obj MathText::peekNext(){
@@ -812,7 +813,7 @@ void MathText::moveUp(){
         return;
     }
 	c = peekPrevious();
-    if(type(c)==FRACTION){
+    if(c && type(c)==FRACTION){
         ins.setpos(ins.pos);
         moveIntoNum((list_*)c);
         moveToLast();
@@ -837,13 +838,13 @@ void MathText::moveDown(){
 		}
 	}
 	obj c = peekNext();
-    if(type(c)==FRACTION){
+    if(c && type(c)==FRACTION){
         ins.setpos(ins.pos+1);
         moveIntoDenom((list_*)c);
         return;
     }
 	c = peekPrevious();
-    if(type(c)==FRACTION){
+    if(c && type(c)==FRACTION){
         ins.setpos(ins.pos);
         moveIntoDenom((list_*)c);
         moveToLast();
