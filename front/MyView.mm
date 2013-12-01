@@ -1,5 +1,9 @@
 #import "MyView.h"
+#include "ciph.h"
+#include "value.h"
+#include "list.h"
 #import "appSpeci.h"
+
 @implementation MyView
 
 #define larger(a, b) ((a) > (b) ? (a) : (b))
@@ -57,10 +61,10 @@
         ShowCaret();
     } else HideCaret();
 */
-    theStr = backingStore;
-    caller = self;
-    Redraw(rect);
-    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
+    text->theStr = backingStore;
+    text->caller = self;
+    text->Redraw(rect);
+    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
 }
 
 - (void) drawCaretAt:(NSPoint)pt
@@ -76,7 +80,7 @@
 }
 
 - (void) setMode:(CRmode)m {
-    setMode(m);
+    text->setMode(m);
 }
 
 - (id) initWithFrame:(NSRect)frameRect
@@ -85,8 +89,9 @@
     line = [[NSMutableString alloc] init];
     [self startAnimation];
     [self setFrameSize:NSMakeSize(500, 100)];
-    initLines();
-    newLine();
+    text = new MathText;
+    text->initLines();
+    text->newLine();
 
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
@@ -99,6 +104,7 @@
     backingStore = [[NSMutableAttributedString alloc] initWithString:@"" attributes:dicAttr];
     selectedRange = NSMakeRange(0, 0);
     markedRange = NSMakeRange(NSNotFound, 0);
+
     return self;
 }
 
@@ -109,15 +115,15 @@
 
 - (void) updateFrameSizeAndDraw {
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
-    if(baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
-        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine + FONTSIZE - clip.size.height);
+    if(text->baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
+        NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine + FONTSIZE - clip.size.height);
         [self scrollPoint:newScrollOrigin];
     }
-    if(baseLine - FONTSIZE < clip.origin.y) {
-        NSPoint newScrollOrigin = NSMakePoint(0.0, baseLine - FONTSIZE);
+    if(text->baseLine - FONTSIZE < clip.origin.y) {
+        NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine - FONTSIZE);
         [self scrollPoint:newScrollOrigin];
     }
-    [self setFrameSize:NSMakeSize(500, larger(viewHeight, baseLine + FONTSIZE))];
+    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];
     // larger(clip.size.height, ;
     [self setNeedsDisplay:YES];
 }
@@ -142,12 +148,12 @@
         [[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
     } else {
         //[line appendString: str];
-        HandleTyping(key);
+        text->HandleTyping(key);
     }
     cursorOn = true;
     [self updateFrameSizeAndDraw];
     [self display];
-	if(!(key==NSUpArrowFunctionKey || key==NSUpArrowFunctionKey)) setCursorBeforeVertMove();
+	if(!(key==NSUpArrowFunctionKey || key==NSUpArrowFunctionKey)) text->setCursorBeforeVertMove();
 }
 
 - (void) insertText:(id)string
@@ -155,63 +161,63 @@
     //[line appendString: string];
     const char * s = [string cStringUsingEncoding:NSUTF16LittleEndianStringEncoding];
     if (!s) return;
-    for(const unichar* p = (unichar*)s; *p; p++) HandleTyping(*p);
+    for(const unichar* p = (unichar*)s; *p; p++) text->HandleTyping(*p);
     // need update of framesize here
 }
 
 - (void)insertNewline:(id)sender
 {
-    HandleTyping(CR);
+    text->HandleTyping(CR);
 }
 
 - (void) deleteBackward:(id)sender
 {
-    HandleTyping(BS);
+    text->HandleTyping(BS);
 }
 
 - (void) insertTab:(id)sender
 {
-    HandleTyping('\t');
+    text->HandleTyping('\t');
 }
 
 - (void) moveLeft:(id)sender    // what is moveBackward?
 {
-    HandleTyping(arrowLeft);
+    text->HandleTyping(arrowLeft);
 }
 
 - (void) moveRight:(id)sender
 {
-    HandleTyping(arrowRight);
+    text->HandleTyping(arrowRight);
 }
 
 - (void) moveUp:(id)sender
 {
-    HandleTyping(arrowUp);
+    text->HandleTyping(arrowUp);
 }
 
 - (void) moveDown:(id)sender
 {
-    HandleTyping(arrowDown);
+    text->HandleTyping(arrowDown);
 }
 
 - (void)moveLeftAndModifySelection:(id)sender
 {
-    HandleShifted(arrowLeft);
+    text->HandleShifted(arrowLeft);
 }
 
 - (void)moveRightAndModifySelection:(id)sender
 {
-    HandleShifted(arrowRight);
+    text->HandleShifted(arrowRight);
 }
 
 - (void)moveUpAndModifySelection:(id)sender
 {
-    HandleShifted(arrowUp);
+    text->HandleShifted(arrowUp);
 }
 
 - (void)moveDownAndModifySelection:(id)sender
 {
-    HandleShifted(arrowDown);
+    text->HandleShifted(arrowDown);
 }
 
 
@@ -227,7 +233,7 @@
     
     // convert the mouse-down location into the view coords
     clickLocation = [self convertPoint:[event locationInWindow] fromView:nil];
-    HandleContentClick(clickLocation);
+    text->HandleContentClick(clickLocation);
     
     /*
     BOOL itemHit = NO;
@@ -249,7 +255,7 @@
 - (void) mouseDragged:(NSEvent *)event
 {
     NSPoint newDragLocation = [self convertPoint:[event locationInWindow] fromView:nil];
-    HandleDragTo(newDragLocation);
+    text->HandleDragTo(newDragLocation);
     /*
     // offset the item by the change in mouse movement
     // in the event
@@ -268,16 +274,16 @@
 
 - (NSString *)string
 {
-    return serializedString();
+    return text->serializedString();
 }
 
 - (void)setString:(NSString *)string
 {
-    setCString([string cStringUsingEncoding:NSUTF8StringEncoding]);
+    text->setCString([string cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
 - (void) undo:sender {
-    DoUndo();
+    text->DoUndo();
 }
 
 - (void) redo:sender {
@@ -285,7 +291,7 @@
 }
 
 - (void) cut:sender {
-    NSString *string = DoCut();
+    NSString *string = text->DoCut();
     if (string != nil) {
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
         [pasteboard clearContents];
@@ -297,7 +303,7 @@
 
 // from Paste board Getting Started
 - (void) copy:sender {
-    NSString *string = copySelected();
+    NSString *string = text->copySelected();
     if (string != nil) {
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
         [pasteboard clearContents];
@@ -317,7 +323,7 @@
         NSString *string = [objectsToPaste objectAtIndex:0];
         const char * s = [string cStringUsingEncoding:NSUTF8StringEncoding];
         assert(s);    // yen mark results in null pointer
-        pasteCString(s);
+        text->pasteCString(s);
     }
     [self updateFrameSizeAndDraw];
 }
@@ -325,10 +331,10 @@
 - (BOOL)validateUserInterfaceItem:(id < NSValidatedUserInterfaceItem >)anItem {
     
     if ([anItem action] == @selector(cut:)) {
-        return nowSelected;
+        return text->nowSelected;
     }
     if ([anItem action] == @selector(copy:)) {
-        return nowSelected;
+        return text->nowSelected;
     }
     if ([anItem action] == @selector(undo:)) {
         return YES;
@@ -421,7 +427,7 @@
     // insert aString to backingstore and
     //[self insertText:[backingStore string]];
     [self insertText:aString ];
-    removeSelected();
+    text->removeSelected();
     [backingStore setAttributedString:[[NSAttributedString alloc] initWithString:@"" attributes:dicAttr]];
     [backingStore endEditing];
     
@@ -457,7 +463,7 @@
         [backingStore addAttributes:dicAttr range:markedRange];
     }
     [backingStore endEditing];
-    removeSelected();
+    text->removeSelected();
     
     // Redisplay
     selectedRange.location = replacementRange.location + newSelection.location; // Just for now, only select the marked text

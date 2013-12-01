@@ -11,6 +11,8 @@
     NSMutableAttributedString *backingStore;
     NSRange markedRange;
     NSRange selectedRange;
+    
+    struct MathText* text;
 }
 - (void) drawRect : (NSRect) rect;
 - (void) drawCaretAt : (NSPoint) pt;

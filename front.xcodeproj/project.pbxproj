@@ -10,7 +10,7 @@
 		051F9E071809FCB600289510 /* appSpeci.mm in Sources */ = {isa = PBXBuildFile; fileRef = 051F9E061809FCB600289510 /* appSpeci.mm */; };
 		0527D949181C808200E5B8E0 /* tokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0527D948181C808200E5B8E0 /* tokenizer.cpp */; };
 		0598030418095D4C000E9157 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0598030218095D4C000E9157 /* list.cpp */; };
-		0598486417EE906F008EEB70 /* MyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.m */; };
+		0598486417EE906F008EEB70 /* MyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0598486317EE906F008EEB70 /* MyView.mm */; };
 		05A21B7918109E5900F512A6 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A21B7818109E5900F512A6 /* vector.cpp */; };
 		05A5A2FB182723DC00F813F4 /* eval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2F7182723DC00F813F4 /* eval.cpp */; };
 		05A5A2FC182723DC00F813F4 /* lib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 05A5A2F9182723DC00F813F4 /* lib.cpp */; };
@@ -51,7 +51,7 @@
 		0598030318095D4C000E9157 /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = "../cipher-shell/cipher-shell/list.h"; sourceTree = "<group>"; };
 		059803051809E89E000E9157 /* appSpeci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = appSpeci.h; sourceTree = "<group>"; };
 		0598486217EE906F008EEB70 /* MyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyView.h; sourceTree = "<group>"; };
-		0598486317EE906F008EEB70 /* MyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyView.m; sourceTree = "<group>"; };
+		0598486317EE906F008EEB70 /* MyView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MyView.mm; sourceTree = "<group>"; };
 		05A21B7818109E5900F512A6 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vector.cpp; path = "../cipher-shell/cipher-shell/vector.cpp"; sourceTree = "<group>"; };
 		05A5A2F7182723DC00F813F4 /* eval.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eval.cpp; path = "../cipher-shell/cipher-shell/eval.cpp"; sourceTree = "<group>"; };
 		05A5A2F8182723DC00F813F4 /* eval.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = eval.h; path = "../cipher-shell/cipher-shell/eval.h"; sourceTree = "<group>"; };
@@ -171,7 +171,7 @@
 				05AD7D7117EDAA5A006391A3 /* Document.h */,
 				05AD7D7217EDAA5A006391A3 /* Document.m */,
 				0598486217EE906F008EEB70 /* MyView.h */,
-				0598486317EE906F008EEB70 /* MyView.m */,
+				0598486317EE906F008EEB70 /* MyView.mm */,
 				059802FE18095BB1000E9157 /* ciph.h */,
 				059803051809E89E000E9157 /* appSpeci.h */,
 				051F9E061809FCB600289510 /* appSpeci.mm */,
@@ -321,7 +321,7 @@
 				05A5A2FC182723DC00F813F4 /* lib.cpp in Sources */,
 				05AD7D6C17EDAA5A006391A3 /* main.m in Sources */,
 				05A5A30018272E2D00F813F4 /* matrix.cpp in Sources */,
-				0598486417EE906F008EEB70 /* MyView.m in Sources */,
+				0598486417EE906F008EEB70 /* MyView.mm in Sources */,
 				0598030418095D4C000E9157 /* list.cpp in Sources */,
 				05A21B7918109E5900F512A6 /* vector.cpp in Sources */,
 			);

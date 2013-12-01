@@ -14,3 +14,8 @@
     IBOutlet id myView;
 }
 @end
+
+typedef enum {  // copied to Document.h
+    session,
+    editor
+} CRmode;

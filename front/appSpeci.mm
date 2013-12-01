@@ -2,20 +2,28 @@
 #include "ciph.h"
 #include "value.h"
 #include "list.h"
+#import "MyView.h"
 #include "appSpeci.h"
 #include <string.h>
 //#include "lib.h"
 
 #import <Cocoa/Cocoa.h>
 
+
+
+
+struct MathText* icaller;
+char* cacheForUnitTest = nil;
+
+
 void showPlot(obj y);
 void drawLine(list*line, bool draw);
-static float getWidth(obj string);
-static void drawFragment(obj line, bool draw);
-static int findPreviousLine();
-static list CStringToLine(obj str);
-static void serialize(string*rs, list l, list end);
-static void win_normalize();
+float getWidth(obj string);
+void drawFragment(obj line, bool draw);
+int findPreviousLine();
+list CStringToLine(obj str);
+void serialize(string*rs, list l, list end);
+void win_normalize();
 char* listToCString(list l);
 //-----
 inline int_* create(ValueType t, int i){
@@ -31,9 +39,6 @@ public:
 };
 typedef list text;
 
-
-// globals -> should be a instance vars
-WindowPtr	currWindow;
 
 #include <setjmp.h>
 jmp_buf jmpEnv;
@@ -55,96 +60,66 @@ void exit2shell(){
     longjmp(jmpEnv, 1);
 }
 
-int viewPosition = 0;
-//static list lines;
-//---------current line with insertion point object---------------------------
 
-static text line;
-static int startOfThisLine;	//絶対座標, multiple lineのときの始め。
+typedef node<int>* intlist;
+typedef node<list>* listlist;
+node<int>* yposOfLines = nil;
+node<list>* pointerToLines = nil;
+template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
 
-static NSPoint cursorPosition;
-float baseLine = 50;// ほかに使っているのはplot()
-                // baseLine ~ カーソル位置。描画なしでの予測と解釈できる
-                // line編集中はcursorPositionと同時に変更を行う。
-
-static bool drawingTheEditingLine = false;
-static list drawList;
-static list insList = nil;// insertion point のスタック（先頭の要素が、一番内側の方。） (list of "Int")
-                        // insと合わせてinsertion pointを表す
-                        // ins.posは実質insListの先頭。
-static list	beginSelList;
-struct insp {
-	int pos;            // position in curstr
-	list *curstr;       // current string
-	list *lpos;         // pos-th of curstr. アクセサ関数の中からのみ変更されている。
-    char* curcstr;
-    
-	inline void moveInto(list *l){
-		curstr = l;
-		lpos = l;
-		pos = 0;
-        curcstr = nil; }
-	inline void moveRightmost(list *l){
-		curstr = l;
-		pos = length(*l);
-		lpos = rest(l, pos);
-        curcstr = nil; }    // cstr until here
-	insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
-	insp():curstr(nil), pos(0), lpos(nil), curcstr(nil){};
-	void setpos(int p){
-		if(curstr){
-            lpos = rest(curstr, p);
-            pos = p;
-            curcstr = nil;
-        } else {
-            lpos = nil;
-            pos = p;
-        }
-    }
-	list* list_point(){
-        assert(lpos);   // not implemented for curCstr != nil
-        return lpos;
-		return rest(curstr, pos);
+node<int>* cons(int v, node<int>* l){
+	node<int>* nn = (node<int>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+node<list>* cons(list v, node<list>* l){
+	node<list>* nn = (node<list>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+    //	L nn = new node<T>();
+	nn->a = v;
+	nn->d = l;
+	return nn;
+}
+/*template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
+ node<T>* nn = (node<T>*)node_alloc<obj>();
+ //	L nn = new node<T>();
+ nn->a = v;
+ nn->d = l;
+ return nn;
+ }*/
+template <class T> void surface_free(node<T>* p){
+	node<T>* next;
+	for( ; p; p=next){
+		next = p->d;
+		assert(p->refcount);
+		node_free((node<obj>*)p);
 	}
-} beginOfSel, ins;		//insは現在のinsertion point
-
-inline bool equalsToCursor(list* curline, list l, int pos){
-    if(!ins.curstr) return false;
-    // assert((curline==ins.curstr && l == *ins.lpos) == (equal(insList, drawList) && pos == ins.pos));
-    return(curline==ins.curstr && l == *ins.lpos);
-}
-inline bool equalsToCursor(char* curline, int pos){
-    if(!ins.curcstr) return false;
-    return(curline==ins.curcstr && pos == ins.pos);
 }
 
-static NSPoint cursorBeforeVertMove;
+template <class T> T& first(node<T>* l){ return l->a;}
 
-static NSPoint selectionCursorPosition;
-bool 	nowSelected = false;
+void rememberYPos(int y, obj v){     // v want to be either obj or list*
+}
 
-// didBufのデータ形式の定義
-// 	list of insert_string("hoge"), move_to(list ins), delete(int n)
-// undoBufのデータ形式の定義
-//		delete(int n), move_to(list ins), insert_string("hoge")
+int find(list l, list line){
+    int p = 0;
+    for (; line; line=rest(line), p++) if(l==line) break;
+    return p;
+}
 
-//いまのところundobufをつかい1-levelのundoだけ
-static list didBuf = nil;
-static list undoBuf = nil;
-static obj undobuf = nil;
+
+
 //-----------draw functions----------
-NSPoint curPt;
-NSMutableDictionary *dicAttr;
-NSFont *fontAttr;
 
-void GetPen(NSPoint * pt){
+void MathText::GetPen(NSPoint * pt){
     *pt = curPt;
 }
-void MoveTo(float h, float v){
+void MathText::MoveTo(float h, float v){
     curPt.x = h;
     curPt.y = v;
 }
-void Line(float h, float v){
+void MathText::Line(float h, float v){
     float w = 0.5;
     NSPoint	point0 = {(float)curPt.x, (int)curPt.y + w/2};
     NSPoint	point1 = {(float)curPt.x + h, (int)curPt.y + v + w/2};
@@ -156,33 +131,33 @@ void Line(float h, float v){
     curPt.x += h;
     curPt.y += v;
 }
-void Move(float h, float v){
+void MathText::Move(float h, float v){
     curPt.x += h;
     curPt.y += v;
 }
-void TextSize(float s){
+void MathText::TextSize(float s){
     // setting text font size
     fontAttr = [ NSFont fontWithName : @"Helvetica" size : s ];
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
 }
-float StringWidth(NSString* s1){
+float MathText::StringWidth(NSString* s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     CGFloat w = [attStr size].width;
     return w;
 }
-void DrawString(NSString *s1){
+void MathText::DrawString(NSString *s1){
     NSAttributedString* attStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
     [attStr drawAtPoint : NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
     CGFloat w = [attStr size].width;
     curPt.x += w;
 }
-float StringWidth(const char * str){
+float MathText::StringWidth(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
     assert(s1);
     return StringWidth(s1);
 }
-void DrawString(const char * str){
+void MathText::DrawString(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
     assert(s1);
     DrawString(s1);
@@ -234,7 +209,7 @@ long vrIntD(obj v){
 //#define Int dInt
 //*/
 
-void drawFraction(list_* f, bool draw){
+void MathText::drawFraction(list_* f, bool draw){
 	NSPoint pt;
 	GetPen(&pt);
 	assert(type(f)==FRACTION);
@@ -253,7 +228,7 @@ void drawFraction(list_* f, bool draw){
     vrInt(pop(&drawList));
 	MoveTo(pt.x+width+2, pt.y);
 }
-void drawSuperScript(obj v, bool draw){
+void MathText::drawSuperScript(obj v, bool draw){
 	Move(0,-FONTSIZE*1/2);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SuperScript);
@@ -261,7 +236,7 @@ void drawSuperScript(obj v, bool draw){
 	TextSize(FONTSIZE);
 	Move(0,FONTSIZE*1/2);
 }
-void drawSubScript(obj v, bool draw){
+void MathText::drawSubScript(obj v, bool draw){
 	Move(0,+FONTSIZE/3);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SubScript);
@@ -270,7 +245,6 @@ void drawSubScript(obj v, bool draw){
 	Move(0,-FONTSIZE/3);
 }
 // CRは行末に付属すると考える。
-static bool crossed;
 
 bool isWide(unichar c){return (c & 0xF800) == 0xD8;}
 
@@ -301,7 +275,7 @@ void toString(char* buf, int c){
         buf[2] = NULL;
     }
 }
-void drawACharOrABox(list& l, int& pos, bool draw){
+void MathText::drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
 	obj v = first(l);
     /*if(((long)v&dVal)==idStr) {
@@ -373,7 +347,7 @@ void step(list& l){
     l=rest(l);
 }
 
-inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
+inline int MathText::getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
 	NSPoint pt;
 	for(; ;){
 		GetPen(&pt);
@@ -395,7 +369,7 @@ endline:
 	return 0;
 }
 
-void findInsertionCloseTo(float h, int &next, int &prev){
+void MathText::findInsertionCloseTo(float h, int &next, int &prev){
 	int pos = findPreviousLine();
 	int curr_mark=0; 
 	if(pos<0) pos=0;
@@ -419,15 +393,7 @@ endline:
 	}
 }
 
-NSMutableAttributedString* theStr;
-#import "MyView.h"
-MyView* caller;
-
-insp click;
-NSPoint clickpnt;
-NSPoint curclick;
-
-bool drawFragment0(list* line, list& l, int& pos, bool draw){
+bool MathText::drawFragment0(list* line, list& l, int& pos, bool draw){
 	NSPoint pt;
 	for(; ; ){	// chars
         if(equalsToCursor(line, l, pos)){
@@ -461,62 +427,14 @@ newline:
 	return 1;
 }
 
-void drawFragment(obj line, bool draw){      // drawLine()   ?
+void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
 	list l=ul(line);
 	int pos=0;
 	drawFragment0(&ul(line), l, pos, draw);
 }
 
-typedef node<int>* intlist;
-typedef node<list>* listlist;
-node<int>* yposOfLines = nil;
-node<list>* pointerToLines = nil;
-template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
-
-node<int>* cons(int v, node<int>* l){
-	node<int>* nn = (node<int>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
-    //	L nn = new node<T>();
-	nn->a = v;
-	nn->d = l;
-	return nn;
-}
-node<list>* cons(list v, node<list>* l){
-	node<list>* nn = (node<list>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
-    //	L nn = new node<T>();
-	nn->a = v;
-	nn->d = l;
-	return nn;
-}
-/*template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
-	node<T>* nn = (node<T>*)node_alloc<obj>();
-    //	L nn = new node<T>();
-	nn->a = v;
-	nn->d = l;
-	return nn;
-}*/
-template <class T> void surface_free(node<T>* p){
-	node<T>* next;
-	for( ; p; p=next){
-		next = p->d;
-		assert(p->refcount);
-		node_free((node<obj>*)p);
-	}
-}
-
-template <class T> T& first(node<T>* l){ return l->a;}
-
-void rememberYPos(int y, obj v){     // v want to be either obj or list*
-}
-
-int find(list l, list line){
-    int p = 0;
-    for (; line; line=rest(line), p++) if(l==line) break;
-    return p;
-}
-int viewHeight = 100;
-static int getNLine(list line);
-NSRect updateRect;
-void drawLine(list*line, bool draw){
+//static int getNLine(list line);
+void MathText::drawLine(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
     drawList = phi();   // may have trouble with tShow
@@ -566,7 +484,7 @@ void drawLine(list*line, bool draw){
     if(!l) viewHeight = vv + FONTSIZE*3;
 }
 
-float getWidth(obj str){
+float MathText::getWidth(obj str){
 	NSPoint pt, np;
 	GetPen(&pt);
 	drawFragment(str, false);	// wrapされるとまずい
@@ -574,7 +492,7 @@ float getWidth(obj str){
 	return np.x - pt.x;
 }
 
-void showPlot(obj y){           // plotting
+void MathText::showPlot(obj y){           // plotting
     NSPoint pt;
     GetPen(&pt);
     int baseLine = pt.y;
@@ -584,7 +502,7 @@ void showPlot(obj y){           // plotting
     [path stroke];
 }
 
-void drawObj(obj line){		//set cursorPosition at the same time
+void MathText::drawObj(obj line){		//set cursorPosition at the same time
 	if(type(line) ==STRING){
 		DrawString(ustr(line));
 		return;
@@ -599,9 +517,9 @@ void drawObj(obj line){		//set cursorPosition at the same time
 	drawLine(&ul(line), true);
 }
 
-static void highlightSelected();
+//static void highlightSelected();
 
-void Redraw(NSRect rect){
+void MathText::Redraw(NSRect rect){
     updateRect = rect;
     /*	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
@@ -614,9 +532,7 @@ void Redraw(NSRect rect){
 		drawObj(first(aLine));
 	}*/
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
-    drawingTheEditingLine = true;
 	drawLine(&line, true);
-    drawingTheEditingLine = false;
 	viewHeight = larger(viewHeight, larger(startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line), cursorPosition.y) + 3*FONTSIZE);// too inacurate
     /*if(caretState){
      MoveTo(cursorPosition.x, cursorPosition.y);
@@ -629,12 +545,12 @@ void Redraw(NSRect rect){
 
 //------accessors of the current line -----------------
 
-inline void set_insp(int pos){	// <-> move insertion
+inline void MathText::set_insp(int pos){	// <-> move insertion
 	release(insList);
 	insList = nil;
 	ins = insp(&line, pos);
 }
-int findPreviousLetter(){
+int MathText::findPreviousLetter(){
 	int p = 0;
 	int i = 0;
 	for(list l=*(ins.curstr); l && i<ins.pos; l=rest(l), i++) {
@@ -645,7 +561,7 @@ int findPreviousLetter(){
 	}
 	return p;
 }
-int findPreviousLine(){//returns -1 if none
+int MathText::findPreviousLine(){//returns -1 if none
 	int pp = -1, p = 0, curr_pos;
 	if(insList) curr_pos = uint(*last(insList));
 	else curr_pos = ins.pos;
@@ -657,7 +573,7 @@ int findPreviousLine(){//returns -1 if none
 		}
 	return pp;
 }
-int findBeginOfThisLine(){
+int MathText::findBeginOfThisLine(){
 	int p = 0, curr_pos;
 	if(insList) curr_pos = uint(*last(insList));
 	else curr_pos = ins.pos;
@@ -668,7 +584,7 @@ int findBeginOfThisLine(){
 		}
 	return p;
 }
-list deleteALetter0(){
+list MathText::deleteALetter0(){
 	int p = findPreviousLetter();
 	list* lpp = rest(ins.curstr, p);
 	list l = *lpp;
@@ -677,7 +593,7 @@ list deleteALetter0(){
 	ins.setpos(p);
 	return l;
 }
-static void putinUndobuf(list l){
+void MathText::putinUndobuf(list l){
 	if(!undobuf) undobuf = (obj)create(tIns, phi());
 	else if(type(undobuf)!=tIns){
 		release(undobuf);
@@ -685,24 +601,24 @@ static void putinUndobuf(list l){
 	}
 	ul(undobuf) = merge(l, ul(undobuf));
 }
-static void deleteALetter(){
+void MathText::deleteALetter(){
 	list l = deleteALetter0();
 	putinUndobuf(l);
 }
 
-static int peekPreviousLetter(){	// not good for 2-bytes
+int MathText::peekPreviousLetter(){	// not good for 2-bytes
 	if(ins.pos==0) return NUL;
 	int p = findPreviousLetter();
 	obj vp = first(rest(*ins.curstr, p));
 	if(type(vp)!=INT) return NUL;
 	return uint(vp);
 }
-inline void insert0(obj v){
+inline void MathText::insert0(obj v){
 	list* inspp = ins.list_point();
 	*inspp = cons(v, *inspp);
 	ins.setpos(ins.pos+1);
 }
-void insert(obj v){
+void MathText::insert(obj v){
 	insert0(v);
 	if(!undobuf) undobuf = create(tDel, 1);
 	else if(undobuf && type(undobuf)==tDel){
@@ -712,38 +628,38 @@ void insert(obj v){
 		undobuf = create(tDel, 1);
 	}
 }
-static void pushInsertion(){
+void MathText::pushInsertion(){
 	insList = cons(Int(ins.pos), insList);
 }
-static int popInsertion(){
+int MathText::popInsertion(){
 	return vrInt(pop(&insList));
 }
-void moveIntoNum(list_* fr){
+void MathText::moveIntoNum(list_* fr){
 	pushInsertion();
     //	ins.pos = 2;
     //	pushInsertion();
 	insList = cons(Int(1), insList);
 	ins.moveInto(&ul(em0(fr)));
 }
-void moveIntoDenom(list_* fr){
+void MathText::moveIntoDenom(list_* fr){
 	pushInsertion();
 //	ins.pos = 2;
 //	pushInsertion();
 	insList = cons(Int(2), insList);
 	ins.moveInto(&ul(em1(fr)));
 }
-void insertFraction(list num, list denom){
+void MathText::insertFraction(list num, list denom){
 	list_* v = render(FRACTION, list2(List2v(num), List2v(denom)));
 	insert(v);
 	moveIntoDenom(v);
 }
-list* curr_str(list l){
+list* MathText::curr_str(list l){
 	if(! l) return &line;
 	obj v = first(rest(*curr_str(rest(l)), uint(first(l))-1));
 	assert(type(v)==FRACTION || type(v)==SubScript || type(v)==SuperScript || type(v)==LIST);
 	return &ul(v);
 }
-list ins_list(list*scan, list*cstr){	// finding insList from curstr
+list MathText::ins_list(list*scan, list*cstr){	// finding insList from curstr
 	if(scan == cstr) return nil;
 	list l = *scan;
 	for(int i=0; l; l=rest(l), i++) {
@@ -766,7 +682,7 @@ list ins_list(list*scan, list*cstr){	// finding insList from curstr
 	return nil;
 }*/
 
-static list isInFracRecur(){
+list MathText::isInFracRecur(){
 	list l = insList;
 	if(! l) return nil;
 	for(;; l=rest(l)){
@@ -775,52 +691,52 @@ static list isInFracRecur(){
 		if(type(v)==FRACTION) return l;
 	}
 }
-static bool isInFrac(){
+bool MathText::isInFrac(){
 	if(! insList) return false;
 	obj v = first(rest(*curr_str(rest((insList))), uint(first(insList))-1));
 	if(type(v)!=FRACTION) return false;
 	return true;
 }
-void moveToUpperLevel(){
+void MathText::moveToUpperLevel(){
 	int pos = popInsertion();
 	if(isInFrac()) pos = popInsertion();
 	ins = insp(curr_str(insList), pos);
 }
-int getNLine(list l){//line数-1,CRの数を数える
+int MathText::getNLine(list l){//line数-1,CRの数を数える
 	int i=0;
 	for(; l; l=rest(l)) if(type(first(l))==INT && uint(first(l))==CR) i++;
 	return i;
 }
-void insertSuperScriptAndMoveInto(){
+void MathText::insertSuperScriptAndMoveInto(){
 	obj vp = render(SuperScript, nil);
 	insert(vp);
 	pushInsertion();		//insertion pointはみぎで待っていてもらうことにする。
 	ins.moveInto(&ul(vp));
 }
 
-void insertSubScriptAndMoveInto(){
+void MathText::insertSubScriptAndMoveInto(){
 	obj vp = render(SubScript, phi());
 	insert(vp);
 	pushInsertion();
 	ins.moveInto(&ul(vp));
 }
-obj peekPrevious(){
+obj MathText::peekPrevious(){
     return first(rest(*(ins.curstr), ins.pos-1));
 }
-obj peekNext(){
+obj MathText::peekNext(){
     list* l =ins.list_point();
     if(*l) return first(*l);
     else return nil;
 }
-void moveToLast(){
+void MathText::moveToLast(){
     ins.setpos(length(*ins.curstr));
 }
-bool isAtLast(){
+bool MathText::isAtLast(){
     assert(ins.pos <= length(*ins.curstr));
     return ins.pos==length(*ins.curstr);
 }
 // -------------- controllers ------------
-void moveLeft(){
+void MathText::moveLeft(){
 	if(insList && ins.pos==0) {
 		moveToUpperLevel();
 		ins.setpos(ins.pos-1);
@@ -839,7 +755,7 @@ void moveLeft(){
 	}
 	ins.setpos(findPreviousLetter());
 }
-void moveRight(){
+void MathText::moveRight(){
 	if(insList && isAtLast()) {
 		moveToUpperLevel();
 		return;
@@ -860,7 +776,7 @@ void moveRight(){
 	//if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
 	ins.setpos(ins.pos+1);
 }
-list cutSelected(){
+list MathText::cutSelected(){
 	if(beginSelList != insList){
 		//SysBeep(1);
 		return nil;
@@ -877,7 +793,7 @@ list cutSelected(){
 	*ep = nil;
 	return l;
 }
-void moveUp(){
+void MathText::moveUp(){
 	if(list l = isInFracRecur()) {
 		 if(uint(first(l))==2){	// in donominator?
 			l = rest(l);
@@ -908,7 +824,7 @@ void moveUp(){
 	set_insp(pv);
 	baseLine += -LINEHEIGHT;
 }
-void moveDown(){
+void MathText::moveDown(){
 	if(list l = isInFracRecur()) {
 		 if(uint(first(l))==1){	// in numerator?
 			l = rest(l);
@@ -941,15 +857,14 @@ void moveDown(){
 }
 
 //--------------------
-//static unsigned long caretLastChanged;
-static int caretState;	//==0 if hidden, ==1 if shown
+// unsigned long caretLastChanged;
 
-void ShowCaret(){
+void MathText::ShowCaret(){
 //	caretLastChanged = TickCount();
 	caretState = 1;
 }
 
-void HideCaret(){
+void MathText::HideCaret(){
 	MoveTo(cursorPosition.x, cursorPosition.y);
 //	PenPat(&qd.white);  // change color here
 //	Line(0,-FONTSIZE);
@@ -967,7 +882,6 @@ void HideCaret(){
 }*/
 
 #define upboundby(b,x) ((x)<(b)?(x):(b))
-extern WindowPtr	currWindow;
 
 void win_normalize(){       // smoothly scroll the view to make the cursor within
 /*	if(!baseLine > windowHeight-FONTSIZE && !baseLine < FONTSIZE) return;
@@ -989,23 +903,22 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 */	//MoveTo(LEFTMARGIN,baseLine);
 }
 
-void scrollBy(int points){
+void MathText::scrollBy(int points){
 	baseLine += points;
 	win_normalize();
     insert(Int(CR));
 }
 
-void scroll(){
+void MathText::scroll(){
 	scrollBy(FONTSIZE);
 }
 
 //-----------------
-extern Interpreter	interpreter;
 
-static list csparse(const char* str, size_t len);
+list csparse(const char* str, size_t len);
 
-void newLine(){}
-void newLine0(){
+void MathText::newLine(){}
+void MathText::newLine0(){
 	line = phi();
 	ins.moveInto(&line);
 	insList = nil;
@@ -1029,8 +942,17 @@ void newLine0(){
 	undoBuf = nil;
 }
 
-void initLines(){
+void MathText::initLines(){
 //	lines = phi();
+    viewPosition = 0;
+    baseLine = 50;
+    insList = nil;
+    nowSelected = false;
+    didBuf = nil;
+    undoBuf = nil;
+    undobuf = nil;
+    mode = session;
+
 	ins = insp(&line, 0);
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
@@ -1044,21 +966,19 @@ void initLines(){
     newLine0();
 }
 
-void addObjToText(obj v){	//taking line
+void MathText::addObjToText(obj v){	//taking line
 //	list aLine = list2(v, Int(baseLine+viewPosition));
 //	append(&lines, List2v(aLine));
     insert(v);
 }
 
-static void addLineToText(obj line){	//taking line
+void MathText::addLineToText(obj line){	//taking line
     return;     // used in edit and readline, needs repair of those functions
 	list aLine = list2(line, Int(startOfThisLine));
 //	append(&lines, List2v(aLine));
 }
 
-char* cacheForUnitTest = nil;
-
-void addStringToText(char* string){
+void MathText::addStringToText(char* string){
     obj str = val(copyString(string));
     insert(str);
     cacheForUnitTest = ustr(str);
@@ -1071,32 +991,8 @@ void addStringToText(char* string){
 
 #include <stdarg.h>
 #include <stdio.h>
-//bool recordingPrintf = 0;
-//string ks;    // kiroku string
-/*append_string(string *s, const char* str){
- for(char* p=0; *p; p++) appendB(s, *p);
- }*/
 
-void myPrintf(const char *fmt,...){
-	va_list	ap;
-	char str[256];
-	NSPoint pt;
-	GetPen(&pt);
-	if(pt.x > LEFTMARGIN+colWidth) return;
-//	if(pt.x > LEFTMARGIN+colWidth) scroll();
-	va_start(ap,fmt);
-	if (fmt) {
-		vsprintf(str,fmt,ap);
-	}
-	va_end(ap);
-	if(strlen(str)>255) assert_func("app.c", __LINE__);
-	addStringToText(str);
-    //append_string(&ks, str); write string merge
-	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
-	Move(StringWidth(str), 0);
-}
-
-void print_str(char*s){
+void MathText::print_str(char*s){
 	char str[256];
 	NSPoint pt;
 	GetPen(&pt);
@@ -1131,7 +1027,7 @@ int imbalanced(list line){
 	}
 	return abs(paren)+abs(brace);
 }
-void updateAround(bool erase){
+void MathText::updateAround(bool erase){
 	Rect r;
 	r.left = LEFTMARGIN;
 	r.right= LEFTMARGIN+colWidth+50;
@@ -1146,11 +1042,11 @@ void updateAround(bool erase){
 	//InvalRect(&r);
 //	DoUpdate(currWindow);
 }
-void removeSelected(){
+void MathText::removeSelected(){
     if(nowSelected) putinUndobuf(cutSelected());
 	nowSelected = false;
 }
-void HandleTyping0(unichar c){
+void MathText::HandleTyping0(unichar c){
 	HideCaret();
 	if(c==CR){
 		if(! insList){
@@ -1178,7 +1074,6 @@ void HandleTyping0(unichar c){
 		goto sho;
 	}
 
-	static int halfchar = 0;
 	if(c=='^' && ! halfchar){
 		insertSuperScriptAndMoveInto();
 	} else if(c=='_' && ! halfchar){
@@ -1206,16 +1101,16 @@ sho:if(c==arrowLeft||c==arrowRight||c==arrowUp||c==arrowDown){
 	
 	nowSelected = false;
 }
-void setCursorBeforeVertMove(){
+void MathText::setCursorBeforeVertMove(){
     cursorBeforeVertMove = cursorPosition;
 }
-Interpreter	interpreter;
-void handleCR(){
+void MathText::handleCR(){
 //	addLineToText(List2v(line));
 	//baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
 	obj tl = val(listToCString(rest(line, findBeginOfThisLine())));
 	scrollBy(0);	// newline
     if(setjmp(jmpEnv)==0){	//try
+        icaller = this;
         interpret(interpreter, ustr(tl));
     } else {				//catch
     }
@@ -1224,13 +1119,11 @@ void handleCR(){
 	newLine();
 }
 
-static CRmode mode = session;
-
-void setMode(CRmode m){
+void MathText::setMode(CRmode m){
     mode = m;
 }
 
-void HandleTyping(unichar c){
+void MathText::HandleTyping(unichar c){
 	if(mode==session && c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
 		HideCaret();
 		handleCR();
@@ -1239,7 +1132,7 @@ void HandleTyping(unichar c){
 	} else HandleTyping0(c);
 }
 
-void highlightSelected(){
+void MathText::highlightSelected(){
     if(!nowSelected) return;
     //[[[NSColor selectedControlColor] colorWithAlphaComponent:0.5] set];   was not useful
     [[NSColor selectedControlColor] set];
@@ -1261,7 +1154,7 @@ void highlightSelected(){
     [path fill];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
 }
-void HandleShifted(unichar c){
+void MathText::HandleShifted(unichar c){
     if(!nowSelected){
         beginOfSel = ins;	//for text selection
         //release(beginSelList);       possibly no need 131018
@@ -1285,7 +1178,7 @@ void HandleShifted(unichar c){
 	MoveTo(cursorPosition.x, cursorPosition.y);
 	nowSelected = true;
 }
-void getClickPosition(NSPoint pt){
+void MathText::getClickPosition(NSPoint pt){
 	clickpnt = pt;
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
@@ -1298,12 +1191,12 @@ void getClickPosition(NSPoint pt){
 	insList = ins_list(&line, click.curstr);
 	cursorPosition = curclick;
 }
-void HandleContentClick(NSPoint pt){
+void MathText::HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
     nowSelected = false;
     ShowCaret();
 }
-void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
+void MathText::HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 	clickpnt = pt;
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
@@ -1337,7 +1230,7 @@ void HandleDragTo(NSPoint pt){  // combined getClockPosition and HandleShifted
 //	DrawControls(targetWindow);
 //	EndUpdate(targetWindow);
 }*/
-void DoUndo(){
+void MathText::DoUndo(){
 	obj doit=retainD(undobuf);
 	if(type(doit)==tDel){
 		int n = uint(doit);
@@ -1352,7 +1245,7 @@ void DoUndo(){
 	release(doit);
 	updateAround(true);
 }
-NSString* copySelected(){
+NSString* MathText::copySelected(){
 	if(beginSelList != insList) {
 		//SysBeep(1);
 		return nil;
@@ -1368,13 +1261,13 @@ NSString* copySelected(){
     return str;
 }
 
-void DoHide(){
+void MathText::DoHide(){
 	insert(create(tShow, cutSelected()));
 	updateAround(true);
 	// next, make switch possible, then make it Hide not Show
 }
 
-NSString* DoCut(){
+NSString* MathText::DoCut(){
 	NSString* str = copySelected();
 	putinUndobuf(cutSelected());
 	updateAround(true);
@@ -1382,14 +1275,14 @@ NSString* DoCut(){
     return str;
 }
 
-void pasteCString(const char* str){    // assumes UTF16
+void MathText::pasteCString(const char* str){    // assumes UTF16
     list tt = csparse(str, strlen(str));
     for(list l=tt; l; l=rest(l)) insert(retainD(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
-void setCString(const char* str){   // UTF8
+void MathText::setCString(const char* str){   // UTF8
 	newLine();
 	line = csparse(str, strlen(str));
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
@@ -1397,18 +1290,18 @@ void setCString(const char* str){   // UTF8
 	MoveTo(cursorPosition.x, cursorPosition.y);
 }
 
-NSString* serializedString(){
+NSString* MathText::serializedString(){
 	char* st = listToCString(line);
     NSString* str = [[NSString alloc] initWithCString:st encoding:NSUTF8StringEncoding];
     free(st);
     return str;
 }
 
-void DoLatex(){
+void MathText::DoLatex(){
 	assert(0);
 }
 
-obj edit(obj fn){	// open edit save
+obj MathText::edit(obj fn){	// open edit save
 	long bytes;
 	obj rr = nil;//val(read(&bytes, (fn)));     // restore needed 131014
 	newLine();
@@ -1426,7 +1319,7 @@ obj edit(obj fn){	// open edit save
 	return nil;
 }
 
-obj editline(obj v){
+obj MathText::editline(obj v){
 	newLine();
 	line = CStringToLine(v);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);	
@@ -1445,7 +1338,7 @@ static void append(string*rs, const char*s){
 	for(; *s; s++) appendS(rs, *(unsigned char*)s);
 }
 
-static void serialize(string*rs, list l, list end){
+void serialize(string*rs, list l, list end){
 	for(; l != end; step(l)){
 		obj v = first(l);
 		switch(type(v)){
@@ -1484,8 +1377,8 @@ char* listToCString(list l){
 	return rs.s;
 }
 
-static char* clp;	//
-static char* clpe;	// end
+char* clp;	//
+char* clpe;	// end
 list csparse0();
 
 list putchar(int c, list l){
@@ -1523,8 +1416,6 @@ int readchar2(char* st){    // UTF8
 }
 char* next2(char* st){    // UTF8
     if(!(*st & 0x80)) return st+1;
-//    int c = *st & 0x3F;
-//    for(int i = 0x20; c-i >= 0; i = i>>1) c -= i;
     for(st++; (*st & 0xC0) == 0x80; st++);
 	return st;
 }
@@ -1565,6 +1456,33 @@ list CStringToLine(obj str){
 	assert(type(str)==STRING);
 	return csparse(ustr(str), strlen(ustr(str)));
 }
+
+
+
+void scroll(){          icaller -> scroll();}
+void scrollBy(int i){   icaller -> scrollBy(i);}
+
+void myPrintf(const char *fmt,...){
+	va_list	ap;
+	char str[256];
+	NSPoint pt;
+//	GetPen(&pt);
+	if(pt.x > LEFTMARGIN+colWidth) return;
+    //	if(pt.x > LEFTMARGIN+colWidth) scroll();
+	va_start(ap,fmt);
+	if (fmt) {
+		vsprintf(str,fmt,ap);
+	}
+	va_end(ap);
+	if(strlen(str)>255) assert_func("app.c", __LINE__);
+	icaller->addStringToText(str);
+    //append_string(&ks, str); write string merge
+	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
+//	Move(StringWidth(str), 0);
+}
+
+void addObjToText(struct value* line){icaller -> addObjToText(line);}
+
 
 
 
