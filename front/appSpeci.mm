@@ -405,6 +405,12 @@ bool MathText::drawFragment0(list* line, list& l, int& pos, bool draw){
             if(draw) [caller drawCaretAt:curPt];
             Move(w, 0);
         }
+		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
+            click.curstr = line;
+            click.pos = pos;
+			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
+			curclick = pt;
+		}
 		if(! l) goto endline;
 
 		obj v= first(l);
@@ -414,12 +420,6 @@ bool MathText::drawFragment0(list* line, list& l, int& pos, bool draw){
         
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth) goto newline;    //wrap
-		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
-            click.curstr = line;
-            click.pos = pos;
-			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
-			curclick = pt;
-		}
 	}
 endline:
 	return 0;
@@ -454,13 +454,14 @@ void MathText::drawLine(list*line, bool draw){
             surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
             *il = cons((int)vv, nil);
             *ll = cons(l, nil);
-        } else if((*il)->d && first((*il)->d) < clip.origin.y - FONTSIZE){
+        } else if((*il)->d && first((*il)->d) < clip.origin.y){
             l = first((*ll)->d);
             pos = find(l, *line);
             vv = first((*il)->d);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
         }
+        //NSLog(@"%i", (int)vv);
         if(drawFragment0(line, l, pos, draw)){
             vv += LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);

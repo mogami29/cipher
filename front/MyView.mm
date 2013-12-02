@@ -175,6 +175,12 @@
     text->HandleTyping(BS);
 }
 
+- (void) deleteForward:(id)sender
+{
+    text->HandleTyping(arrowRight);     // There may be some trouble with this easy implementation.
+    text->HandleTyping(BS);
+}
+
 - (void) insertTab:(id)sender
 {
     text->HandleTyping('\t');
@@ -249,7 +255,8 @@
         // store the starting mouse-down location;
         lastDragLocation = clickLocation;
     }*/
-    [self display];
+    cursorOn = 1;
+    [self setNeedsDisplay:YES];
 }
 
 - (void) mouseDragged:(NSEvent *)event
@@ -284,6 +291,7 @@
 
 - (void) undo:sender {
     text->DoUndo();
+    [self setNeedsDisplay:YES];
 }
 
 - (void) redo:sender {
@@ -363,8 +371,8 @@
     // The next two lines make sure that animation will continue to occur
     // while modal panels are displayed and while event tracking is taking
     // place (for example, while a slider is being dragged).
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
+    //[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSModalPanelRunLoopMode];
+    //[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
     
     cursorOn = 1;
 //    lastTime = [NSDate timeIntervalSinceReferenceDate];
