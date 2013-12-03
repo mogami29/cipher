@@ -79,14 +79,14 @@ node<list>* cons(list v, node<list>* l){
 	nn->a = v;
 	nn->d = l;
 	return nn;
-}
-/*template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
+}/*/
+template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it does not work
  node<T>* nn = (node<T>*)node_alloc<obj>();
  //	L nn = new node<T>();
  nn->a = v;
  nn->d = l;
  return nn;
- }*/
+ }//*/
 template <class T> void surface_free(node<T>* p){
 	node<T>* next;
 	for( ; p; p=next){
@@ -948,7 +948,7 @@ void MathText::newLine0(){
 void MathText::initLines(){
 //	lines = phi();
     viewPosition = 0;
-    baseLine = 50;
+    baseLine = 20;
     insList = nil;
     nowSelected = false;
     didBuf = nil;

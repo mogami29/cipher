@@ -5,7 +5,7 @@
 #import "appSpeci.h"
 
 float FONTSIZE = 12;
-float colWidth = 450;
+float colWidth = COLWIDTH;
 
 @implementation MyView
 
@@ -66,9 +66,9 @@ float colWidth = 450;
 */
     text->theStr = backingStore;
     text->caller = self;
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12*0.8; colWidth = 450*0.8;}// [self stopAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopAnimation];}
         text->Redraw(rect);
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12; colWidth = 450;}// [self startAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12; colWidth = COLWIDTH;}// [self startAnimation];}
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
 }
 

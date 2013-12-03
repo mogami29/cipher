@@ -2,6 +2,7 @@
 extern float FONTSIZE;
 #define LINEHEIGHT (FONTSIZE*3/2)
 #define LEFTMARGIN 20
+#define COLWIDTH 450
 extern float colWidth;
 #define colSep 30
 #define nCols 1
