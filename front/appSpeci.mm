@@ -237,12 +237,12 @@ void MathText::drawSuperScript(obj v, bool draw){
 	Move(0,FONTSIZE*1/2);
 }
 void MathText::drawSubScript(obj v, bool draw){
-	Move(0,+FONTSIZE/3);
+	Move(0,+FONTSIZE/4);
 	TextSize(FONTSIZE*3/4);
 	assert(type(v)==SubScript);
 	drawFragment(v, draw);
 	TextSize(FONTSIZE);
-	Move(0,-FONTSIZE/3);
+	Move(0,-FONTSIZE/4);
 }
 // CRは行末に付属すると考える。
 
@@ -532,6 +532,7 @@ void MathText::Redraw(NSRect rect){
         rememberYPos(position-viewPosition, first(aLine));
 		drawObj(first(aLine));
 	}*/
+    TextSize(FONTSIZE);
 	MoveTo(LEFTMARGIN, startOfThisLine-viewPosition);
 	drawLine(&line, true);
 	viewHeight = larger(viewHeight, larger(startOfThisLine + FONTSIZE*2 + LINEHEIGHT*getNLine(line), cursorPosition.y) + 3*FONTSIZE);// too inacurate

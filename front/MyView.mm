@@ -4,6 +4,9 @@
 #include "list.h"
 #import "appSpeci.h"
 
+float FONTSIZE = 12;
+float colWidth = 450;
+
 @implementation MyView
 
 #define larger(a, b) ((a) > (b) ? (a) : (b))
@@ -63,7 +66,9 @@
 */
     text->theStr = backingStore;
     text->caller = self;
-    text->Redraw(rect);
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12*0.8; colWidth = 450*0.8;}// [self stopAnimation];}
+        text->Redraw(rect);
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12; colWidth = 450;}// [self startAnimation];}
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
 }
 
@@ -75,7 +80,8 @@
         NSPoint	point0 = {(int)(pt.x + w)+.5, pt.y };
         NSPoint	point1 = {(int)(pt.x + w)+.5, pt.y - FONTSIZE};
         [[NSColor blackColor] set];
-        [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
+        if ([NSGraphicsContext currentContextDrawingToScreen])
+            [NSBezierPath strokeLineFromPoint:point0 toPoint:point1];
     }
 }
 

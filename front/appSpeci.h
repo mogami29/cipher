@@ -1,9 +1,8 @@
 //app.cÇ∆appspeci.cÇÃã§í ÉwÉbÉ_Å[
-#define FONTSIZE 12
+extern float FONTSIZE;
 #define LINEHEIGHT (FONTSIZE*3/2)
 #define LEFTMARGIN 20
-#define colWidth 450
-//#define colWidth 200
+extern float colWidth;
 #define colSep 30
 #define nCols 1
 #define viewWidth 500
