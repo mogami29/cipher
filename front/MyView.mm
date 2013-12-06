@@ -66,9 +66,9 @@ float colWidth = COLWIDTH;
 */
     text->theStr = backingStore;
     text->caller = self;
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopAnimation];}
         text->Redraw(rect);
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {FONTSIZE = 12; colWidth = COLWIDTH;}// [self startAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;}// [self startAnimation];}
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
 }
 
@@ -143,6 +143,40 @@ float colWidth = COLWIDTH;
     else
         ;// handle error here
 }
+/*
+// from "Laying Out Page Content"
+// Return the number of pages available for printing
+- (BOOL)knowsPageRange:(NSRangePointer)range {
+    NSRect bounds = [self bounds];
+    float printHeight = [self calculatePrintHeight];
+ 
+    range->location = 1;
+    range->length = NSHeight(bounds) / printHeight + 1;
+    return YES;
+}
+
+// Return the drawing rectangle for a particular page number
+- (NSRect)rectForPage:(NSInteger)page {
+    NSRect bounds = [self bounds];
+    float pageHeight = [self calculatePrintHeight];
+    return NSMakeRect( NSMinX(bounds), (page - 1) * pageHeight,
+                        NSWidth(bounds), pageHeight );
+}
+
+// Calculate the vertical size of the view that fits on a single page
+- (float)calculatePrintHeight {
+    // Obtain the print info object for the current operation
+    NSPrintInfo *pi = [[NSPrintOperation currentOperation] printInfo];
+ 
+    // Calculate the page height in points
+    NSSize paperSize = [pi paperSize];
+    float pageHeight = paperSize.height - [pi topMargin] - [pi bottomMargin];
+ 
+    // Convert height to the scaled view
+    float scale = [[[pi dictionary] objectForKey:NSPrintScalingFactor]
+                    floatValue];
+    return pageHeight / scale;
+}//*/
 
 - (void) keyDown : (NSEvent *) theEvent
 {

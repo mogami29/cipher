@@ -62,8 +62,6 @@ void exit2shell(){
 
 typedef node<int>* intlist;
 typedef node<list>* listlist;
-node<int>* yposOfLines = nil;
-node<list>* pointerToLines = nil;
 template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
 
 node<int>* cons(int v, node<int>* l){
@@ -448,7 +446,7 @@ void MathText::drawLine(list*line, bool draw){
         if(*il==nil) {
             *il = cons((int)vv, nil);
             *ll = cons(l, nil);
-        } else if(/*first(*il) != vv ||*/ first(*ll) != l){
+        } else if(/*first(*il) != (int)vv ||*/ first(*ll) != l){
             // invalidate
             surface_free(*il);
             surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
@@ -483,6 +481,11 @@ void MathText::drawLine(list*line, bool draw){
     MoveTo(LEFTMARGIN, vv);
     viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(l));
     if(!l) viewHeight = vv + FONTSIZE*3;
+}
+
+void MathText::invalidateLayoutCache(){
+    yposOfLines = nil;
+    pointerToLines = nil;
 }
 
 float MathText::getWidth(obj str){
@@ -1142,7 +1145,7 @@ void MathText::highlightSelected(){
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositePlusDarker];
     NSBezierPath* path = [NSBezierPath bezierPath];
     NSPoint s = selectionCursorPosition, e = cursorPosition;
-    if(s.y == e.y ){
+    if(abs(s.y - e.y) < FONTSIZE){
         Rect r;
         r.left = smaller(s.x, e.x);
         r.right= larger(s.x, e.x);
@@ -1280,6 +1283,7 @@ NSString* MathText::DoCut(){
 
 void MathText::pasteCString(const char* str){    // assumes UTF16
     list tt = csparse(str, strlen(str));
+    removeSelected();
     for(list l=tt; l; l=rest(l)) insert(retainD(first(l)));
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
@@ -1288,9 +1292,9 @@ void MathText::pasteCString(const char* str){    // assumes UTF16
 void MathText::setCString(const char* str){   // UTF8
 	newLine();
 	line = csparse(str, strlen(str));
-	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
+/*	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	drawLine(&line, true);
-	MoveTo(cursorPosition.x, cursorPosition.y);
+	MoveTo(cursorPosition.x, cursorPosition.y);*/
 }
 
 NSString* MathText::serializedString(){

@@ -156,7 +156,6 @@ inline bool equalsToCursor(char* curline, int pos){
     inline int getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark);
     void findInsertionCloseTo(float h, int &next, int &prev);
     NSMutableAttributedString* theStr;
-//#import "MyView.h"
     MyView* caller;
     insp click;
     NSPoint clickpnt;
@@ -165,7 +164,10 @@ inline bool equalsToCursor(char* curline, int pos){
     void drawFragment(obj line, bool draw);
     int viewHeight = 100;
     NSRect updateRect;
+    node<int>* yposOfLines = nil;
+    node<list>* pointerToLines = nil;
     void drawLine(list*line, bool draw);
+    void invalidateLayoutCache();
     float getWidth(obj str);
     void showPlot(obj y);
     void drawObj(obj line);
