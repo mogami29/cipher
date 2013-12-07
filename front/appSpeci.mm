@@ -60,7 +60,7 @@ void exit2shell(){
 
 
 typedef node<int>* intlist;
-typedef node<list>* listlist;
+typedef node<list*>* listlist;
 template <class T> node<T>** rest(node<T>** l){return &((*l)->d);}
 
 node<int>* cons(int v, node<int>* l){
@@ -70,8 +70,8 @@ node<int>* cons(int v, node<int>* l){
 	nn->d = l;
 	return nn;
 }
-node<list>* cons(list v, node<list>* l){
-	node<list>* nn = (node<list>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+node<list*>* cons(list* v, node<list*>* l){
+	node<list*>* nn = (node<list*>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
     //	L nn = new node<T>();
 	nn->a = v;
 	nn->d = l;
@@ -337,6 +337,13 @@ void step(list& l, int& pos){
     }
     pos++, l=rest(l);
 }
+void step(list*& l, int& pos){
+    obj v = first(*l);
+    if(type(v)==INT && isWide(uint(v)) && rest(*l) && type(second(*l))==INT){
+        pos++; l=rest(l);
+    }
+    pos++, l=rest(l);
+}
 void step(list& l){
     obj v = first(l);
     if(type(v)==INT && isWide(uint(v)) && rest(l) && type(second(l))==INT){
@@ -391,10 +398,10 @@ endline:
 	}
 }
 
-bool MathText::drawFragment0(list* line, list& l, int& pos, bool draw){
+bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){
 	NSPoint pt;
 	for(; ; ){	// chars
-        if(equalsToCursor(line, l, pos)){
+        if(equalsToCursor(line, *l, pos)){
 			GetPen(&cursorPosition);
 			crossed = true;
 
@@ -409,11 +416,11 @@ bool MathText::drawFragment0(list* line, list& l, int& pos, bool draw){
 			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
 			curclick = pt;
 		}
-		if(! l) goto endline;
+		if(! *l) goto endline;
 
-		obj v= first(l);
+		obj v= first(*l);
 		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l); goto newline;};	//newlineifneccesary
-		drawACharOrABox(l, pos, draw);
+		drawACharOrABox(*l, pos, draw);
         step(l, pos);
         
 		GetPen(&pt);
@@ -426,7 +433,7 @@ newline:
 }
 
 void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
-	list l=ul(line);
+	list *l=&ul(line);
 	int pos=0;
 	drawFragment0(&ul(line), l, pos, draw);
 }
@@ -439,17 +446,17 @@ void MathText::drawLine(list*line, bool draw){
     drawLine0(line, draw);
 }
 void MathText::drawLine0(list*line, bool draw){
-	list l = *line;
+	list* l = line;
 	int pos = 0;
 	NSPoint pt;
 	GetPen(&pt);
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
-    for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
+    for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft or hard)
         if(*il==nil) {
             *il = cons((int)vv, nil);
             *ll = cons(l, nil);
-        } else if(/*first(*il) != (int)vv ||*/ first(*ll) != l){
+        } else if(first(*ll) != l){     //first(*il) != (int)vv ||
             // invalidate
             surface_free(*il);
             surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
@@ -457,7 +464,7 @@ void MathText::drawLine0(list*line, bool draw){
             *ll = cons(l, nil);
         } else if((*il)->d && first((*il)->d) < clip.origin.y){
             l = first((*ll)->d);
-            pos = find(l, *line);
+            pos = find(*l, *line);
             vv = first((*il)->d);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
@@ -467,7 +474,7 @@ void MathText::drawLine0(list*line, bool draw){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
-            if(equalsToCursor(line, l, pos)) continue;
+            if(equalsToCursor(line, *l, pos)) continue;
 /*                GetPen(&cursorPosition);
                 crossed = true;
                 
@@ -478,12 +485,12 @@ void MathText::drawLine0(list*line, bool draw){
             }*/
         }
     skipthisline:
-        if(! l) return;
+        if(! *l) return;
         if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
     }
     //vv += -windowHeight + FONTSIZE;
     MoveTo(LEFTMARGIN, vv);
-    viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(l));
+    viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
     if(!l) viewHeight = vv + FONTSIZE*3;
 }
 
@@ -677,6 +684,7 @@ list MathText::ins_list(list*scan, list*cstr){	// finding insList from curstr
 		if( &ul(v)==cstr) return list1(Int(i+1));
 		else if (list ll = ins_list(&ul(v), cstr)) return merge(ll, list1(Int(i+1)));
 	}
+    assert(0);
 	return nil;
 }
 /*list* upper_str(list*scan){

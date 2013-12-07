@@ -160,14 +160,14 @@ inline bool equalsToCursor(char* curline, int pos){
     insp click;
     NSPoint clickpnt;
     NSPoint curclick;
-    bool drawFragment0(list* line, list& l, int& pos, bool draw);
+    bool drawFragment0(list* line, list*& l, int& pos, bool draw);
     void drawFragment(obj line, bool draw);
     int viewHeight = 100;
     NSRect updateRect;
     node<int>* yposOfLines = nil;
-    node<list>* pointerToLines = nil;
+    node<list*>* pointerToLines = nil;
     node<int>** il;
-    node<list>** ll;
+    node<list*>** ll;
     void drawLine(list*line, bool draw);
     void drawLine0(list*line, bool draw);
     void invalidateLayoutCache();
