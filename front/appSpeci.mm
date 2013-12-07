@@ -43,7 +43,6 @@ public:
 jmp_buf jmpEnv;
 
 void assert_func(const char* file, int line){
-	scroll();
 	NSLog(@"assertion failure line %d in %s.", line, file);
 	//longjmp(jmpEnv, 1);
 }
@@ -101,7 +100,8 @@ void rememberYPos(int y, obj v){     // v want to be either obj or list*
 
 int find(list l, list line){
     int p = 0;
-    for (; line; line=rest(line), p++) if(l==line) break;
+    for (; line; line=rest(line), p++) if(l==line) return p;
+    if(l!=nil) assert(0);
     return p;
 }
 
@@ -308,14 +308,14 @@ void MathText::drawACharOrABox(list& l, int& pos, bool draw){
         assert(0);
 	case tShow:
 		DrawString("▽");
-		drawLine(&ul(v), draw);
+		drawLine0(&ul(v), draw);
 		DrawString("▽");
 		break;
     case tHide:
 		DrawString("△");
 		break;
     case STRING:
-            if(draw) DrawString(ustr(v)); else Move(StringWidth(ustr(v)), 0);
+        if(draw) DrawString(ustr(v)); else Move(StringWidth(ustr(v)), 0);
         break;
     case IMAGE:
     case tCImg:
@@ -433,15 +433,18 @@ void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
 
 //static int getNLine(list line);
 void MathText::drawLine(list*line, bool draw){
+    drawList = phi();
+    il = &yposOfLines;
+    ll = &pointerToLines;
+    drawLine0(line, draw);
+}
+void MathText::drawLine0(list*line, bool draw){
 	list l = *line;
 	int pos = 0;
-    drawList = phi();   // may have trouble with tShow
 	NSPoint pt;
 	GetPen(&pt);
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
-    intlist* il = &yposOfLines;
-    listlist* ll = &pointerToLines;
     for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft and hard)
         if(*il==nil) {
             *il = cons((int)vv, nil);
@@ -461,7 +464,8 @@ void MathText::drawLine(list*line, bool draw){
         }
         //NSLog(@"%i", (int)vv);
         if(drawFragment0(line, l, pos, draw)){
-            vv += LINEHEIGHT;
+            GetPen(&pt);
+            vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
             if(equalsToCursor(line, l, pos)) continue;
 /*                GetPen(&cursorPosition);
@@ -505,7 +509,7 @@ void MathText::showPlot(obj y){           // plotting
     for(int i=1; i< udar(y).size; i++) [path lineToPoint:NSMakePoint(10+i*3, baseLine - udar(y).v[i])];
     [path stroke];
 }
-
+/*
 void MathText::drawObj(obj line){		//set cursorPosition at the same time
 	if(type(line) ==STRING){
 		DrawString(ustr(line));
@@ -520,7 +524,7 @@ void MathText::drawObj(obj line){		//set cursorPosition at the same time
 	assert(type(line)==LIST);
 	drawLine(&ul(line), true);
 }
-
+*/
 //static void highlightSelected();
 
 void MathText::Redraw(NSRect rect){
@@ -1269,7 +1273,7 @@ NSString* MathText::copySelected(){
 
 void MathText::DoHide(){
 	insert(create(tShow, cutSelected()));
-	updateAround(true);
+	//updateAround(true);
 	// next, make switch possible, then make it Hide not Show
 }
 

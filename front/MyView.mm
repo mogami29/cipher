@@ -376,6 +376,10 @@ float colWidth = COLWIDTH;
     [self updateFrameSizeAndDraw];
 }
 
+- (void) hideText: sender{
+    text->DoHide();
+}
+
 - (BOOL)validateUserInterfaceItem:(id < NSValidatedUserInterfaceItem >)anItem {
     
     if ([anItem action] == @selector(cut:)) {
@@ -389,6 +393,9 @@ float colWidth = COLWIDTH;
     }
     if ([anItem action] == @selector(redo:)) {
         return YES;
+    }
+    if ([anItem action] == @selector(hideText:)) {
+        return text->nowSelected;
     }
     if ([anItem action] == @selector(paste:)) {
         NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];

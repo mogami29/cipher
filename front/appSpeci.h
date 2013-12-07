@@ -166,11 +166,14 @@ inline bool equalsToCursor(char* curline, int pos){
     NSRect updateRect;
     node<int>* yposOfLines = nil;
     node<list>* pointerToLines = nil;
+    node<int>** il;
+    node<list>** ll;
     void drawLine(list*line, bool draw);
+    void drawLine0(list*line, bool draw);
     void invalidateLayoutCache();
     float getWidth(obj str);
     void showPlot(obj y);
-    void drawObj(obj line);
+    //void drawObj(obj line);
     void Redraw(NSRect rect);
     //----------
     inline void set_insp(int pos);
