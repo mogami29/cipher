@@ -70,6 +70,43 @@ void setCursorBeforeVertMove();*/
 #define shiftCR 	1	// DoOpen, edit
 #define onlyCR 	2	// readline
 
+struct insp {
+	int pos;            // position in curstr
+	list *curstr;       // current string
+	list *lpos;         // pos-th of curstr. アクセサ関数の中からのみ変更されている。
+    char* curcstr;
+    
+	inline void moveInto(list *l){
+		curstr = l;
+		lpos = l;
+		pos = 0;
+        curcstr = nil; }
+	inline void moveRightmost(list *l){
+		curstr = l;
+		pos = length(*l);
+		lpos = rest(l, pos);
+        curcstr = nil; }    // cstr until here
+	inline insp(list *curstr, list* l, int i):curstr(curstr), lpos(l), pos(i) {}
+	inline insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
+	inline insp():curstr(nil), pos(0), lpos(nil), curcstr(nil){};
+	inline void setpos(int p){
+		if(curstr){
+            lpos = rest(curstr, p);
+            pos = p;
+            curcstr = nil;
+        } else {
+            lpos = nil;
+            pos = p;
+        }
+    }
+	inline list* list_point(){
+        assert(lpos);   // not implemented for curCstr != nil
+        return lpos;
+		return rest(curstr, pos);
+	}
+};
+
+
 struct MathText { public:
 
 int viewPosition;
@@ -89,40 +126,6 @@ list insList;// insertion point のスタック（先頭の要素が、一番内
                         // insと合わせてinsertion pointを表す
                         // ins.posは実質insListの先頭。
 list	beginSelList;
-struct insp {
-	int pos;            // position in curstr
-	list *curstr;       // current string
-	list *lpos;         // pos-th of curstr. アクセサ関数の中からのみ変更されている。
-    char* curcstr;
-    
-	inline void moveInto(list *l){
-		curstr = l;
-		lpos = l;
-		pos = 0;
-        curcstr = nil; }
-	inline void moveRightmost(list *l){
-		curstr = l;
-		pos = length(*l);
-		lpos = rest(l, pos);
-        curcstr = nil; }    // cstr until here
-	inline insp(list* l, int i):curstr(l), pos(i) {lpos = rest(l,i);}
-	inline insp():curstr(nil), pos(0), lpos(nil), curcstr(nil){};
-	inline void setpos(int p){
-		if(curstr){
-            lpos = rest(curstr, p);
-            pos = p;
-            curcstr = nil;
-        } else {
-            lpos = nil;
-            pos = p;
-        }
-    }
-	inline list* list_point(){
-        assert(lpos);   // not implemented for curCstr != nil
-        return lpos;
-		return rest(curstr, pos);
-	}
-};
 insp beginOfSel, ins;		//insは現在のinsertion point
 
 inline bool equalsToCursor(list* curline, list l, int pos){
@@ -165,9 +168,9 @@ inline bool equalsToCursor(char* curline, int pos){
     int viewHeight = 100;
     NSRect updateRect;
     node<int>* yposOfLines = nil;
-    node<list*>* pointerToLines = nil;
+    node<insp>* pointerToLines = nil;
     node<int>** il;
-    node<list*>** ll;
+    node<insp>** ll;
     void drawLine(list*line, bool draw);
     void drawLine0(list*line, bool draw);
     void invalidateLayoutCache();

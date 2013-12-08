@@ -70,8 +70,8 @@ node<int>* cons(int v, node<int>* l){
 	nn->d = l;
 	return nn;
 }
-node<list*>* cons(list* v, node<list*>* l){
-	node<list*>* nn = (node<list*>*)node_alloc<obj>();  //platform dependent: cast may cause trouble with the position of refcount
+node<insp>* cons(insp v, node<insp>* l){
+	node<insp>* nn = (node<insp>*)malloc(sizeof(node<insp>));  //platform dependent: cast may cause trouble with the position of refcount
     //	L nn = new node<T>();
 	nn->a = v;
 	nn->d = l;
@@ -84,12 +84,27 @@ template <class T> node<T>* cons(T v, node<T>* l){       // don't know why it do
  nn->d = l;
  return nn;
  }//*/
-template <class T> void surface_free(node<T>* p){
+/*template <class T> void surface_free(node<T>* p){
 	node<T>* next;
 	for( ; p; p=next){
 		next = p->d;
 		assert(p->refcount);
 		node_free((node<obj>*)p);
+	}
+}*/
+void surface_free(node<int>* p){
+	node<int>* next;
+	for( ; p; p=next){
+		next = p->d;
+		assert(p->refcount==1);
+		node_free((node<obj>*)p);
+	}
+}
+void surface_free(node<insp>* p){
+	node<insp>* next;
+	for( ; p; p=next){
+		next = p->d;
+		free(p);
 	}
 }
 
@@ -455,16 +470,18 @@ void MathText::drawLine0(list*line, bool draw){
     for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft or hard)
         if(*il==nil) {
             *il = cons((int)vv, nil);
-            *ll = cons(l, nil);
-        } else if(first(*ll) != l){     //first(*il) != (int)vv ||
+            *ll = cons(insp(line, l, pos), nil);
+        } else if(first(*ll).lpos != l){     //first(*il) != (int)vv ||
             // invalidate
             surface_free(*il);
             surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
             *il = cons((int)vv, nil);
-            *ll = cons(l, nil);
+            *ll = cons(insp(line, l, pos), nil);
         } else if((*il)->d && first((*il)->d) < clip.origin.y){
-            l = first((*ll)->d);
-            pos = find(*l, *line);
+            l = first((*ll)->d).lpos;
+            //pos = find(*l, *line);
+            pos = first((*ll)->d).pos;
+            line = first((*ll)->d).curstr;
             vv = first((*il)->d);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
@@ -488,7 +505,6 @@ void MathText::drawLine0(list*line, bool draw){
         if(! *l) return;
         if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
     }
-    //vv += -windowHeight + FONTSIZE;
     MoveTo(LEFTMARGIN, vv);
     viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
     if(!l) viewHeight = vv + FONTSIZE*3;
@@ -684,7 +700,6 @@ list MathText::ins_list(list*scan, list*cstr){	// finding insList from curstr
 		if( &ul(v)==cstr) return list1(Int(i+1));
 		else if (list ll = ins_list(&ul(v), cstr)) return merge(ll, list1(Int(i+1)));
 	}
-    assert(0);
 	return nil;
 }
 /*list* upper_str(list*scan){
