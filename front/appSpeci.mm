@@ -415,6 +415,7 @@ endline:
 
 bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){
 	NSPoint pt;
+    GetPen(&pt);
 	for(; ; ){	// chars
         if(equalsToCursor(line, *l, pos)){
 			GetPen(&cursorPosition);
@@ -428,7 +429,7 @@ bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){
 		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
             click.curstr = line;
             click.pos = pos;
-			click = insp(click.curstr, click.pos);  // setting lpos will be postponed to getClickPosition()
+			click.lpos = l;
 			curclick = pt;
 		}
 		if(! *l) goto endline;
@@ -477,7 +478,7 @@ void MathText::drawLine0(list*line, bool draw){
             surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
             *il = cons((int)vv, nil);
             *ll = cons(insp(line, l, pos), nil);
-        } else if((*il)->d && first((*il)->d) < clip.origin.y){
+        } else if((*il)->d && first((*il)->d) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
             l = first((*ll)->d).lpos;
             //pos = find(*l, *line);
             pos = first((*ll)->d).pos;
@@ -503,7 +504,7 @@ void MathText::drawLine0(list*line, bool draw){
         }
     skipthisline:
         if(! *l) return;
-        if(vv > clip.origin.y + clip.size.height + FONTSIZE/2) break;
+        if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
     }
     MoveTo(LEFTMARGIN, vv);
     viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
@@ -571,6 +572,7 @@ void MathText::Redraw(NSRect rect){
      Line(0,-FONTSIZE);
      Move(0, FONTSIZE);
      }*/
+    [NSBezierPath strokeRect:NSMakeRect(clickpnt.x - 0.5, clickpnt.y -0.5, 1, 1)];
     highlightSelected();
     baseLine = cursorPosition.y;
 }
@@ -1176,13 +1178,15 @@ void MathText::highlightSelected(){
         Rect r;
         r.left = smaller(s.x, e.x);
         r.right= larger(s.x, e.x);
-        r.top  = smaller(s.y, e.y) - FONTSIZE;
-        r.bottom=larger(s.y, e.y);
-        [path appendBezierPathWithRect:NSMakeRect(r.left, r.top, r.right - r.left, r.bottom - r.top)];
+        //r.top  = smaller(s.y, e.y) - FONTSIZE;
+        //r.bottom=larger(s.y, e.y);
+        [path appendBezierPathWithRect:NSMakeRect(r.left, s.y - FONTSIZE, r.right - r.left, LINEHEIGHT)];
     } else {
         if(s.y > e.y) {s=cursorPosition; e=selectionCursorPosition;}
-        [path appendBezierPathWithRect:NSMakeRect(s.x, s.y - FONTSIZE - [fontAttr descender], viewWidth - s.x, e.y - s.y)];
-        [path appendBezierPathWithRect:NSMakeRect(0, s.y - [fontAttr descender], e.x, e.y - s.y)];
+        [path appendBezierPathWithRect:NSMakeRect(s.x, s.y - FONTSIZE, LEFTMARGIN + COLWIDTH + FONTSIZE  - s.x, LINEHEIGHT)];
+        [path appendBezierPathWithRect:NSMakeRect(LEFTMARGIN - 1, s.y - FONTSIZE + LINEHEIGHT,
+            LEFTMARGIN + COLWIDTH + FONTSIZE - (LEFTMARGIN - 1), e.y - s.y - LINEHEIGHT)];
+        [path appendBezierPathWithRect:NSMakeRect(LEFTMARGIN - 1, e.y - FONTSIZE, e.x - (LEFTMARGIN - 1), LINEHEIGHT)];
     }
     [path fill];
     [[NSGraphicsContext currentContext] setCompositingOperation:NSCompositeSourceOver];
