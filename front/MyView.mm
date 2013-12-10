@@ -193,7 +193,7 @@ float colWidth = COLWIDTH;
     cursorOn = true;
     [self updateFrameSizeAndDraw];
     [self display];
-	if(!(key==NSUpArrowFunctionKey || key==NSUpArrowFunctionKey)) text->setCursorBeforeVertMove();
+	if(!(key==NSUpArrowFunctionKey || key==NSDownArrowFunctionKey)) text->setCursorBeforeVertMove();
 }
 
 - (void) insertText:(id)string
@@ -378,6 +378,7 @@ float colWidth = COLWIDTH;
 
 - (void) hideText: sender{
     text->DoHide();
+    [self setNeedsDisplay:YES];
 }
 
 - (BOOL)validateUserInterfaceItem:(id < NSValidatedUserInterfaceItem >)anItem {

@@ -511,11 +511,15 @@ void MathText::drawLine0(list*line, bool draw){
             }*/
         }
     skipthisline:
+		if(!draw && vv < clickpnt.y + FONTSIZE){
+            click = insp(line, l, pos);
+			curclick = pt;
+		}
         if(! *l) return;
         if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
         startLineWith(insp(line, l, pos));      // cacheは２番目から始まる   // excessive check if skipped
         il=rest(il), ll=rest(ll);
-     }
+    }
     MoveTo(LEFTMARGIN, vv);
     viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
     if(!l) viewHeight = vv + FONTSIZE*3;
@@ -863,11 +867,12 @@ void MathText::moveUp(){
         moveToLast();
         return;
     }
-	int nx,pv;
+    getClickPosition(NSMakePoint(cursorBeforeVertMove.x, cursorPosition.y - LINEHEIGHT));
+	/*int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(pv == -1) return;
 	set_insp(pv);
-	baseLine += -LINEHEIGHT;
+	baseLine += -LINEHEIGHT;*/
 }
 void MathText::moveDown(){
 	if(list l = isInFracRecur()) {
@@ -894,11 +899,12 @@ void MathText::moveDown(){
         moveToLast();
         return;
     }
-	int nx,pv;
+    getClickPosition(NSMakePoint(cursorBeforeVertMove.x, cursorPosition.y + LINEHEIGHT));
+	/*int nx,pv;
 	findInsertionCloseTo(cursorBeforeVertMove.x, nx, pv);
 	if(nx==-1) return;
 	set_insp(nx);
-	baseLine += +LINEHEIGHT;
+	baseLine += +LINEHEIGHT;*/
 }
 
 //--------------------
