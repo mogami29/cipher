@@ -185,6 +185,9 @@ void MathText::DrawString(const char * str){
 #define idInt	1
 #define idStr	2
 //#define idChar	3
+void setType(obj v, ValueType t){
+	v->type = t;
+}
 inline obj dInt(long i){return (obj)((i<<2)+1);}
 inline long rInt(obj v){return (long)v>>2;}
 ValueType typeD(obj v){
@@ -218,7 +221,7 @@ long vrIntD(obj v){
 }
 #define vrInt vrIntD
 
-#define uint(v) ((long)v & dVal ? rInt(v) : ((int_*)v)->intv)
+#define uint(v) ((long)v & dVal ? (int)rInt(v) : ((int_*)v)->intv)
 //#define Int dInt
 //*/
 
@@ -461,6 +464,20 @@ void MathText::drawLine(list*line, bool draw){
     ll = &pointerToLines;
     drawLine0(line, draw);
 }
+void MathText::startLineWith(insp ip){      // or checkCache()
+	NSPoint pt;
+	GetPen(&pt);
+    if(*il==nil) {
+        *il = cons(pt.y, nil);
+        *ll = cons(ip, nil);
+    } else if(first(*ll).lpos != ip.lpos || first(*ll).pos != ip.pos){  //first(*il) != (int)vv ||
+        // invalidate
+        surface_free(*il);
+        surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
+        *il = cons(pt.y, nil);
+        *ll = cons(ip, nil);
+    }
+}
 void MathText::drawLine0(list*line, bool draw){
 	list* l = line;
 	int pos = 0;
@@ -468,22 +485,13 @@ void MathText::drawLine0(list*line, bool draw){
 	GetPen(&pt);
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
-    for(; ; il=rest(il), ll=rest(ll)){			// lines (either soft or hard)
-        if(*il==nil) {
-            *il = cons((int)vv, nil);
-            *ll = cons(insp(line, l, pos), nil);
-        } else if(first(*ll).lpos != l){     //first(*il) != (int)vv ||
-            // invalidate
-            surface_free(*il);
-            surface_free(*ll);    //releaseに変えた方がよい、freeされたnodeが再利用されているとまずい
-            *il = cons((int)vv, nil);
-            *ll = cons(insp(line, l, pos), nil);
-        } else if((*il)->d && first((*il)->d) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
-            l = first((*ll)->d).lpos;
-            //pos = find(*l, *line);
-            pos = first((*ll)->d).pos;
-            line = first((*ll)->d).curstr;
-            vv = first((*il)->d);
+    for(; ;){			// lines (either soft or hard)
+        //assert(*il);
+        if(*il && first(*il) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
+            l = first(*ll).lpos;
+            pos = first(*ll).pos;
+            line = first(*ll).curstr;
+            vv = first(*il);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
         }
@@ -493,7 +501,7 @@ void MathText::drawLine0(list*line, bool draw){
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
             if(equalsToCursor(line, *l, pos)) continue;
-/*                GetPen(&cursorPosition);
+                /*GetPen(&cursorPosition);
                 crossed = true;
                 
                 if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
@@ -505,7 +513,9 @@ void MathText::drawLine0(list*line, bool draw){
     skipthisline:
         if(! *l) return;
         if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
-    }
+        startLineWith(insp(line, l, pos));      // cacheは２番目から始まる   // excessive check if skipped
+        il=rest(il), ll=rest(ll);
+     }
     MoveTo(LEFTMARGIN, vv);
     viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
     if(!l) viewHeight = vv + FONTSIZE*3;
@@ -572,7 +582,7 @@ void MathText::Redraw(NSRect rect){
      Line(0,-FONTSIZE);
      Move(0, FONTSIZE);
      }*/
-    [NSBezierPath strokeRect:NSMakeRect(clickpnt.x - 0.5, clickpnt.y -0.5, 1, 1)];
+    //[NSBezierPath strokeRect:NSMakeRect(clickpnt.x - 0.5, clickpnt.y -0.5, 1, 1)];
     highlightSelected();
     baseLine = cursorPosition.y;
 }
@@ -1230,6 +1240,11 @@ void MathText::getClickPosition(NSPoint pt){
 }
 void MathText::HandleContentClick(NSPoint pt){
 	getClickPosition(pt);
+    obj v = peekNext();
+    if(v && (type(v)==tHide || type(v)==tShow)){ // cursor move should be suppressed in the future
+        if(type(v)==tHide) setType(v, tShow);
+        else setType(v, tHide);
+    }//*/
     nowSelected = false;
     ShowCaret();
 }
