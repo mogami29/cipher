@@ -416,11 +416,11 @@ endline:
 	}
 }
 
-bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){    //残りがあるか返る
+bool MathText::drawFragment0(insp& ip, bool draw){    //残りがあるか返る
 	NSPoint pt;
     GetPen(&pt);
 	for(; ; ){	// chars
-        if(equalsToCursor(line, *l, pos)){
+        if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)){
 			GetPen(&cursorPosition);
 			crossed = true;
 
@@ -430,17 +430,19 @@ bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){    //�
             Move(w, 0);
         }
 		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
-            click.curstr = line;
-            click.pos = pos;
-			click.lpos = l;
+            click = ip;
 			curclick = pt;
 		}
-		if(! *l) goto endline;
+		if(! *ip.lpos) goto endline;
 
-		obj v= first(*l);
-		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l); goto newline;};	//newlineifneccesary
-		drawACharOrABox(*l, pos, draw);
-        step(l, pos);
+		obj v= first(*ip.lpos);
+		if(type(v)==INT && uint(v)==CR) {ip.pos++, ip.lpos=rest(ip.lpos); goto newline;};	//newlineifneccesary
+        if(type(v) != tShow){
+            drawACharOrABox(*ip.lpos, ip.pos, draw);
+        } else {
+            goto endline;
+        }
+        step(ip.lpos, ip.pos);
         
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth) goto newline;    //wrap
@@ -452,9 +454,8 @@ newline:
 }
 
 void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
-	list *l=&ul(line);
-	int pos=0;
-	drawFragment0(&ul(line), l, pos, draw);
+    insp ip = insp(&ul(line), 0);
+	drawFragment0(ip, draw);
 }
 
 //static int getNLine(list line);
@@ -478,6 +479,15 @@ void MathText::startLineWith(insp ip){      // or checkCache()
         *ll = cons(ip, nil);
     }
 }
+
+insp MathText::toUpperLevel(insp ip){
+    list insl = ins_list(&line, ip.curstr);
+    int pos = vrInt(pop(&insl));
+    list* str = curr_str(insl);
+    release(insl);
+    return insp(str, pos);
+}
+
 void MathText::drawLine0(list*line, bool draw){
     insp ip = insp(line, 0);
 	NSPoint pt;
@@ -493,7 +503,8 @@ void MathText::drawLine0(list*line, bool draw){
             goto skipthisline;
         }
         //NSLog(@"%i", (int)vv);
-        if(drawFragment0(ip.curstr, ip.lpos, ip.pos, draw)){
+    continue_drawing:
+        if(drawFragment0(ip, draw)){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
@@ -506,13 +517,27 @@ void MathText::drawLine0(list*line, bool draw){
                 if(draw) [caller drawCaretAt:curPt];
                 Move(w, 0);
             }*/
+        } else if(*ip.lpos){    // begin of tShow
+            obj v=first(*ip.lpos);
+            DrawString("▽");
+            if(type(v)==tShow) ip.moveInto(&(ul(v)));
+            goto continue_drawing;
+        }
+        if(! *ip.lpos) {    // end of tShow
+            if(&(this->line) == ip.curstr) return;   // break ?
+            ip = toUpperLevel(ip);
+            DrawString("▽");
+            goto continue_drawing;
         }
     skipthisline:
 		if(!draw && vv < clickpnt.y + FONTSIZE){
             click = ip;
 			curclick = pt;
 		}
-        if(! *ip.lpos) return;
+        if(! *ip.lpos) {    // necessary ?
+            if(&(this->line) == ip.curstr) return;   // break ?
+            assert(0);
+        }
         if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
         startLineWith(ip);      // cacheは２番目から始まる   // excessive check if skipped
         il=rest(il), ll=rest(ll);

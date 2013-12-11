@@ -163,7 +163,7 @@ inline bool equalsToCursor(char* curline, int pos){
     insp click;
     NSPoint clickpnt;
     NSPoint curclick;
-    bool drawFragment0(list* line, list*& l, int& pos, bool draw);
+    bool drawFragment0(insp& ip, bool draw);
     void drawFragment(obj line, bool draw);
     int viewHeight = 100;
     NSRect updateRect;
