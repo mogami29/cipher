@@ -416,7 +416,7 @@ endline:
 	}
 }
 
-bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){
+bool MathText::drawFragment0(list* line, list*& l, int& pos, bool draw){    //残りがあるか返る
 	NSPoint pt;
     GetPen(&pt);
 	for(; ; ){	// chars
@@ -479,8 +479,7 @@ void MathText::startLineWith(insp ip){      // or checkCache()
     }
 }
 void MathText::drawLine0(list*line, bool draw){
-	list* l = line;
-	int pos = 0;
+    insp ip = insp(line, 0);
 	NSPoint pt;
 	GetPen(&pt);
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
@@ -488,19 +487,17 @@ void MathText::drawLine0(list*line, bool draw){
     for(; ;){			// lines (either soft or hard)
         //assert(*il);
         if(*il && first(*il) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
-            l = first(*ll).lpos;
-            pos = first(*ll).pos;
-            line = first(*ll).curstr;
+            ip = first(*ll);
             vv = first(*il);
             MoveTo(LEFTMARGIN, vv);
             goto skipthisline;
         }
         //NSLog(@"%i", (int)vv);
-        if(drawFragment0(line, l, pos, draw)){
+        if(drawFragment0(ip.curstr, ip.lpos, ip.pos, draw)){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
-            if(equalsToCursor(line, *l, pos)) continue;
+            if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)) continue;
                 /*GetPen(&cursorPosition);
                 crossed = true;
                 
@@ -512,17 +509,17 @@ void MathText::drawLine0(list*line, bool draw){
         }
     skipthisline:
 		if(!draw && vv < clickpnt.y + FONTSIZE){
-            click = insp(line, l, pos);
+            click = ip;
 			curclick = pt;
 		}
-        if(! *l) return;
+        if(! *ip.lpos) return;
         if(vv > clip.origin.y + clip.size.height + FONTSIZE) break;
-        startLineWith(insp(line, l, pos));      // cacheは２番目から始まる   // excessive check if skipped
+        startLineWith(ip);      // cacheは２番目から始まる   // excessive check if skipped
         il=rest(il), ll=rest(ll);
     }
     MoveTo(LEFTMARGIN, vv);
-    viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*l));
-    if(!l) viewHeight = vv + FONTSIZE*3;
+    viewHeight = larger(viewHeight, vv + FONTSIZE*3 + LINEHEIGHT*getNLine(*ip.lpos));
+    if(! *ip.lpos) viewHeight = vv + FONTSIZE*3;
 }
 
 void MathText::invalidateLayoutCache(){

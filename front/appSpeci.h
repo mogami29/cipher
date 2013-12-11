@@ -172,6 +172,7 @@ inline bool equalsToCursor(char* curline, int pos){
     node<int>** il;
     node<insp>** ll;
     void startLineWith(insp i);
+    insp toUpperLevel(insp ip);
     void drawLine(list*line, bool draw);
     void drawLine0(list*line, bool draw);
     void invalidateLayoutCache();
