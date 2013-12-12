@@ -295,6 +295,7 @@ float colWidth = COLWIDTH;
         // store the starting mouse-down location;
         lastDragLocation = clickLocation;
     }*/
+    text->setCursorBeforeVertMove();
     cursorOn = 1;
     [self setNeedsDisplay:YES];
 }

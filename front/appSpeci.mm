@@ -355,12 +355,12 @@ void step(list& l, int& pos){
     }
     pos++, l=rest(l);
 }
-void step(list*& l, int& pos){
-    obj v = first(*l);
-    if(type(v)==INT && isWide(uint(v)) && rest(*l) && type(second(*l))==INT){
-        pos++; l=rest(l);
+void step(insp& ip){
+    obj v = first(*ip.lpos);
+    if(type(v)==INT && isWide(uint(v)) && rest(*ip.lpos) && type(second(*ip.lpos))==INT){
+        ip.pos++; ip.lpos=rest(ip.lpos);
     }
-    pos++, l=rest(l);
+    ip.pos++, ip.lpos=rest(ip.lpos);
 }
 void step(list& l){
     obj v = first(l);
@@ -415,20 +415,23 @@ endline:
 		if(crossed) metend = true;
 	}
 }
+void MathText::toDosOnCursor(insp ip, bool draw){
+    if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)){
+        GetPen(&cursorPosition);
+        crossed = true;
+        
+        if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
+        CGFloat w = [theStr size].width;
+        if(draw) [caller drawCaretAt:curPt];
+        Move(w, 0);
+    }
+}
 
 bool MathText::drawFragment0(insp& ip, bool draw){    //残りがあるか返る
 	NSPoint pt;
     GetPen(&pt);
 	for(; ; ){	// chars
-        if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)){
-			GetPen(&cursorPosition);
-			crossed = true;
-
-            if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
-            CGFloat w = [theStr size].width;
-            if(draw) [caller drawCaretAt:curPt];
-            Move(w, 0);
-        }
+        toDosOnCursor(ip, draw);
 		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
             click = ip;
 			curclick = pt;
@@ -436,16 +439,21 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //残りがあるか返る
 		if(! *ip.lpos) goto endline;
 
 		obj v= first(*ip.lpos);
-		if(type(v)==INT && uint(v)==CR) {ip.pos++, ip.lpos=rest(ip.lpos); goto newline;};	//newlineifneccesary
+		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
         } else {
             goto endline;
         }
-        step(ip.lpos, ip.pos);
+        step(ip);
         
 		GetPen(&pt);
-		if(pt.x > LEFTMARGIN+colWidth) goto newline;    //wrap
+		if(pt.x > LEFTMARGIN+colWidth){
+            if(! *ip.lpos) goto endline;
+            obj v= first(*ip.lpos);
+            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+            goto newline;    //wrap
+        }
 	}
 endline:
 	return 0;
@@ -500,7 +508,7 @@ void MathText::drawLine0(list*line, bool draw){
             ip = first(*ll);
             vv = first(*il);
             MoveTo(LEFTMARGIN, vv);
-            goto skipthisline;
+            goto start_line;
         }
         //NSLog(@"%i", (int)vv);
     continue_drawing:
@@ -508,15 +516,7 @@ void MathText::drawLine0(list*line, bool draw){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
-            if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)) continue;
-                /*GetPen(&cursorPosition);
-                crossed = true;
-                
-                if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
-                CGFloat w = [theStr size].width;
-                if(draw) [caller drawCaretAt:curPt];
-                Move(w, 0);
-            }*/
+            if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)) continue;   // to do onCursor todos
         } else if(*ip.lpos){    // begin of tShow
             obj v=first(*ip.lpos);
             DrawString("▽");
@@ -529,7 +529,7 @@ void MathText::drawLine0(list*line, bool draw){
             DrawString("▽");
             goto continue_drawing;
         }
-    skipthisline:
+    start_line:
 		if(!draw && vv < clickpnt.y + FONTSIZE){
             click = ip;
 			curclick = pt;
