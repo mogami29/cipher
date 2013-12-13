@@ -427,7 +427,52 @@ void MathText::toDosOnCursor(insp ip, bool draw){
     }
 }
 
-bool MathText::drawFragment0(insp& ip, bool draw){    //残りがあるか返る
+bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
+	NSPoint pt;
+	for(; ; ){	// chars
+    continue_drawing:
+        GetPen(&pt);
+        toDosOnCursor(ip, draw);
+		if(!draw && pt.y < clickpnt.y + FONTSIZE && pt.x < clickpnt.x){
+            click = ip;
+			curclick = pt;
+		}
+		if(! *ip.lpos) goto endofline;
+
+		obj v= first(*ip.lpos);
+		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+        if(type(v) != tShow){
+            drawACharOrABox(*ip.lpos, ip.pos, draw);
+        } else {
+            obj v=first(*ip.lpos);
+            DrawString("▽");
+            if(type(v)==tShow) ip.moveInto(&(ul(v)));
+            goto continue_drawing;
+        }
+        step(ip);
+        
+		GetPen(&pt);
+		if(pt.x > LEFTMARGIN+colWidth){
+            if(! *ip.lpos) goto endofline;
+            obj v= first(*ip.lpos);
+            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+            goto newline;    //wrap
+        }
+	}
+endofline:
+    if(&(this->line) != ip.curstr) {    // end of tShow
+        ip = toUpperLevel(ip);
+        DrawString("▽");
+        goto continue_drawing;
+    }
+	return 0;
+newline:
+	return 1;
+}
+
+
+void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
+    insp ip = insp(&ul(line), 0);
 	NSPoint pt;
     GetPen(&pt);
 	for(; ; ){	// chars
@@ -436,34 +481,28 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //残りがあるか返る
             click = ip;
 			curclick = pt;
 		}
-		if(! *ip.lpos) goto endline;
-
+		if(! *ip.lpos) goto endofline;
+        
 		obj v= first(*ip.lpos);
 		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
         } else {
-            goto endline;
+            goto endofline;
         }
         step(ip);
         
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth){
-            if(! *ip.lpos) goto endline;
+            if(! *ip.lpos) goto endofline;
             obj v= first(*ip.lpos);
             if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
             goto newline;    //wrap
         }
 	}
-endline:
-	return 0;
+endofline:
 newline:
-	return 1;
-}
-
-void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
-    insp ip = insp(&ul(line), 0);
-	drawFragment0(ip, draw);
+    ;
 }
 
 //static int getNLine(list line);
@@ -517,17 +556,10 @@ void MathText::drawLine0(list*line, bool draw){
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
             if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)) continue;   // to do onCursor todos
-        } else if(*ip.lpos){    // begin of tShow
-            obj v=first(*ip.lpos);
-            DrawString("▽");
-            if(type(v)==tShow) ip.moveInto(&(ul(v)));
-            goto continue_drawing;
         }
         if(! *ip.lpos) {    // end of tShow
             if(&(this->line) == ip.curstr) return;   // break ?
-            ip = toUpperLevel(ip);
-            DrawString("▽");
-            goto continue_drawing;
+            assert(0);
         }
     start_line:
 		if(!draw && vv < clickpnt.y + FONTSIZE){
