@@ -32,7 +32,7 @@
     [super windowControllerDidLoadNib:aController];
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
     if (loadedData) {
-        NSString* string = [[NSString alloc] initWithData:loadedData encoding:NSShiftJISStringEncoding];
+        NSString* string = [[NSString alloc] initWithData:loadedData encoding:NSUTF8StringEncoding];
         if (string) {       // it seems to return nil for other encoding
             [myView setString:string];
         } else {
@@ -59,7 +59,7 @@
 {
     // Insert code here to write your document to data of the specified type. If outError != NULL, ensure that you create and set an appropriate error when returning nil.
     if ([typeName isEqualToString:@"PlainText"]){
-        NSData *data = [[myView string] dataUsingEncoding:NSShiftJISStringEncoding allowLossyConversion:YES];
+        NSData *data = [[myView string] dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
         if (data) return data;
         // else shouldBeTrouble With Encoding
     }
