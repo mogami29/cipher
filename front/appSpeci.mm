@@ -337,11 +337,11 @@ void MathText::drawACharOrABox(list& l, int& pos, bool draw){
         break;
     case IMAGE:
     case tCImg:
-        print_image(v);
+        if(draw) show_image(v);
         break;
     case tPlot:
         Move(0, 200);
-        showPlot(v);
+        if(draw) showPlot(v);
         break;
 	}
     vrInt(pop(&drawList));
@@ -590,6 +590,46 @@ float MathText::getWidth(obj str){
 	drawFragment(str, false);	// wrapされるとまずい
 	GetPen(&np);
 	return np.x - pt.x;
+}
+
+void MathText::show_image(obj v){
+    NSPoint pt;
+	GetPen(&pt);
+    if(type(v)==IMAGE){
+        int h = uar(v).size;
+        int w = udar(uar(v).v[0]).size;
+        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:1 hasAlpha:NO isPlanar:NO colorSpaceName:NSDeviceWhiteColorSpace bytesPerRow:h*2 bitsPerPixel:0];
+        unsigned short * bp = (unsigned short *)[bm bitmapData];
+		for(int i=0; i< h; i++){
+			obj row = uar(v).v[i];
+			assert(type(row)==tDblArray);
+			for(int j=0; j < udar(row).size; j++){
+				bp[i*w + j] = 0x10000 * smaller(1.0, udar(row).v[j]);
+			}
+		}
+        [bm drawAtPoint:NSMakePoint(LEFTMARGIN, pt.y)];
+        Move(0, h);
+	} else if(type(v)==tCImg){
+		assert(type(uar(v).v[0])==tArray);
+        int h = uar(uar(v).v[0]).size;
+        obj rowr = uar(uar(v).v[0]).v[0];
+        int w = udar(rowr).size;
+        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:3 hasAlpha:NO isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace bytesPerRow:h*6 bitsPerPixel:0];
+        unsigned short * bp = (unsigned short *)[bm bitmapData];
+		for(int i=0; i< h; i++){
+			obj rowr = uar(uar(v).v[0]).v[i];
+			obj rowg = uar(uar(v).v[1]).v[i];
+			obj rowb = uar(uar(v).v[2]).v[i];
+			assert(type(rowr)==tDblArray);
+			for(int j=0; j< w; j++){
+				bp[(i*w + j)*3 + 0] = 0x10000*(udar(rowr).v[j]);
+				bp[(i*w + j)*3 + 1] = 0x10000*(udar(rowg).v[j]);
+				bp[(i*w + j)*3 + 2] = 0x10000*(udar(rowb).v[j]);
+			}
+        [bm drawAtPoint:NSMakePoint(LEFTMARGIN, pt.y)];
+        Move(0, h);
+		}
+	} else assert(0);
 }
 
 void MathText::showPlot(obj y){           // plotting
@@ -1390,7 +1430,11 @@ NSString* MathText::DoCut(){
 void MathText::pasteCString(const char* str){    // assumes UTF16
     list tt = csparse(str, strlen(str));
     removeSelected();
-    for(list l=tt; l; l=rest(l)) insert(retainD(first(l)));
+    for(list l=tt; l; l=rest(l)){
+        obj v = first(l);
+        if(mode==session && type(v)==INT && uint(v)==CR) HandleTyping(CR);
+        else insert(retainD(v));
+    }
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
 }

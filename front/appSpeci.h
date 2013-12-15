@@ -178,6 +178,7 @@ inline bool equalsToCursor(char* curline, int pos){
     void drawLine0(list*line, bool draw);
     void invalidateLayoutCache();
     float getWidth(obj str);
+    void show_image(obj v);
     void showPlot(obj y);
     //void drawObj(obj line);
     void Redraw(NSRect rect);
