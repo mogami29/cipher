@@ -165,6 +165,19 @@ void MathText::DrawString(NSString *s1){
     CGFloat w = [attStr size].width;
     curPt.x += w;
 }
+/*/
+void MathText::DrawString(NSString *s1){
+    NSAttributedString* attrStr = [[NSAttributedString alloc] initWithString:s1 attributes:dicAttr];
+    // from "Common Text Layout Operations"
+    CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+    CTLineRef line = CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)attrStr);
+    // Set text position and draw the line into the graphics context
+    CGContextSetTextPosition(context, curPt.x, curPt.y);
+    CTLineDraw(line, context);
+    CFRelease(line);
+    // c.f. note 131117
+    curPt = CGContextGetTextPosition(context);
+}//*/
 float MathText::StringWidth(const char * str){
     NSString* s1 = [[NSString alloc] initWithCString:(char*)str encoding:NSUTF8StringEncoding];
     assert(s1);
@@ -440,7 +453,7 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 		if(! *ip.lpos) goto endofline;
 
 		obj v= first(*ip.lpos);
-		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
         } else {
@@ -455,13 +468,13 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 		if(pt.x > LEFTMARGIN+colWidth){
             if(! *ip.lpos) goto endofline;
             obj v= first(*ip.lpos);
-            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
             goto newline;    //wrap
         }
 	}
 endofline:
     if(&(this->line) != ip.curstr) {    // end of tShow
-        ip = toUpperLevel(ip);
+        ip = toUpperLevel(ip);          // (moving into step possible?)
         DrawString("▽");
         goto continue_drawing;
     }
@@ -471,7 +484,7 @@ newline:
 }
 
 
-void MathText::drawFragment(obj line, bool draw){      // drawLine()   ?
+void MathText::drawFragment(obj line, bool draw){
     insp ip = insp(&ul(line), 0);
 	NSPoint pt;
     GetPen(&pt);
@@ -542,6 +555,10 @@ void MathText::drawLine0(list*line, bool draw){
     NSRect clip = draw ? updateRect : NSMakeRect(clickpnt.x, clickpnt.y, 0, 0);
 	float vv = pt.y;
     for(; ;){			// lines (either soft or hard)
+		if(!draw && vv < clickpnt.y + FONTSIZE){
+            click = ip;
+			curclick = pt;
+		}
         //assert(*il);
         if(*il && first(*il) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
             ip = first(*ll);
@@ -550,7 +567,6 @@ void MathText::drawLine0(list*line, bool draw){
             goto start_line;
         }
         //NSLog(@"%i", (int)vv);
-    continue_drawing:
         if(drawFragment0(ip, draw)){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
@@ -562,10 +578,6 @@ void MathText::drawLine0(list*line, bool draw){
             assert(0);
         }
     start_line:
-		if(!draw && vv < clickpnt.y + FONTSIZE){
-            click = ip;
-			curclick = pt;
-		}
         if(! *ip.lpos) {    // necessary ?
             if(&(this->line) == ip.curstr) return;   // break ?
             assert(0);
@@ -1634,7 +1646,7 @@ void myPrintf(const char *fmt,...){
 	if(strlen(str)>255) assert_func("app.c", __LINE__);
 	icaller->addStringToText(str);
     //append_string(&ks, str); write string merge
-	for(char* s=str; *s; s++) if(*s=='\n') *s=' ';
+	for(char* s=str; *s; s++) if(*s=='\n') scroll();
 //	Move(StringWidth(str), 0);
 }
 
