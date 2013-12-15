@@ -11,6 +11,8 @@ float colWidth = COLWIDTH;
 
 #define larger(a, b) ((a) > (b) ? (a) : (b))
 
++ (BOOL)isCompatibleWithResponsiveScrolling{ return YES;}
+
 - (void) drawRect : (NSRect) rect
 {
     //[[NSColor whiteColor] set];
@@ -182,10 +184,12 @@ float colWidth = COLWIDTH;
 {
     NSString* str = [theEvent characters];
 	//BOOL bar = [str isEqualToString: @"\n"];
-    unichar key = [str characterAtIndex:0];     // can be plural
+    unichar key = 0;
+    if ([str length]!=0) key = [str characterAtIndex:0];
+    if ([str length] >= 2) NSLog(@"2 word char!");
     if (key == 0x7F || key >= 0xF700 ||1){  // 0x7F is delete
         //[self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
-        [[self inputContext] handleEvent:theEvent];   // it won't work until we implement text input client protocol
+        [[self inputContext] handleEvent:theEvent];
     } else {
         //[line appendString: str];
         text->HandleTyping(key);
