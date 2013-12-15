@@ -60,12 +60,12 @@
 		05A5A2FE18272E2D00F813F4 /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = matrix.cpp; path = "../cipher-shell/cipher-shell/matrix.cpp"; sourceTree = "<group>"; };
 		05A5A2FF18272E2D00F813F4 /* parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parser.cpp; path = "../cipher-shell/cipher-shell/parser.cpp"; sourceTree = "<group>"; };
 		05A5A30218272E4900F813F4 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vector.h; path = "../cipher-shell/cipher-shell/vector.h"; sourceTree = "<group>"; };
-		05AD7D5C17EDAA5A006391A3 /* front.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = front.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		05AD7D5C17EDAA5A006391A3 /* cipher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cipher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		05AD7D5F17EDAA5A006391A3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		05AD7D6217EDAA5A006391A3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		05AD7D6317EDAA5A006391A3 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		05AD7D6417EDAA5A006391A3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		05AD7D6717EDAA5A006391A3 /* front-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "front-Info.plist"; sourceTree = "<group>"; };
+		05AD7D6717EDAA5A006391A3 /* cipher-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cipher-Info.plist"; sourceTree = "<group>"; };
 		05AD7D6917EDAA5A006391A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		05AD7D6B17EDAA5A006391A3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		05AD7D6D17EDAA5A006391A3 /* front-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "front-Prefix.pch"; sourceTree = "<group>"; };
@@ -75,7 +75,7 @@
 		05AD7D7517EDAA5A006391A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/Document.xib; sourceTree = "<group>"; };
 		05AD7D7817EDAA5A006391A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		05AD7D7A17EDAA5A006391A3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		05AD7D8017EDAA5A006391A3 /* frontTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = frontTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		05AD7D8017EDAA5A006391A3 /* cipherTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cipherTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		05AD7D8117EDAA5A006391A3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		05AD7D8817EDAA5A006391A3 /* frontTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "frontTests-Info.plist"; sourceTree = "<group>"; };
 		05AD7D8A17EDAA5A006391A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -140,8 +140,8 @@
 		05AD7D5D17EDAA5A006391A3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				05AD7D5C17EDAA5A006391A3 /* front.app */,
-				05AD7D8017EDAA5A006391A3 /* frontTests.xctest */,
+				05AD7D5C17EDAA5A006391A3 /* cipher.app */,
+				05AD7D8017EDAA5A006391A3 /* cipherTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -186,7 +186,7 @@
 		05AD7D6617EDAA5A006391A3 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				05AD7D6717EDAA5A006391A3 /* front-Info.plist */,
+				05AD7D6717EDAA5A006391A3 /* cipher-Info.plist */,
 				05AD7D6817EDAA5A006391A3 /* InfoPlist.strings */,
 				05AD7D6B17EDAA5A006391A3 /* main.m */,
 				05AD7D6D17EDAA5A006391A3 /* front-Prefix.pch */,
@@ -216,9 +216,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		05AD7D5B17EDAA5A006391A3 /* front */ = {
+		05AD7D5B17EDAA5A006391A3 /* cipher */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 05AD7D9017EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "front" */;
+			buildConfigurationList = 05AD7D9017EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "cipher" */;
 			buildPhases = (
 				05AD7D5817EDAA5A006391A3 /* Sources */,
 				05AD7D5917EDAA5A006391A3 /* Frameworks */,
@@ -228,14 +228,14 @@
 			);
 			dependencies = (
 			);
-			name = front;
+			name = cipher;
 			productName = front;
-			productReference = 05AD7D5C17EDAA5A006391A3 /* front.app */;
+			productReference = 05AD7D5C17EDAA5A006391A3 /* cipher.app */;
 			productType = "com.apple.product-type.application";
 		};
-		05AD7D7F17EDAA5A006391A3 /* frontTests */ = {
+		05AD7D7F17EDAA5A006391A3 /* cipherTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 05AD7D9317EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "frontTests" */;
+			buildConfigurationList = 05AD7D9317EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "cipherTests" */;
 			buildPhases = (
 				05AD7D7C17EDAA5A006391A3 /* Sources */,
 				05AD7D7D17EDAA5A006391A3 /* Frameworks */,
@@ -246,9 +246,9 @@
 			dependencies = (
 				05AD7D8517EDAA5A006391A3 /* PBXTargetDependency */,
 			);
-			name = frontTests;
+			name = cipherTests;
 			productName = frontTests;
-			productReference = 05AD7D8017EDAA5A006391A3 /* frontTests.xctest */;
+			productReference = 05AD7D8017EDAA5A006391A3 /* cipherTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -265,7 +265,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 05AD7D5717EDAA5A006391A3 /* Build configuration list for PBXProject "front" */;
+			buildConfigurationList = 05AD7D5717EDAA5A006391A3 /* Build configuration list for PBXProject "cipher" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -278,8 +278,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				05AD7D5B17EDAA5A006391A3 /* front */,
-				05AD7D7F17EDAA5A006391A3 /* frontTests */,
+				05AD7D5B17EDAA5A006391A3 /* cipher */,
+				05AD7D7F17EDAA5A006391A3 /* cipherTests */,
 			);
 		};
 /* End PBXProject section */
@@ -340,7 +340,7 @@
 /* Begin PBXTargetDependency section */
 		05AD7D8517EDAA5A006391A3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 05AD7D5B17EDAA5A006391A3 /* front */;
+			target = 05AD7D5B17EDAA5A006391A3 /* cipher */;
 			targetProxy = 05AD7D8417EDAA5A006391A3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -466,9 +466,9 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "front/front-Prefix.pch";
-				INFOPLIST_FILE = "front/front-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "front/cipher-Prefix.pch";
+				INFOPLIST_FILE = "front/cipher-Info.plist";
+				PRODUCT_NAME = cipher;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -480,9 +480,9 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "front/front-Prefix.pch";
-				INFOPLIST_FILE = "front/front-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "front/cipher-Prefix.pch";
+				INFOPLIST_FILE = "front/cipher-Info.plist";
+				PRODUCT_NAME = cipher;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -503,7 +503,7 @@
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = "frontTests/frontTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = cipherTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -521,7 +521,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "front/front-Prefix.pch";
 				INFOPLIST_FILE = "frontTests/frontTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = cipherTests;
 				TEST_HOST = "$(BUNDLE_LOADER)";
 				WRAPPER_EXTENSION = xctest;
 			};
@@ -530,7 +530,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		05AD7D5717EDAA5A006391A3 /* Build configuration list for PBXProject "front" */ = {
+		05AD7D5717EDAA5A006391A3 /* Build configuration list for PBXProject "cipher" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				05AD7D8E17EDAA5A006391A3 /* Debug */,
@@ -539,7 +539,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		05AD7D9017EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "front" */ = {
+		05AD7D9017EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "cipher" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				05AD7D9117EDAA5A006391A3 /* Debug */,
@@ -548,7 +548,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		05AD7D9317EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "frontTests" */ = {
+		05AD7D9317EDAA5A006391A3 /* Build configuration list for PBXNativeTarget "cipherTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				05AD7D9417EDAA5A006391A3 /* Debug */,

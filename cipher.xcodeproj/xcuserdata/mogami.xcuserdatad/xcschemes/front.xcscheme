@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
                BuildableName = "front.app"
-               BlueprintName = "front"
-               ReferencedContainer = "container:front.xcodeproj">
+               BlueprintName = "cipher"
+               ReferencedContainer = "container:cipher.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -34,8 +34,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "05AD7D7F17EDAA5A006391A3"
                BuildableName = "frontTests.xctest"
-               BlueprintName = "frontTests"
-               ReferencedContainer = "container:front.xcodeproj">
+               BlueprintName = "cipherTests"
+               ReferencedContainer = "container:cipher.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -44,8 +44,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
             BuildableName = "front.app"
-            BlueprintName = "front"
-            ReferencedContainer = "container:front.xcodeproj">
+            BlueprintName = "cipher"
+            ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -63,8 +63,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
             BuildableName = "front.app"
-            BlueprintName = "front"
-            ReferencedContainer = "container:front.xcodeproj">
+            BlueprintName = "cipher"
+            ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -81,8 +81,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
             BuildableName = "front.app"
-            BlueprintName = "front"
-            ReferencedContainer = "container:front.xcodeproj">
+            BlueprintName = "cipher"
+            ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
