@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
-               BuildableName = "front.app"
+               BuildableName = "cipher.app"
                BlueprintName = "cipher"
                ReferencedContainer = "container:cipher.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "05AD7D7F17EDAA5A006391A3"
-               BuildableName = "frontTests.xctest"
+               BuildableName = "cipherTests.xctest"
                BlueprintName = "cipherTests"
                ReferencedContainer = "container:cipher.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
-            BuildableName = "front.app"
+            BuildableName = "cipher.app"
             BlueprintName = "cipher"
             ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
-            BuildableName = "front.app"
+            BuildableName = "cipher.app"
             BlueprintName = "cipher"
             ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>
@@ -80,7 +80,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "05AD7D5B17EDAA5A006391A3"
-            BuildableName = "front.app"
+            BuildableName = "cipher.app"
             BlueprintName = "cipher"
             ReferencedContainer = "container:cipher.xcodeproj">
          </BuildableReference>

@@ -71,7 +71,7 @@ float colWidth = COLWIDTH;
 	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopAnimation];}
         text->Redraw(rect);
 	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;}// [self startAnimation];}
-    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrameAndDraw
+    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrame
 }
 
 - (void) drawCaretAt:(NSPoint)pt
@@ -121,7 +121,7 @@ float colWidth = COLWIDTH;
     [self stopAnimation];
 }
 
-- (void) updateFrameSizeAndDraw {
+- (void) updateFrameSize {
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
     if(text->baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
         NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine + FONTSIZE - clip.size.height);
@@ -132,8 +132,6 @@ float colWidth = COLWIDTH;
         [self scrollPoint:newScrollOrigin];
     }
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];
-    // larger(clip.size.height, ;
-    [self setNeedsDisplay:YES];
 }
 
 // from Printing Programming Guide for Mac
@@ -195,8 +193,18 @@ float colWidth = COLWIDTH;
         text->HandleTyping(key);
     }
     cursorOn = true;
-    [self updateFrameSizeAndDraw];
-    [self display];
+    [self updateFrameSize];
+    NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
+	CGFloat top;
+    CGFloat bottom;
+    if(key==NSUpArrowFunctionKey || key==NSDownArrowFunctionKey || key==NSUpArrowFunctionKey || key==NSDownArrowFunctionKey) {
+        top = caretPosition.y - LINEHEIGHT - FONTSIZE;
+        bottom = caretPosition.y + LINEHEIGHT + FONTSIZE/2;
+    } else {
+        top = caretPosition.y - 2*LINEHEIGHT ;  // large enough for fractions
+        bottom = clip.origin.y + clip.size.height;
+    }
+    [self setNeedsDisplayInRect:NSMakeRect(clip.origin.x, top, clip.size.width, bottom - top)];
 	if(!(key==NSUpArrowFunctionKey || key==NSDownArrowFunctionKey)) text->setCursorBeforeVertMove();
 }
 
@@ -351,7 +359,8 @@ float colWidth = COLWIDTH;
         NSArray *copiedObjects = [NSArray arrayWithObject:string];
         [pasteboard writeObjects:copiedObjects];
     }
-    [self updateFrameSizeAndDraw];
+    [self updateFrameSize];
+    [self setNeedsDisplay:YES];
 }
 
 // from Paste board Getting Started
@@ -378,7 +387,8 @@ float colWidth = COLWIDTH;
         assert(s);    // yen mark results in null pointer
         text->pasteCString(s);
     }
-    [self updateFrameSizeAndDraw];
+    [self updateFrameSize];
+    [self setNeedsDisplay:YES];
 }
 
 - (void) hideText: sender{
