@@ -68,9 +68,9 @@ float colWidth = COLWIDTH;
 */
     text->theStr = backingStore;
     text->caller = self;
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopBlink];}
         text->Redraw(rect);
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;}// [self startAnimation];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;}// [self startBlink];}
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrame
 }
 
@@ -95,7 +95,7 @@ float colWidth = COLWIDTH;
 {
     self = [super initWithFrame:frameRect];
     line = [[NSMutableString alloc] init];
-    [self startAnimation];
+    [self startBlink];
     //[self setFrameSize:NSMakeSize(500, 100)];
     text = new MathText;
     text->initLines();
@@ -118,7 +118,7 @@ float colWidth = COLWIDTH;
 
 - (void) dealloc
 {
-    [self stopAnimation];
+    [self stopBlink];
 }
 
 - (void) updateFrameSize {
@@ -423,13 +423,13 @@ float colWidth = COLWIDTH;
 }
 
 // taken from Circleview
-- (void) startAnimation {
-    [self stopAnimation];
+- (void) startBlink {
+    [self stopBlink];
     
     // We schedule a timer for a desired 30fps animation rate.
-    // In performAnimation: we determine exactly
+    // In performBlink: we determine exactly
     // how much time has elapsed and animate accordingly.
-    timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/2.0) target:self selector:@selector(performAnimation:) userInfo:nil repeats:YES];
+    timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/2.0) target:self selector:@selector(performBlink:) userInfo:nil repeats:YES];
     
     // The next two lines make sure that animation will continue to occur
     // while modal panels are displayed and while event tracking is taking
@@ -441,20 +441,20 @@ float colWidth = COLWIDTH;
 //    lastTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
-- (void) stopAnimation {
+- (void) stopBlink {
     [timer invalidate];
     timer = nil;
 }
 
-- (void) toggleAnimation {
+- (void) toggleBlink {
     if (timer != nil) {
-        [self stopAnimation];
+        [self stopBlink];
     } else {
-        [self startAnimation];
+        [self startBlink];
     }
 }
 
-- (void)performAnimation:(NSTimer *)aTimer {
+- (void)performBlink:(NSTimer *)aTimer {
     // We determine how much time has elapsed since the last animation,
     // and we advance the angle accordingly.
     //NSTimeInterval thisTime = [NSDate timeIntervalSinceReferenceDate];

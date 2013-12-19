@@ -18,8 +18,8 @@
 - (void) drawCaretAt : (NSPoint) pt;
 - (void) keyDown : (NSEvent *) theEvent;
 - (void) mouseDown:(NSEvent *) theEvent;
-- (void) startAnimation;
-- (void) stopAnimation;
-- (void) toggleAnimation;
+- (void) startBlink;
+- (void) stopBlink;
+- (void) toggleBlink;
 - (void)performAnimation:(NSTimer *)aTimer;
 @end
