@@ -127,6 +127,7 @@ list insList;// insertion point のスタック（先頭の要素が、一番内
                         // ins.posは実質insListの先頭。
 list	beginSelList;
 insp beginOfSel, ins;		//insは現在のinsertion point
+insp beginOfContinuedLine;
 
 inline bool equalsToCursor(list* curline, list l, int pos){
     if(!ins.curstr) return false;

@@ -1121,6 +1121,7 @@ void MathText::initLines(){
     interpreter = create_interpreter();
 
     newLine0();
+    beginOfContinuedLine = insp();  // invalid point
 }
 
 void MathText::addObjToText(obj v){	//taking line
@@ -1167,7 +1168,7 @@ int imbalanced(list line){
 	for(list l=line; l; l=rest(l)){
 		switch(type(first(l))){
         case INT:{
-			char c=uint(first(l));
+			unichar c = uint(first(l));
 			if(c=='(') paren++;
 			if(c==')') paren--;
 			if(c=='{') brace++;
@@ -1262,9 +1263,8 @@ void MathText::setCursorBeforeVertMove(){
     cursorBeforeVertMove = cursorPosition;
 }
 void MathText::handleCR(){
-//	addLineToText(List2v(line));
-	//baseLine = startOfThisLine - viewPosition + FONTSIZE*2 + LINEHEIGHT*getNLine(line);//dame
-	obj tl = val(listToCString(rest(line, findBeginOfThisLine())));
+    list l = beginOfContinuedLine.lpos ? *beginOfContinuedLine.lpos : rest(line, findBeginOfThisLine());
+	obj tl = val(listToCString(l));
 	scrollBy(0);	// newline
     if(setjmp(jmpEnv)==0){	//try
         icaller = this;
@@ -1281,12 +1281,30 @@ void MathText::setMode(CRmode m){
 }
 
 void MathText::HandleTyping(unichar c){
-	if(mode==session && c==CR && !insList && !imbalanced(rest(line, findBeginOfThisLine()))){
-		HideCaret();
-		handleCR();
-		ShowCaret();
-		return;
-	} else HandleTyping0(c);
+	if(mode==session && c==CR && !insList){
+        if(! beginOfContinuedLine.lpos){
+            int bp = findBeginOfThisLine();
+            if(imbalanced(rest(line, bp))){
+                beginOfContinuedLine = insp(&line, bp);
+                HandleTyping0(c);
+            } else {
+                HideCaret();
+                handleCR();
+                ShowCaret();
+            }
+        } else {
+            if(imbalanced(*beginOfContinuedLine.lpos)){
+                HandleTyping0(c);
+            } else {
+                HideCaret();
+                handleCR();
+                ShowCaret();
+                beginOfContinuedLine = insp();  // invalid
+            }
+        }
+        return;
+    }
+    HandleTyping0(c);
 }
 
 void MathText::highlightSelected(){
