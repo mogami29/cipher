@@ -133,9 +133,10 @@ inline bool equalsToCursor(list* curline, list l, int pos){
     // assert((curline==ins.curstr && l == *ins.lpos) == (equal(insList, drawList) && pos == ins.pos));
     return(curline==ins.curstr && l == *ins.lpos);
 }
-inline bool equalsToCursor(char* curline, int pos){
-    if(!ins.curcstr) return false;
-    return(curline==ins.curcstr && pos == ins.pos);
+inline bool equalsToCursor(insp ip){
+    if(!ins.curstr) return false;
+    assert((ip.curstr==ins.curstr && ip.lpos == ins.lpos) == (ip.curstr==ins.curstr && ip.pos == ins.pos));
+    return(ip.curstr==ins.curstr && ip.lpos == ins.lpos);
 }
 
 

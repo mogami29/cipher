@@ -429,7 +429,7 @@ endline:
 	}
 }
 void MathText::toDosOnCursor(insp ip, bool draw){
-    if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)){
+    if(equalsToCursor(ip)){
         GetPen(&cursorPosition);
         crossed = true;
         
@@ -571,7 +571,7 @@ void MathText::drawLine0(list*line, bool draw){
             GetPen(&pt);
             vv = pt.y + LINEHEIGHT;
             MoveTo(LEFTMARGIN, vv);
-            if(equalsToCursor(ip.curstr, *ip.lpos, ip.pos)) continue;   // to do onCursor todos
+            if(equalsToCursor(ip)) continue;   // to do onCursor todos
         }
         if(! *ip.lpos) {    // end of tShow
             if(&(this->line) == ip.curstr) return;   // break ?
@@ -1342,7 +1342,6 @@ void MathText::getClickPosition(NSPoint pt){
 	MoveTo(LEFTMARGIN, startOfThisLine - viewPosition);
 	click = insp(nil, 0);
 	drawLine(&line, false);
-    click = insp(click.curstr, click.pos);  // setting lpos has been postponed since drawFragment0()
 	if(!click.curstr) return;
 
 	ins = click;
