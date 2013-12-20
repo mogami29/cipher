@@ -610,7 +610,7 @@ void MathText::show_image(obj v){
     if(type(v)==IMAGE){
         int h = uar(v).size;
         int w = udar(uar(v).v[0]).size;
-        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:1 hasAlpha:NO isPlanar:NO colorSpaceName:NSDeviceWhiteColorSpace bytesPerRow:h*2 bitsPerPixel:0];
+        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:1 hasAlpha:NO isPlanar:NO colorSpaceName:NSCalibratedWhiteColorSpace bytesPerRow:w*2 bitsPerPixel:0];
         unsigned short * bp = (unsigned short *)[bm bitmapData];
 		for(int i=0; i< h; i++){
 			obj row = uar(v).v[i];
@@ -626,7 +626,7 @@ void MathText::show_image(obj v){
         int h = uar(uar(v).v[0]).size;
         obj rowr = uar(uar(v).v[0]).v[0];
         int w = udar(rowr).size;
-        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:3 hasAlpha:NO isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace bytesPerRow:h*6 bitsPerPixel:0];
+        NSBitmapImageRep* bm = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:w pixelsHigh:h bitsPerSample:16 samplesPerPixel:3 hasAlpha:NO isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:w*6 bitsPerPixel:0];
         unsigned short * bp = (unsigned short *)[bm bitmapData];
 		for(int i=0; i< h; i++){
 			obj rowr = uar(uar(v).v[0]).v[i];
@@ -638,9 +638,9 @@ void MathText::show_image(obj v){
 				bp[(i*w + j)*3 + 1] = 0x10000*(udar(rowg).v[j]);
 				bp[(i*w + j)*3 + 2] = 0x10000*(udar(rowb).v[j]);
 			}
+		}
         [bm drawAtPoint:NSMakePoint(LEFTMARGIN, pt.y)];
         Move(0, h);
-		}
 	} else assert(0);
 }
 
