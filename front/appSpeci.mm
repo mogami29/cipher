@@ -277,7 +277,7 @@ void MathText::drawSubScript(obj v, bool draw){
 
 bool isWide(unichar c){return (c & 0xF800) == 0xD8;}
 
-NSString* read(list& l){  // experimental. not in use still.
+NSString* read(list& l){
 	obj v = first(l);
     assert(type(v)==INT);
     unichar buf[3];
@@ -497,7 +497,7 @@ void MathText::drawFragment(obj line, bool draw){
 		if(! *ip.lpos) goto endofline;
         
 		obj v= first(*ip.lpos);
-		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
         } else {
@@ -509,7 +509,7 @@ void MathText::drawFragment(obj line, bool draw){
 		if(pt.x > LEFTMARGIN+colWidth){
             if(! *ip.lpos) goto endofline;
             obj v= first(*ip.lpos);
-            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};	//newlineifneccesary
+            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
             goto newline;    //wrap
         }
 	}
@@ -634,9 +634,10 @@ void MathText::show_image(obj v){
 			obj rowb = uar(uar(v).v[2]).v[i];
 			assert(type(rowr)==tDblArray);
 			for(int j=0; j< w; j++){
-				bp[(i*w + j)*3 + 0] = 0x10000*(udar(rowr).v[j]);
-				bp[(i*w + j)*3 + 1] = 0x10000*(udar(rowg).v[j]);
-				bp[(i*w + j)*3 + 2] = 0x10000*(udar(rowb).v[j]);
+				bp[(i*w + j)*3 + 0] = 0xE000*(udar(rowr).v[j]);
+				bp[(i*w + j)*3 + 1] = 0xE000*(udar(rowg).v[j]);
+				bp[(i*w + j)*3 + 2] = 0xE000*(udar(rowb).v[j]);
+//              [bm setColor:[NSColor colorWithCalibratedRed:udar(rowr).v[j] green:udar(rowg).v[j] blue:udar(rowb).v[j] alpha:1] atX:j y:i];
 			}
 		}
         [bm drawAtPoint:NSMakePoint(LEFTMARGIN, pt.y)];
@@ -1390,7 +1391,7 @@ void MathText::HandleDragTo(NSPoint pt){  // combined getClockPosition and Handl
         beginSelList = retain(insList);
         selectionCursorPosition = cursorPosition;
     }
-    if(!nowSelected && beginSelList != insList) return; // not well understood in creation
+    if(!nowSelected && beginSelList != insList) return;
 //	HideCaret();
 
 	ins = click;
