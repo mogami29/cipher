@@ -21,5 +21,5 @@
 - (void) startBlink;
 - (void) stopBlink;
 - (void) toggleBlink;
-- (void)performAnimation:(NSTimer *)aTimer;
+- (void)performBlink:(NSTimer *)aTimer;
 @end
