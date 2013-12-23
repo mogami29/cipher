@@ -542,7 +542,7 @@ void MathText::startLineWith(insp ip){      // or checkCache()
 
 insp MathText::toUpperLevel(insp ip){
     list insl = ins_list(&line, ip.curstr);
-    int pos = vrInt(pop(&insl));
+    long pos = vrInt(pop(&insl));
     list* str = curr_str(insl);
     release(insl);
     return insp(str, pos);
@@ -1133,7 +1133,7 @@ void MathText::addObjToText(obj v){	//taking line
 
 void MathText::addLineToText(obj line){	//taking line
     return;     // used in edit and readline, needs repair of those functions
-	list aLine = list2(line, Int(startOfThisLine));
+//	list aLine = list2(line, Int(startOfThisLine));
 //	append(&lines, List2v(aLine));
 }
 
@@ -1489,7 +1489,7 @@ void MathText::DoLatex(){
 }
 
 obj MathText::edit(obj fn){	// open edit save
-	long bytes;
+	//long bytes;
 	obj rr = nil;//val(read(&bytes, (fn)));     // restore needed 131014
 	newLine();
 	line = CStringToLine(rr);

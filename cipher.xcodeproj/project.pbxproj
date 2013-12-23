@@ -467,6 +467,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "front/cipher-Prefix.pch";
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				INFOPLIST_FILE = "front/cipher-Info.plist";
 				PRODUCT_NAME = cipher;
 				WRAPPER_EXTENSION = app;
@@ -481,6 +482,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "front/cipher-Prefix.pch";
+				GCC_WARN_UNUSED_FUNCTION = NO;
 				INFOPLIST_FILE = "front/cipher-Info.plist";
 				PRODUCT_NAME = cipher;
 				WRAPPER_EXTENSION = app;
