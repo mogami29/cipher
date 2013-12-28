@@ -440,6 +440,55 @@ void MathText::toDosOnCursor(insp ip, bool draw){
     }
 }
 
+NSString* preread(list l, int* length){
+	const int buf_max = 100;
+	unichar buf[buf_max];
+	int len = 0;
+	for(; l && len < buf_max -1;) {
+		obj v = first(l);
+		if(type(v)!=INT) break;
+		int c = uint(v);
+		if(c==CR) break;
+		buf[len++] = c;
+		if(isWide(c)){
+			if(! rest(l)) {assert(0);break;}
+			l = rest(l);
+			if(type(first(l)) != INT) {assert(0);break;}
+			buf[len++] = uint(second(l));
+		}
+		l = rest(l);
+	}
+	*length = len;
+	return [[NSString alloc] initWithCharacters:buf length:len];
+}
+
+void drawAChar(MathText* text, list l, bool draw){
+	static CTTypesetterRef typesetter = nil;
+	static NSString *s = nil;
+	static int len = 0;
+	static int p = 0;
+	obj v = first(l);
+	if(p == len || uint(v) != [s characterAtIndex:p]) {
+		if(typesetter) CFRelease(typesetter);
+		s = preread(l, &len);
+		NSAttributedString* str = [[NSAttributedString alloc] initWithString:s attributes:text->dicAttr];
+		typesetter = CTTypesetterCreateWithAttributedString((__bridge CFAttributedStringRef)(str));
+		p = 0;
+	}
+	int count = isWide(uint(v)) ? 2 : 1;
+	CTLineRef aline = CTTypesetterCreateLine(typesetter, CFRangeMake(p, count));
+	if(draw){
+		CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
+		CGContextSetTextMatrix(context, CGAffineTransformMakeScale(1, -1));
+		CGContextSetTextPosition(context, text->curPt.x, text->curPt.y);
+		CTLineDraw(aline, context);
+	}
+	text->curPt.x += CTLineGetTypographicBounds(aline, nil, nil, nil);
+	CFRelease(aline);
+	//text->curPt = CGContextGetTextPosition(context);
+	p += count;
+}
+
 bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 	NSPoint pt;
 	for(; ; ){	// chars
@@ -454,9 +503,14 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 
 		obj v= first(*ip.lpos);
 		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
-        if(type(v) != tShow){
+		switch(type(v)){
+		default:
             drawACharOrABox(*ip.lpos, ip.pos, draw);
-        } else {
+			break;
+		case INT:
+			drawAChar(this, *ip.lpos, draw);
+			break;
+		case tShow:
             obj v=first(*ip.lpos);
             DrawString("▽");
             if(type(v)==tShow) ip.moveInto(&(ul(v)));
@@ -599,7 +653,7 @@ void MathText::invalidateLayoutCache(){
 float MathText::getWidth(obj str){
 	NSPoint pt, np;
 	GetPen(&pt);
-	drawFragment(str, false);	// wrapされるとまずい
+	drawFragment(str, false);
 	GetPen(&np);
 	return np.x - pt.x;
 }
