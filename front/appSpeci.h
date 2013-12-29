@@ -104,6 +104,10 @@ struct insp {
         return lpos;
 		return rest(curstr, pos);
 	}
+	inline obj operator*(){
+		if(! *lpos) return nil;
+		return first(*lpos);
+	}
 };
 
 

@@ -383,7 +383,7 @@ void step(list& l){
     l=rest(l);
 }
 
-inline int MathText::getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
+/*inline int MathText::getInsertionCloseTo0(list& l, int &pos, float h, int& curr_mark){
 	NSPoint pt;
 	for(; ;){
 		GetPen(&pt);
@@ -427,7 +427,7 @@ endline:
         if(metend) {next = curr_mark; return;}
 		if(crossed) metend = true;
 	}
-}
+}*/
 void MathText::toDosOnCursor(insp ip, bool draw){
     if(equalsToCursor(ip)){
         GetPen(&cursorPosition);
@@ -499,9 +499,9 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
             click = ip;
 			curclick = pt;
 		}
-		if(! *ip.lpos) goto endofline;
+		if(! *ip) goto endofline;
 
-		obj v= first(*ip.lpos);
+		obj v = *ip;
 		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
 		switch(type(v)){
 		default:
@@ -511,17 +511,16 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 			drawAChar(this, *ip.lpos, draw);
 			break;
 		case tShow:
-            obj v=first(*ip.lpos);
             DrawString("▽");
-            if(type(v)==tShow) ip.moveInto(&(ul(v)));
+            ip.moveInto(&(ul(v)));
             goto continue_drawing;
         }
         step(ip);
         
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth){
-            if(! *ip.lpos) goto endofline;
-            obj v= first(*ip.lpos);
+            if(! *ip) goto endofline;
+            obj v = *ip;
             if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
             goto newline;    //wrap
         }
@@ -548,9 +547,9 @@ void MathText::drawFragment(obj line, bool draw){
             click = ip;
 			curclick = pt;
 		}
-		if(! *ip.lpos) goto endofline;
+		if(! *ip) goto endofline;
         
-		obj v= first(*ip.lpos);
+		obj v = *ip;
 		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
@@ -561,8 +560,8 @@ void MathText::drawFragment(obj line, bool draw){
         
 		GetPen(&pt);
 		if(pt.x > LEFTMARGIN+colWidth){
-            if(! *ip.lpos) goto endofline;
-            obj v= first(*ip.lpos);
+            if(! *ip) goto endofline;
+            obj v= *ip;
             if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
             goto newline;    //wrap
         }
@@ -613,7 +612,6 @@ void MathText::drawLine0(list*line, bool draw){
             click = ip;
 			curclick = pt;
 		}
-        //assert(*il);
         if(*il && first(*il) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
             ip = first(*ll);
             vv = first(*il);
