@@ -1580,15 +1580,15 @@ void serialize(string*rs, list l, list end){
             break; }
 		case SuperScript:
 			appendS(rs, '^');
-			appendS(rs, '{');
+			appendS(rs, '(');
 			serialize(rs, ul(v), nil);
-			appendS(rs, '}');
+			appendS(rs, ')');
 			break;
 		case SubScript:
 			appendS(rs, '_');
-			appendS(rs, '{');
+			appendS(rs, '(');
 			serialize(rs, ul(v), nil);
-			appendS(rs, '}');
+			appendS(rs, ')');
 			break;
 		case FRACTION:
 			append(rs, "//{");
@@ -1623,14 +1623,14 @@ list putchar(int c, list l){
 	return l;
 }
 list csparen(){
-	if(*clp != '{') {
+	if(*clp != '{' && *clp != '(') {
 		list l=putchar(readchar(clp), nil);
 		clp = next(clp);
 		return l;
 	}
 	clp++;
 	list l = csparse0();
-	if(*clp != '}') ;//assert(0);
+	if(*clp != '}' && *clp != ')') ;//assert(0);
 	else clp++;
 	return l;
 }
@@ -1655,24 +1655,23 @@ list csparse0(){
 	list l = nil;
 	int bracelevel = 0;
 	for(; *clp && clp!=clpe; ){
-//		if(readchar(clp) == '}') break;
 		if(getchar(&clp, '^')){
 			assert(*clp);
-			if(readchar(clp) != '{') continue;
-			else l = cons(render(SuperScript, csparen()), l);
+			//if(readchar(clp) != '{') continue;
+			l = cons(render(SuperScript, csparen()), l);
 		} else if(getchar(&clp, '_')){
 			assert(*clp);
-			if(readchar(clp) != '{') continue;
-			else l = cons(render(SubScript, csparen()), l);
+			//if(readchar(clp) != '{') continue;
+			l = cons(render(SubScript, csparen()), l);
 		} else if(get_pat((unsigned char**)&clp, "//")){
-			if(readchar(clp) != '{') continue;
+			//if(readchar(clp) != '{') continue;
 			list nu = csparen();
 			list de = csparen();
 			l = cons(render(FRACTION, list2(List2v(nu), List2v(de))) ,l);
 		} else {
 			int c = readchar2(clp);
-			if( c =='{' ) bracelevel++;
-			if( c =='}' ) {bracelevel--; if(bracelevel < 0) break;}
+			if( c =='{' || c =='(') bracelevel++;
+			if( c =='}' || c ==')') {bracelevel--; if(bracelevel < 0) break;}
 			l = putchar(c, l);
 			clp = next2(clp);
 		}
