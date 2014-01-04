@@ -16,10 +16,11 @@
 }
 - (void) drawRect : (NSRect) rect;
 - (void) drawCaretAt : (NSPoint) pt;
+- (void) updateFrame;
 - (void) keyDown : (NSEvent *) theEvent;
 - (void) mouseDown:(NSEvent *) theEvent;
 - (void) startBlink;
 - (void) stopBlink;
 - (void) toggleBlink;
-- (void)performBlink:(NSTimer *)aTimer;
+- (void) performBlink:(NSTimer *)aTimer;
 @end

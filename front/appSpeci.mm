@@ -49,7 +49,7 @@ void assert_func(const char* file, int line){
 
 void error_func(const char *str, const char* file, int line){
 	scroll();
-	myPrintf("error: %s occured in line %d of file %s\n", str, line, file);
+	myPrintf("error: %s occured in line %d of file %s\n", str, line, file+40);
 	longjmp(jmpEnv, 1);
 }
 
@@ -275,7 +275,7 @@ void MathText::drawSubScript(obj v, bool draw){
 }
 // CRは行末に付属すると考える。
 
-bool isWide(unichar c){return (c & 0xF800) == 0xD8;}
+bool isWide(unichar c){return (c & 0xF800) == 0xD800;}
 
 NSString* read(list& l){
 	obj v = first(l);
@@ -294,15 +294,6 @@ NSString* read(list& l){
         len = 2;
     }
     return [[NSString alloc] initWithCharacters:buf length:len];
-}
-void toString(char* buf, int c){
-    buf[0] = c;
-    buf[1] = NULL;
-    if(c&0x80){
-        buf[0] = c >> 8;
-        buf[1] = c & 0xff;
-        buf[2] = NULL;
-    }
 }
 void MathText::drawACharOrABox(list& l, int& pos, bool draw){
 	NSPoint pt;
@@ -432,6 +423,7 @@ void MathText::toDosOnCursor(insp ip, bool draw){
     if(equalsToCursor(ip)){
         GetPen(&cursorPosition);
         crossed = true;
+		baseLine = cursorPosition.y;
         
         if(draw) [theStr drawAtPoint:NSMakePoint( curPt.x, curPt.y - [fontAttr ascender] + [fontAttr descender])];
         CGFloat w = [theStr size].width;
@@ -612,7 +604,7 @@ void MathText::drawLine0(list*line, bool draw){
             click = ip;
 			curclick = pt;
 		}
-        if(*il && first(*il) - FONTSIZE < clip.origin.y){  //この行の下端 ~ 次の行の上端
+        if(*il && first(*il) - FONTSIZE < clip.origin.y){  //今の行の下端 ~ 次の行の上端
             ip = first(*ll);
             vv = first(*il);
             MoveTo(LEFTMARGIN, vv);
@@ -668,7 +660,7 @@ void MathText::show_image(obj v){
 			obj row = uar(v).v[i];
 			assert(type(row)==tDblArray);
 			for(int j=0; j < udar(row).size; j++){
-				bp[i*w + j] = 0x10000 * smaller(1.0, udar(row).v[j]);
+				bp[i*w + j] = smaller(0xFFFF, 0x10000 * udar(row).v[j]);
 			}
 		}
         [bm drawAtPoint:NSMakePoint(LEFTMARGIN, pt.y)];
@@ -747,7 +739,7 @@ void MathText::Redraw(NSRect rect){
      }*/
     //[NSBezierPath strokeRect:NSMakeRect(clickpnt.x - 0.5, clickpnt.y -0.5, 1, 1)];
     highlightSelected();
-    baseLine = cursorPosition.y;
+    //baseLine = cursorPosition.y;
 }
 
 //------accessors of the current line -----------------
@@ -1115,12 +1107,13 @@ void win_normalize(){       // smoothly scroll the view to make the cursor withi
 
 void MathText::scrollBy(int points){
 	baseLine += points;
-	win_normalize();
+	//win_normalize();
+	[caller updateFrame];
     insert(Int(CR));
 }
 
 void MathText::scroll(){
-	scrollBy(FONTSIZE);
+	scrollBy(LINEHEIGHT);
 }
 
 //-----------------
@@ -1318,14 +1311,14 @@ void MathText::setCursorBeforeVertMove(){
 void MathText::handleCR(){
     list l = beginOfContinuedLine.lpos ? *beginOfContinuedLine.lpos : rest(line, findBeginOfThisLine());
 	obj tl = val(listToCString(l));
-	scrollBy(0);	// newline
+	scroll();	// newline
     if(setjmp(jmpEnv)==0){	//try
         icaller = this;
         interpret(interpreter, ustr(tl));
     } else {				//catch
     }
     release(tl);
-    scrollBy(FONTSIZE*2);
+    scroll();
 	newLine();
 }
 

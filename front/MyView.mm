@@ -96,7 +96,6 @@ float colWidth = COLWIDTH;
     self = [super initWithFrame:frameRect];
     line = [[NSMutableString alloc] init];
     [self startBlink];
-    //[self setFrameSize:NSMakeSize(500, 100)];
     text = new MathText;
     text->initLines();
     text->newLine();
@@ -121,7 +120,7 @@ float colWidth = COLWIDTH;
     [self stopBlink];
 }
 
-- (void) updateFrameSize {
+- (void) updateFrame {
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
     if(text->baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
         NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine + FONTSIZE - clip.size.height);
@@ -193,7 +192,7 @@ float colWidth = COLWIDTH;
         text->HandleTyping(key);
     }
     cursorOn = true;
-    [self updateFrameSize];
+    [self updateFrame];
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
 	CGFloat top;
     CGFloat bottom;
@@ -204,7 +203,7 @@ float colWidth = COLWIDTH;
         top = caretPosition.y - 2*LINEHEIGHT ;  // large enough for fractions
         bottom = clip.origin.y + clip.size.height;
     }
-    [self setNeedsDisplayInRect:NSMakeRect(clip.origin.x, top, clip.size.width, bottom - top)];
+    [self displayRect:NSMakeRect(clip.origin.x, top, clip.size.width, bottom - top)];
 	if(!(key==NSUpArrowFunctionKey || key==NSDownArrowFunctionKey)) text->setCursorBeforeVertMove();
 }
 
@@ -359,7 +358,7 @@ float colWidth = COLWIDTH;
         NSArray *copiedObjects = [NSArray arrayWithObject:string];
         [pasteboard writeObjects:copiedObjects];
     }
-    [self updateFrameSize];
+    [self updateFrame];
     [self setNeedsDisplay:YES];
 }
 
@@ -387,7 +386,7 @@ float colWidth = COLWIDTH;
         assert(s);    // yen mark results in null pointer
         text->pasteCString(s);
     }
-    [self updateFrameSize];
+    [self updateFrame];
     [self setNeedsDisplay:YES];
 }
 
