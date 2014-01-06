@@ -1183,7 +1183,7 @@ void MathText::addLineToText(obj line){	//taking line
 }
 
 void MathText::addStringToText(char* string){
-    obj str = val(copyString(string));
+    obj str = cval(copyString(string));
     insert(str);
     cacheForUnitTest = ustr(str);
 /*
@@ -1310,7 +1310,7 @@ void MathText::setCursorBeforeVertMove(){
 }
 void MathText::handleCR(){
     list l = beginOfContinuedLine.lpos ? *beginOfContinuedLine.lpos : rest(line, findBeginOfThisLine());
-	obj tl = val(listToCString(l));
+	obj tl = cval(listToCString(l));
 	scroll();	// newline
     if(setjmp(jmpEnv)==0){	//try
         icaller = this;
@@ -1561,7 +1561,7 @@ obj MathText::editline(obj v){
 	addLineToText(List2v(line));
 	//baseLine = startOfThisLine-viewPosition;      // 131118 in question
 	scrollBy(FONTSIZE*2+getNLine(line)*LINEHEIGHT);	// newline
-	obj lin = val(listToCString(line));
+	obj lin = cval(listToCString(line));
 	newLine();
 	return lin;
 }
