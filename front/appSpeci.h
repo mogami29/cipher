@@ -148,6 +148,7 @@ inline bool equalsToCursor(insp ip){
     NSPoint curPt;
     NSMutableDictionary *dicAttr;
     NSFont *fontAttr;
+	NSString* font = @"Helvetica";
     void GetPen(NSPoint * pt);
     void MoveTo(float h, float v);
     void Line(float h, float v);

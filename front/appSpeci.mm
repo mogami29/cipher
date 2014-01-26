@@ -150,7 +150,7 @@ void MathText::Move(float h, float v){
 }
 void MathText::TextSize(float s){
     // setting text font size
-    fontAttr = [ NSFont fontWithName : @"Helvetica" size : s ];
+    fontAttr = [ NSFont fontWithName : font size : s ];
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
 }
@@ -1160,7 +1160,7 @@ void MathText::initLines(){
     dicAttr = [ NSMutableDictionary dictionary ];
     [ dicAttr setObject : [ NSColor blackColor ]
                 forKey  : NSForegroundColorAttributeName ];
-    fontAttr = [ NSFont fontWithName : @"Helvetica" size : FONTSIZE ];
+    fontAttr = [ NSFont fontWithName : font size : FONTSIZE ];
     [ dicAttr setObject : fontAttr
                 forKey  : NSFontAttributeName];
 

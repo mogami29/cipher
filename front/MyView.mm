@@ -11,7 +11,7 @@ float colWidth = COLWIDTH;
 
 #define larger(a, b) ((a) > (b) ? (a) : (b))
 
-+ (BOOL)isCompatibleWithResponsiveScrolling{ return YES;}
+//+ (BOOL)isCompatibleWithResponsiveScrolling{ return YES;}
 
 - (void) drawRect : (NSRect) rect
 {
@@ -68,9 +68,9 @@ float colWidth = COLWIDTH;
 */
     text->theStr = backingStore;
     text->caller = self;
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8;}// [self stopBlink];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12*0.8; colWidth = COLWIDTH*0.8; text->font = @"Times";}// [self stopBlink];}
         text->Redraw(rect);
-	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;}// [self startBlink];}
+	if (![NSGraphicsContext currentContextDrawingToScreen]) {text->invalidateLayoutCache(); FONTSIZE = 12; colWidth = COLWIDTH;  text->font = @"Helvetica";}// [self startBlink];}
     [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];   // copy from updateFrame
 }
 
