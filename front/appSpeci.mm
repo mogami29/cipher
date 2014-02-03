@@ -6,6 +6,7 @@
 #include "appSpeci.h"
 #include <string.h>
 //#include "lib.h"
+#include "vector.h"
 
 #import <Cocoa/Cocoa.h>
 
@@ -326,8 +327,6 @@ void MathText::drawACharOrABox(list& l, int& pos, bool draw){
 	case SubScript:
 		drawSubScript(v, draw);
 		break;
-    default:
-        assert(0);
 	case tShow:
 		DrawString("▽");
 		drawLine0(&ul(v), draw);
@@ -347,6 +346,12 @@ void MathText::drawACharOrABox(list& l, int& pos, bool draw){
         Move(0, 200);
         if(draw) showPlot(v);
         break;
+	case tCanvas:		// if(typeid(*v)==typeid(canvas)) {
+		Move(0, 400);
+		if(draw) drawCanvas((canvas*)v);
+		break;
+	default:
+		assert(0);
 	}
     vrInt(pop(&drawList));
 	return;
@@ -697,6 +702,24 @@ void MathText::showPlot(obj y){           // plotting
     [path moveToPoint:NSMakePoint(10, baseLine - udar(y).v[0])];
     for(int i=1; i< udar(y).size; i++) [path lineToPoint:NSMakePoint(10+i*3, baseLine - udar(y).v[i])];
     [path stroke];
+}
+void gr_line::drawAt(float x, float y){
+    NSBezierPath *path = [NSBezierPath bezierPath];
+	obj pt = (*pts)[0];
+    [path moveToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
+    for(int i=1; i< size(pts); i++){
+		pt = (*pts)[i];
+		[path lineToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
+	}
+    [path stroke];
+}
+void MathText::drawCanvas(canvas* cv){
+    NSPoint pt;
+    GetPen(&pt);
+    int baseLine = pt.y;
+	for(int i=0; i < cv->grs.size; i++){
+		(cv->grs.a[i])->drawAt(10, baseLine);
+	}
 }
 /*
 void MathText::drawObj(obj line){		//set cursorPosition at the same time
@@ -1712,8 +1735,13 @@ void myPrintf(const char *fmt,...){
 //	Move(StringWidth(str), 0);
 }
 
-void addObjToText(struct value* line){icaller -> addObjToText(line);}
+void addObjToText(struct value* ob){icaller -> addObjToText(ob);}
 
-
-
+void addGrObj(gr* gr_obj){
+	if(! icaller->cur_canvas) {
+		icaller->cur_canvas = new canvas();
+		icaller -> addObjToText(icaller->cur_canvas);
+	}
+	icaller->cur_canvas->grs.append(gr_obj);
+}
 

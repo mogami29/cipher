@@ -187,6 +187,7 @@ inline bool equalsToCursor(insp ip){
     float getWidth(obj str);
     void show_image(obj v);
     void showPlot(obj y);
+    void drawCanvas(canvas* y);
     //void drawObj(obj line);
     void Redraw(NSRect rect);
     //----------
@@ -276,4 +277,5 @@ obj undobuf;
     void moveUp();
     void moveDown();
 //------
+	canvas* cur_canvas = nil;
 }; // MathText::
