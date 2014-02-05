@@ -740,6 +740,11 @@ void MathText::drawObj(obj line){		//set cursorPosition at the same time
 //static void highlightSelected();
 
 void MathText::Redraw(NSRect rect){
+	if(printing_canvas){
+		MoveTo(0, 400);
+		drawCanvas(cur_canvas);
+		return;
+	}
     updateRect = rect;
     /*	for(list l=lines; l; l=rest(l)){
 		assert(type(first(l))==LIST);
@@ -1745,3 +1750,12 @@ void addGrObj(gr* gr_obj){
 	icaller->cur_canvas->grs.append(gr_obj);
 }
 
+char* canvas2eps(size_t* n){
+	icaller->printing_canvas = true;
+	NSData* d = [icaller->caller dataWithEPSInsideRect:NSMakeRect(0,0, 400, 400)];
+	icaller->printing_canvas = false;
+	*n = [d length];
+	char* eps = (char*)malloc(*n);
+	[d getBytes:eps length:*n];
+	return eps;
+}

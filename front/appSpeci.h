@@ -278,4 +278,5 @@ obj undobuf;
     void moveDown();
 //------
 	canvas* cur_canvas = nil;
+	bool printing_canvas = false;
 }; // MathText::
