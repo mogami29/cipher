@@ -218,7 +218,7 @@ float colWidth = COLWIDTH;
 
 - (void)insertNewline:(id)sender
 {
-    text->HandleTyping(CR);
+    text->HandleTyping('\n');
 }
 
 - (void) deleteBackward:(id)sender

@@ -50,7 +50,7 @@ void assert_func(const char* file, int line){
 
 void error_func(const char *str, const char* file, int line){
 	scroll();
-	myPrintf("error: %s occured in line %d of file %s\n", str, line, file+40);
+	myPrintf("error: %s occured in line %d of file %s\n", str, line, file+43);
 	longjmp(jmpEnv, 1);
 }
 
@@ -388,7 +388,7 @@ void step(list& l){
 		if(equalsToCursor(&line, l, pos)) crossed = true;
         
 		obj v = first(l);
-		if(type(v)==INT && uint(v)==CR) {pos++, l=rest(l);goto newline;};	//newlineifneccesary
+		if(type(v)==INT && uint(v)=='\n') {pos++, l=rest(l);goto newline;};	//newlineifneccesary
 		drawACharOrABox(l, pos, false);
         step(l, pos);
 
@@ -445,7 +445,7 @@ NSString* preread(list l, int* length){
 		obj v = first(l);
 		if(type(v)!=INT) break;
 		int c = uint(v);
-		if(c==CR) break;
+		if(c=='\n') break;
 		buf[len++] = c;
 		if(isWide(c)){
 			if(! rest(l)) {assert(0);break;}
@@ -499,7 +499,7 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 		if(! *ip) goto endofline;
 
 		obj v = *ip;
-		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
+		if(type(v)==INT && uint(v)=='\n') {step(ip); goto newline;};
 		switch(type(v)){
 		default:
             drawACharOrABox(*ip.lpos, ip.pos, draw);
@@ -518,7 +518,7 @@ bool MathText::drawFragment0(insp& ip, bool draw){    //改行すべきか返る
 		if(pt.x > LEFTMARGIN+colWidth){
             if(! *ip) goto endofline;
             obj v = *ip;
-            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
+            if(type(v)==INT && uint(v)=='\n') {step(ip); goto newline;};
             goto newline;    //wrap
         }
 	}
@@ -547,7 +547,7 @@ void MathText::drawFragment(obj line, bool draw){
 		if(! *ip) goto endofline;
         
 		obj v = *ip;
-		if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
+		if(type(v)==INT && uint(v)=='\n') {step(ip); goto newline;};
         if(type(v) != tShow){
             drawACharOrABox(*ip.lpos, ip.pos, draw);
         } else {
@@ -559,7 +559,7 @@ void MathText::drawFragment(obj line, bool draw){
 		if(pt.x > LEFTMARGIN+colWidth){
             if(! *ip) goto endofline;
             obj v= *ip;
-            if(type(v)==INT && uint(v)==CR) {step(ip); goto newline;};
+            if(type(v)==INT && uint(v)=='\n') {step(ip); goto newline;};
             goto newline;    //wrap
         }
 	}
@@ -794,7 +794,7 @@ int MathText::findPreviousLine(){//returns -1 if none
 	else curr_pos = ins.pos;
 	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++) 
-		if(type(first(l))==INT && uint(first(l))==CR) {
+		if(type(first(l))==INT && uint(first(l))=='\n') {
 			pp = p;
 			p = i+1;
 		}
@@ -806,7 +806,7 @@ int MathText::findBeginOfThisLine(){
 	else curr_pos = ins.pos;
 	int i = 0;
 	for(list l=line; l && i<curr_pos; l=rest(l), i++)
-		if(type(first(l))==INT && uint(first(l))==CR) {
+		if(type(first(l))==INT && uint(first(l))=='\n') {
 			p = i+1;
 		}
 	return p;
@@ -929,9 +929,9 @@ void MathText::moveToUpperLevel(){
 	if(isInFrac()) pos = popInsertion();
 	ins = insp(curr_str(insList), pos);
 }
-int MathText::getNLine(list l){//line数-1,CRの数を数える
+int MathText::getNLine(list l){//line数-1, newlineの数を数える
 	int i=0;
-	for(; l; l=rest(l)) if(type(first(l))==INT && uint(first(l))==CR) i++;
+	for(; l; l=rest(l)) if(type(first(l))==INT && uint(first(l))=='\n') i++;
 	return i;
 }
 void MathText::insertSuperScriptAndMoveInto(){
@@ -1001,7 +1001,7 @@ void MathText::moveRight(){
 		return;
 	}
 	if(type(c)==INT && isWide(uint(c))) ins.setpos(ins.pos+1);
-	//if(type(c)==INT && uint(c)==CR) scrollBy(+LINEHEIGHT);
+	//if(type(c)==INT && uint(c)=='\n') scrollBy(+LINEHEIGHT);
 	ins.setpos(ins.pos+1);
 }
 list MathText::cutSelected(){
@@ -1137,7 +1137,7 @@ void MathText::scrollBy(int points){
 	baseLine += points;
 	//win_normalize();
 	[caller updateFrame];
-    insert(Int(CR));
+    insert(Int('\n'));
 }
 
 void MathText::scroll(){
@@ -1280,9 +1280,9 @@ void MathText::removeSelected(){
 }
 void MathText::HandleTyping0(unichar c){
 	HideCaret();
-	if(c==CR){
+	if(c=='\n'){
 		if(! insList){
-			insert(Int(CR));
+			insert(Int('\n'));
 			//baseLine+=LINEHEIGHT;
 		} else moveToUpperLevel();
 		goto sho;
@@ -1355,7 +1355,7 @@ void MathText::setMode(CRmode m){
 }
 
 void MathText::HandleTyping(unichar c){
-	if(mode==session && c==CR && !insList){
+	if(mode==session && c=='\n' && !insList){
         if(! beginOfContinuedLine.lpos){
             int bp = findBeginOfThisLine();
             if(imbalanced(rest(line, bp))){
@@ -1535,7 +1535,7 @@ void MathText::pasteCString(const char* str){    // assumes UTF16
     removeSelected();
     for(list l=tt; l; l=rest(l)){
         obj v = first(l);
-        if(mode==session && type(v)==INT && uint(v)==CR) HandleTyping(CR);
+        if(mode==session && type(v)==INT && uint(v)=='\n') HandleTyping('\n');
         else insert(retainD(v));
     }
     release(tt);
