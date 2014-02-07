@@ -706,9 +706,12 @@ void MathText::showPlot(obj y){           // plotting
 void gr_line::drawAt(float x, float y){
     NSBezierPath *path = [NSBezierPath bezierPath];
 	obj pt = (*pts)[0];
+	if(isnan(udar(pt).v[0]) || isnan(udar(pt).v[0])) {myPrintf("warning: line with NaN not drawn."); return;}
     [path moveToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
     for(int i=1; i< size(pts); i++){
 		pt = (*pts)[i];
+		if(isnan(udar(pt).v[0]) || isnan(udar(pt).v[0])) {myPrintf("warning: line with NaN not drawn."); return;}
+
 		[path lineToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
 	}
     [path stroke];
@@ -1535,7 +1538,7 @@ void MathText::pasteCString(const char* str){    // assumes UTF16
     removeSelected();
     for(list l=tt; l; l=rest(l)){
         obj v = first(l);
-        if(mode==session && type(v)==INT && uint(v)=='\n') HandleTyping('\n');
+        if(mode==session && type(v)==INT && (uint(v)==CR || uint(v)==LF)) HandleTyping('\n');
         else insert(retainD(v));
     }
     release(tt);
@@ -1759,3 +1762,8 @@ char* canvas2eps(size_t* n){
 	[d getBytes:eps length:*n];
 	return eps;
 }
+
+void new_canvas(){
+	icaller->cur_canvas = nil;
+}
+

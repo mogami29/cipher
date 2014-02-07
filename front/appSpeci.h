@@ -59,7 +59,8 @@ void setCursorBeforeVertMove();*/
 
 #define NUL 0
 #define BS	0x7F
-#define CR 13
+#define CR	13
+#define LF	10
 
 #define arrowLeft 	28
 #define arrowRight 	29
