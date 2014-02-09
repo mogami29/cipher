@@ -121,6 +121,7 @@ float colWidth = COLWIDTH;
 }
 
 - (void) updateFrame {
+    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];
     NSRect clip = [[self superview] bounds];    // the clipview in the scrollview
     if(text->baseLine + FONTSIZE > clip.origin.y + clip.size.height) {     // we may expect size always positive
         NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine + FONTSIZE - clip.size.height);
@@ -130,7 +131,6 @@ float colWidth = COLWIDTH;
         NSPoint newScrollOrigin = NSMakePoint(0.0, text->baseLine - FONTSIZE);
         [self scrollPoint:newScrollOrigin];
     }
-    [self setFrameSize:NSMakeSize(500, larger(text->viewHeight, text->baseLine + FONTSIZE))];
 }
 
 // from Printing Programming Guide for Mac

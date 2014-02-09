@@ -24,7 +24,6 @@ void drawFragment(obj line, bool draw);
 int findPreviousLine();
 list CStringToLine(obj str);
 void serialize(string*rs, list l, list end);
-void win_normalize();
 char* listToCString(list l);
 //-----
 inline int_* create(ValueType t, int i){
@@ -1116,30 +1115,10 @@ void MathText::HideCaret(){
 
 #define upboundby(b,x) ((x)<(b)?(x):(b))
 
-void win_normalize(){       // smoothly scroll the view to make the cursor within
-/*	if(!baseLine > windowHeight-FONTSIZE && !baseLine < FONTSIZE) return;
-	RgnHandle updateRgn = NewRgn();
-	Rect rect = currWindow->portRect;
-	while(baseLine > windowHeight-FONTSIZE) {
-		int move= upboundby(FONTSIZE, baseLine -(windowHeight-FONTSIZE));
-		baseLine -= move;
-		viewPosition += move;
-		ScrollRect(&rect, 0, -move, updateRgn);
-	}
-	while(baseLine < FONTSIZE) {
-		int move= -upboundby(FONTSIZE, -baseLine +FONTSIZE);
-		baseLine -= move;
-		viewPosition += move;
-		ScrollRect(&rect, 0, -move, updateRgn);
-	}
-	DisposeRgn(updateRgn);
-*/	//MoveTo(LEFTMARGIN,baseLine);
-}
-
 void MathText::scrollBy(int points){
 	baseLine += points;
 	//win_normalize();
-	[caller updateFrame];
+//	[caller updateFrame];
     insert(Int('\n'));
 }
 
@@ -1301,11 +1280,9 @@ void MathText::HandleTyping0(unichar c){
 		goto sho;
 	} else if(c==arrowUp){
 		moveUp();
-		win_normalize();
 		goto sho;
 	} else if(c==arrowDown){
 		moveDown();
-		win_normalize();
 		goto sho;
 	}
 
@@ -1423,10 +1400,8 @@ void MathText::HandleShifted(unichar c){
 		moveRight();
 	} else if(c==arrowUp){
 		moveUp();
-		win_normalize();
 	} else if(c==arrowDown){
 		moveDown();
-		win_normalize();
 	}
 	//updateAround(true);
 	MoveTo(cursorPosition.x, cursorPosition.y);
@@ -1538,8 +1513,10 @@ void MathText::pasteCString(const char* str){    // assumes UTF16
     removeSelected();
     for(list l=tt; l; l=rest(l)){
         obj v = first(l);
-        if(mode==session && type(v)==INT && (uint(v)==CR || uint(v)==LF)) HandleTyping('\n');
-        else insert(retainD(v));
+        if(mode==session && type(v)==INT && (uint(v)==CR || uint(v)==LF)){
+			HandleTyping('\n');
+			[caller updateFrame];
+        } else insert(retainD(v));
     }
     release(tt);
     MoveTo(cursorPosition.x, cursorPosition.y);
