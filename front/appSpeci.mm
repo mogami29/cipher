@@ -48,7 +48,6 @@ void assert_func(const char* file, int line){
 }
 
 void error_func(const char *str, const char* file, int line){
-	scroll();
 	myPrintf("error: %s occured in line %d of file %s\n", str, line, file+43);
 	longjmp(jmpEnv, 1);
 }
@@ -704,14 +703,13 @@ void MathText::showPlot(obj y){           // plotting
 }
 void gr_line::drawAt(float x, float y){
     NSBezierPath *path = [NSBezierPath bezierPath];
-	obj pt = (*pts)[0];
-	if(isnan(udar(pt).v[0]) || isnan(udar(pt).v[0])) {myPrintf("warning: line with NaN not drawn."); return;}
-    [path moveToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
+	double* pt = udar((*pts)[0]).v;
+	assert(isfinite(pt[0]) && isfinite(pt[1]));
+    [path moveToPoint:NSMakePoint(x + pt[0], y - pt[1])];
     for(int i=1; i< size(pts); i++){
-		pt = (*pts)[i];
-		if(isnan(udar(pt).v[0]) || isnan(udar(pt).v[0])) {myPrintf("warning: line with NaN not drawn."); return;}
-
-		[path lineToPoint:NSMakePoint(x + udar(pt).v[0], y - udar(pt).v[1])];
+		pt = udar((*pts)[i]).v;
+		assert(isfinite(pt[0]) && isfinite(pt[1]));
+		[path lineToPoint:NSMakePoint(x + pt[0], y - pt[1])];
 	}
     [path stroke];
 }
@@ -1234,8 +1232,9 @@ int imbalanced(list line){
         case FRACTION:
 		case SuperScript:
 		case SubScript:
+		case STRING:
 			break;
-        default:
+		default:
             assert(0);
 		}
 	}
@@ -1326,7 +1325,6 @@ void MathText::handleCR(){
     } else {				//catch
     }
     release(tl);
-    scroll();
 	newLine();
 }
 
@@ -1605,6 +1603,8 @@ void serialize(string*rs, list l, list end){
 			serialize(rs, ul(second(ul(v))), nil);
 			append(rs, "}");
 			break;
+		case STRING:
+			break;
 		default:
 			assert(0);
 		}
@@ -1680,6 +1680,7 @@ list csparse0(){
 			int c = readchar2(clp);
 			if( c =='{' || c =='(') bracelevel++;
 			if( c =='}' || c ==')') {bracelevel--; if(bracelevel < 0) break;}
+			if( c==CR || c==LF) c='\n';
 			l = putchar(c, l);
 			clp = next2(clp);
 		}
@@ -1726,6 +1727,7 @@ void addGrObj(gr* gr_obj){
 	if(! icaller->cur_canvas) {
 		icaller->cur_canvas = new canvas();
 		icaller -> addObjToText(icaller->cur_canvas);
+		scroll();
 	}
 	icaller->cur_canvas->grs.append(gr_obj);
 }
